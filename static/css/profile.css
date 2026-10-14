@@ -1,0 +1,345 @@
+/* Profile — page-specific styles (theme tokens/cards/buttons come from app-theme.css) */
+
+body.page-app .profile-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    margin-top: 40px;
+    padding: 2rem 0;
+}
+
+body.page-app .profile-header h1 {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+body.page-app .profile-header p {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* Profile Grid */
+body.page-app .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+body.page-app .profile-card {
+    grid-column: 1 / -1;
+}
+
+/* Form */
+body.page-app .profile-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+body.page-app .profile-form .form-group:last-child {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+body.page-app .form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--pa-ink);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+body.page-app .form-control {
+    width: 100%;
+    padding: 0.8rem 0.9rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.98rem;
+    transition: all 0.15s ease;
+    background: #ffffff;
+    color: var(--pa-ink);
+}
+
+body.page-app .form-control:focus {
+    outline: none;
+    border-color: var(--pa-accent);
+    box-shadow: 0 0 0 3px var(--pa-accent-soft);
+}
+
+body.page-app .form-control:read-only {
+    background-color: var(--pa-bg-soft);
+    color: var(--pa-ink-faint);
+    cursor: not-allowed;
+}
+
+body.page-app .form-control.error {
+    border-color: var(--pa-danger);
+}
+
+body.page-app .form-help {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--pa-ink-soft);
+    margin-top: 0.3rem;
+}
+
+body.page-app .error-message {
+    margin-top: 0.4rem;
+    padding: 0.5rem 0.65rem;
+    background: var(--pa-danger-soft);
+    border-radius: 7px;
+    border-left: 3px solid var(--pa-danger);
+}
+
+body.page-app .error-message span {
+    display: block;
+    color: #C4342C;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+/* Stats Card */
+body.page-app .stats-card {
+    background: linear-gradient(160deg, var(--pa-ink) 0%, #1A362C 100%);
+    border: none;
+    color: #ffffff;
+}
+
+body.page-app .stats-card .card-header {
+    border-bottom-color: rgba(255, 255, 255, 0.14);
+}
+
+body.page-app .stats-card .card-title {
+    color: #ffffff;
+}
+
+body.page-app .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+body.page-app .stats-card .stat-item {
+    text-align: center;
+}
+
+body.page-app .stats-card .stat-number {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+}
+
+body.page-app .stats-card .stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+body.page-app .member-since {
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    text-align: center;
+}
+
+body.page-app .member-since p {
+    color: rgba(255, 255, 255, 0.75);
+    margin: 0;
+    font-size: 0.92rem;
+}
+
+body.page-app .member-since strong {
+    color: #ffffff;
+}
+
+/* Activity Card */
+body.page-app .activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+body.page-app .activity-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.page-app .activity-list::-webkit-scrollbar-track {
+    background: var(--pa-bg-soft);
+    border-radius: 3px;
+}
+
+body.page-app .activity-list::-webkit-scrollbar-thumb {
+    background: var(--pa-border-strong);
+    border-radius: 3px;
+}
+
+body.page-app .activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+body.page-app .activity-item:last-child {
+    border-bottom: none;
+}
+
+body.page-app .activity-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+    border-radius: 8px;
+}
+
+body.page-app .activity-content {
+    flex: 1;
+    min-width: 0;
+}
+
+body.page-app .activity-text {
+    color: var(--pa-ink);
+    margin: 0 0 0.25rem 0;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+body.page-app .activity-time {
+    color: var(--pa-ink-soft);
+    font-size: 0.85rem;
+}
+
+/* Actions Card */
+body.page-app .actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+body.page-app .action-button {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--pa-bg-soft);
+    border: 1.5px solid var(--pa-border);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+body.page-app .action-button:hover {
+    border-color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+    transform: translateY(-1px);
+}
+
+body.page-app .action-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 9px;
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .action-content h4 {
+    margin: 0 0 0.2rem 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+body.page-app .action-content p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+/* Empty States */
+body.page-app .activity-card .empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+body.page-app .activity-card .empty-icon {
+    margin-bottom: 1rem;
+}
+
+body.page-app .activity-card .empty-state p {
+    margin-bottom: 1rem;
+}
+
+body.page-app .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    body.page-app .profile-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    body.page-app .stats-grid {
+        gap: 1rem;
+    }
+
+    body.page-app .stats-card .stat-number {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body.page-app .profile-header {
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+
+    body.page-app .profile-header h1 {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    body.page-app .profile-grid {
+        gap: 1rem;
+    }
+
+    body.page-app .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    body.page-app .stats-card .stat-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 10px;
+    }
+
+    body.page-app .profile-form .form-group:last-child {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    body.page-app .action-button {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}

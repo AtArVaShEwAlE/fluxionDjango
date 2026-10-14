@@ -1,0 +1,10 @@
+{% if messages %}
+    <div class="flash-messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">×</button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

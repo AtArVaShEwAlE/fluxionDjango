@@ -1,0 +1,297 @@
+/* ==========================================================================
+   Fluxion — Info Pages (About / Contact / FAQ), light theme
+   Scoped under body.page-info
+   ========================================================================== */
+
+body.page-info {
+    --in-bg: #FFFFFF;
+    --in-bg-soft: #F6F9F7;
+    --in-ink: #10201A;
+    --in-ink-soft: #55655F;
+    --in-accent: #1F9D6E;
+    --in-accent-dark: #157A56;
+    --in-accent-soft: #E6F5EF;
+    --in-border: #E3E9E6;
+    --in-border-strong: #CBD6D1;
+    --in-font-display: 'Bricolage Grotesque', sans-serif;
+    --in-font-body: 'Inter', 'DM Sans', sans-serif;
+
+    background: var(--in-bg);
+    color: var(--in-ink);
+    font-family: var(--in-font-body);
+}
+
+body.page-info .navbar-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    border-bottom: 1px solid var(--in-border);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.9rem 3rem;
+}
+
+body.page-info .navbar-links li a {
+    color: var(--in-ink-soft);
+}
+
+body.page-info .navbar-links li a:hover {
+    color: var(--in-ink);
+    background: var(--in-bg-soft);
+}
+
+body.page-info .navbar-links li a.active {
+    color: var(--in-accent-dark);
+    background: var(--in-accent-soft);
+}
+
+body.page-info .login-btn {
+    color: var(--in-ink);
+    border: 1.5px solid var(--in-border-strong);
+}
+
+body.page-info .signup-btn,
+body.page-info .user-btn {
+    background: var(--in-accent);
+    color: #ffffff;
+}
+
+body.page-info .signup-btn:hover,
+body.page-info .user-btn:hover {
+    background: var(--in-accent-dark);
+    color: #ffffff;
+}
+
+body.page-info .footer {
+    background: var(--in-bg);
+    border-top: 1px solid var(--in-border);
+}
+
+body.page-info .footer p {
+    color: var(--in-ink-soft);
+}
+
+/* ---- Page header ---- */
+body.page-info .page-header {
+    position: relative;
+    background: radial-gradient(circle at 30% 0%, var(--in-accent-soft) 0%, transparent 60%);
+    animation: in-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.page-info .page-header h1 {
+    font-family: var(--in-font-display);
+    color: var(--in-ink);
+    letter-spacing: -0.01em;
+}
+
+body.page-info .page-header p {
+    color: var(--in-ink-soft);
+}
+
+/* ---- Card override (info pages only) ---- */
+body.page-info .card {
+    background: #ffffff;
+    border: 1px solid var(--in-border);
+    border-left: 3px solid transparent;
+    box-shadow: 0 4px 16px rgba(16, 32, 26, 0.05);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    animation: in-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.page-info .card:hover {
+    border-color: var(--in-border-strong);
+    border-left-color: var(--in-accent);
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.08);
+    transform: translateY(-2px);
+}
+
+body.page-info .card:nth-of-type(1) { animation-delay: 0.05s; }
+body.page-info .card:nth-of-type(2) { animation-delay: 0.12s; }
+body.page-info .card:nth-of-type(3) { animation-delay: 0.19s; }
+body.page-info .card:nth-of-type(4) { animation-delay: 0.26s; }
+body.page-info .card:nth-of-type(5) { animation-delay: 0.33s; }
+
+body.page-info .card-title,
+body.page-info h3 {
+    color: var(--in-ink);
+}
+
+body.page-info .card p {
+    color: var(--in-ink-soft);
+}
+
+body.page-info .auth-link {
+    color: var(--in-accent-dark);
+    background-image: linear-gradient(var(--in-accent), var(--in-accent));
+    background-size: 0% 1.5px;
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    transition: background-size 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+    padding-bottom: 1px;
+}
+
+body.page-info .auth-link:hover {
+    color: var(--in-accent);
+    background-size: 100% 1.5px;
+}
+
+/* ---- Contact form ---- */
+body.page-info .form-control {
+    background: #ffffff;
+    border: 2px solid var(--in-border);
+    color: var(--in-ink);
+}
+
+body.page-info .form-control:focus {
+    border-color: var(--in-accent);
+    box-shadow: 0 0 0 3px rgba(31, 157, 110, 0.12);
+    background: #ffffff;
+}
+
+body.page-info .form-label {
+    color: var(--in-ink);
+}
+
+body.page-info .btn-primary {
+    background-color: var(--in-accent);
+    color: #ffffff;
+    transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.page-info .btn-primary:hover {
+    background-color: var(--in-accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.22);
+}
+
+body.page-info #contactStatus {
+    color: var(--in-accent-dark);
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-top: 1rem;
+}
+
+/* ---- FAQ ---- */
+body.page-info .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+body.page-info .faq-item {
+    background: #ffffff;
+    border: 1px solid var(--in-border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    animation: in-fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+body.page-info .faq-item:hover {
+    border-color: var(--in-border-strong);
+    box-shadow: 0 8px 20px rgba(16, 32, 26, 0.05);
+}
+
+body.page-info .faq-list .faq-item:nth-child(1) { animation-delay: 0.03s; }
+body.page-info .faq-list .faq-item:nth-child(2) { animation-delay: 0.08s; }
+body.page-info .faq-list .faq-item:nth-child(3) { animation-delay: 0.13s; }
+body.page-info .faq-list .faq-item:nth-child(4) { animation-delay: 0.18s; }
+body.page-info .faq-list .faq-item:nth-child(5) { animation-delay: 0.23s; }
+body.page-info .faq-list .faq-item:nth-child(6) { animation-delay: 0.28s; }
+body.page-info .faq-list .faq-item:nth-child(7) { animation-delay: 0.33s; }
+
+body.page-info .faq-item summary {
+    color: var(--in-ink);
+    font-family: var(--in-font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+body.page-info .faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+body.page-info .faq-item summary::before {
+    content: '+';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--in-accent-dark);
+    background: var(--in-accent-soft);
+    border-radius: 50%;
+    font-size: 0.9rem;
+    transition: transform 0.25s ease;
+}
+
+body.page-info .faq-item[open] summary::before {
+    transform: rotate(135deg);
+}
+
+body.page-info .faq-answer {
+    margin-top: 0.75rem;
+    margin-left: 1.85rem;
+    color: var(--in-ink-soft);
+    animation: in-fade-up 0.25s ease both;
+}
+
+body.page-info .faq-answer p {
+    margin: 0;
+    color: var(--in-ink-soft);
+}
+
+body.page-info .faq-answer code {
+    background: var(--in-bg-soft);
+    border: 1px solid var(--in-border);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: var(--in-ink);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    body.page-info .navbar-container {
+        padding: 0.9rem 1.25rem;
+    }
+}
+
+/* ---- Animations ---- */
+@keyframes in-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.page-info .page-header,
+    body.page-info .card,
+    body.page-info .faq-item,
+    body.page-info .faq-answer {
+        animation: none !important;
+    }
+
+    body.page-info .card:hover,
+    body.page-info .btn-primary:hover {
+        transform: none;
+    }
+}

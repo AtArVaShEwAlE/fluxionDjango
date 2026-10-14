@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reports - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-reports{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Reports</h1>
+        <p>Combine your saved charts into one shareable report</p>
+        <a href="{% url 'create_report' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            New Report
+        </a>
+    </div>
+
+    {% if reports %}
+        <div class="list-controls">
+            <input type="text" id="reportSearchInput" class="form-input list-search-input" placeholder="Search reports by title...">
+            <select id="reportSortSelect" class="form-select list-sort-select">
+                <option value="date-desc">Newest first</option>
+                <option value="date-asc">Oldest first</option>
+                <option value="title-asc">Title A–Z</option>
+                <option value="title-desc">Title Z–A</option>
+            </select>
+        </div>
+        <div class="reports-grid" id="reportsGrid">
+            {% for report in reports %}
+                <div class="report-card" data-title="{{ report.title|lower }}" data-date="{{ report.created_at }}">
+                    <div class="report-card-body">
+                        <div class="report-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                        </div>
+                        <h3 class="report-title">{{ report.title }}</h3>
+                        <div class="report-meta">
+                            <span class="report-chart-count">{{ report.chart_count }} chart{{ report.chart_count|pluralize }}</span>
+                            <span class="report-date">{{ report.created_at|slice:":10" }}</span>
+                        </div>
+                    </div>
+                    <div class="report-card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="viewReportModal({{ report.id }})">
+                            View
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteReport({{ report.id }}, '{{ report.title|escapejs }}')">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+                </div>
+                <h3>No Reports Yet</h3>
+                <p>Reports combine several saved charts behind one shareable link — handy for a weekly summary or a client update. You'll need at least one saved chart first.</p>
+                <div class="empty-actions">
+                    <a href="{% url 'charts' %}" class="btn btn-secondary">View My Charts</a>
+                    <a href="{% url 'create_report' %}" class="btn btn-primary">Create a Report</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Report Modal -->
+<div class="modal" id="reportModal">
+    <div class="modal-overlay" onclick="closeReportModal()"></div>
+    <div class="modal-content modal-content-wide">
+        <div class="modal-header">
+            <h2 id="modalReportTitle">Report Title</h2>
+            <button class="modal-close" onclick="closeReportModal()" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body" id="reportModalBody">
+            <!-- Chart canvases are injected here, one per chart in the report -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeReportModal()">Close</button>
+            <button class="btn btn-primary" id="shareReportBtn">Share</button>
+            <button class="btn btn-secondary" id="embedReportBtn">Embed</button>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+{% include 'partials/messages.html' %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/charts.css' %}">
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/reports.js' %}"></script>
+{% endblock %}

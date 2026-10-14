@@ -1,0 +1,278 @@
+/* ==========================================================================
+   Fluxion — Shared App Theme (Dashboard, Create Chart, My Charts)
+   Scoped under body.page-app. Loaded BEFORE each page's own CSS file.
+   ========================================================================== */
+
+body.page-app {
+    --pa-bg: #FFFFFF;
+    --pa-bg-soft: #F6F9F7;
+    --pa-surface: #FFFFFF;
+    --pa-ink: #10201A;
+    --pa-ink-soft: #55655F;
+    --pa-ink-faint: #8B968F;
+    --pa-accent: #1F9D6E;
+    --pa-accent-dark: #157A56;
+    --pa-accent-soft: #E6F5EF;
+    --pa-border: #E3E9E6;
+    --pa-border-strong: #CBD6D1;
+    --pa-danger: #E1443B;
+    --pa-danger-soft: #FEF1F0;
+    --pa-font-display: 'Bricolage Grotesque', sans-serif;
+    --pa-font-body: 'Inter', sans-serif;
+
+    background: var(--pa-bg);
+    font-family: var(--pa-font-body);
+    color: var(--pa-ink);
+}
+
+body.page-app h1,
+body.page-app h2,
+body.page-app h3 {
+    font-family: var(--pa-font-display);
+    color: var(--pa-ink);
+}
+
+body.page-app p {
+    color: var(--pa-ink-soft);
+}
+
+/* ---- Navbar override (light, sticky, matches landing/auth) ---- */
+body.page-app .navbar-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    border-bottom: 1px solid var(--pa-border);
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0.85rem 3rem;
+}
+
+body.page-app .navbar-container.scrolled {
+    box-shadow: 0 2px 16px rgba(16, 32, 26, 0.06);
+}
+
+body.page-app .navbar-logo h3 {
+    color: var(--pa-ink);
+    font-family: var(--pa-font-display);
+    font-weight: 700;
+}
+
+body.page-app .navbar-links li a {
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .navbar-links li a:hover {
+    color: var(--pa-ink);
+    background: var(--pa-bg-soft);
+}
+
+body.page-app .navbar-links li a.active {
+    color: var(--pa-accent-dark);
+    background: var(--pa-accent-soft);
+}
+
+body.page-app .user-btn {
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .user-btn:hover {
+    background: var(--pa-accent);
+    color: #ffffff;
+}
+
+body.page-app .user-dropdown {
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.1);
+}
+
+body.page-app .dropdown-item {
+    color: var(--pa-ink);
+    border-bottom: 1px solid var(--pa-border);
+}
+
+body.page-app .dropdown-item:hover {
+    background: var(--pa-bg-soft);
+    color: var(--pa-ink);
+}
+
+body.page-app .footer {
+    background: var(--pa-bg);
+    border-top: 1px solid var(--pa-border);
+}
+
+body.page-app .footer p {
+    color: var(--pa-ink-soft);
+}
+
+/* ---- Shared buttons (scoped — safe) ---- */
+body.page-app .btn {
+    font-family: var(--pa-font-body);
+}
+
+body.page-app .btn-primary {
+    background: var(--pa-accent);
+    color: #ffffff;
+}
+
+body.page-app .btn-primary:hover {
+    background: var(--pa-accent-dark);
+    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.22);
+}
+
+body.page-app .btn-secondary {
+    background: #ffffff;
+    color: var(--pa-ink);
+    border: 1.5px solid var(--pa-border-strong);
+}
+
+body.page-app .btn-secondary:hover {
+    background: var(--pa-bg-soft);
+    border-color: var(--pa-ink-soft);
+}
+
+body.page-app .btn-danger {
+    background: var(--pa-danger-soft);
+    color: var(--pa-danger);
+}
+
+body.page-app .btn-danger:hover {
+    background: var(--pa-danger);
+    color: #ffffff;
+}
+
+/* ---- Shared card ---- */
+body.page-app .card {
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.03);
+}
+
+body.page-app .card-header {
+    border-bottom: 1px solid var(--pa-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+body.page-app .card-title {
+    color: var(--pa-ink);
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* ---- Page header ---- */
+body.page-app .page-header h1 {
+    color: var(--pa-ink);
+}
+
+body.page-app .page-header p {
+    color: var(--pa-ink-soft);
+}
+
+/* ---- Icons ---- */
+body.page-app .icon {
+    stroke: currentColor;
+}
+
+/* ---- Stat items ---- */
+body.page-app .stat-number {
+    color: var(--pa-ink);
+    font-family: var(--pa-font-display);
+}
+
+body.page-app .stat-label {
+    color: var(--pa-ink-soft);
+}
+
+/* ---- Loading spinner ---- */
+body.page-app .loading-spinner {
+    border: 3px solid var(--pa-border);
+    border-top: 3px solid var(--pa-accent);
+}
+
+/* ---- Empty states ---- */
+body.page-app .empty-state h3,
+body.page-app .empty-state h4 {
+    color: var(--pa-ink);
+}
+
+body.page-app .empty-state p {
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .empty-icon {
+    color: var(--pa-border-strong);
+    opacity: 1;
+}
+
+/* ---- Flash messages / alerts (shared across the three pages) ---- */
+body.page-app .flash-messages {
+    position: fixed;
+    top: 90px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+body.page-app .alert {
+    padding: 0.9rem 1.25rem;
+    border-radius: 10px;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 500;
+    font-size: 0.92rem;
+    box-shadow: 0 8px 24px rgba(16, 32, 26, 0.1);
+    border: 1px solid transparent;
+    animation: pa-slideIn 0.3s ease-out;
+}
+
+body.page-app .alert-success {
+    background: #ECFDF5;
+    color: #157A56;
+    border-color: #B7EBD3;
+}
+
+body.page-app .alert-error,
+body.page-app .alert-danger {
+    background: var(--pa-danger-soft);
+    color: #C4342C;
+    border-color: #F6C6C2;
+}
+
+body.page-app .alert-info {
+    background: #EFF6FF;
+    color: #1D4ED8;
+    border-color: #BFDBFE;
+}
+
+body.page-app .alert-close {
+    color: inherit;
+    opacity: 0.6;
+}
+
+body.page-app .alert-close:hover {
+    opacity: 1;
+}
+
+@keyframes pa-slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    body.page-app .navbar-container {
+        padding: 0.85rem 1.25rem;
+    }
+}

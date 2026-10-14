@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Fluxion - Data Visualization Platform{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Navigation Container -->
+    <div class="navbar-container">
+        <!-- Left: Logo Section -->
+        <div class="navbar-logo">
+            <a href="{% url 'landing' %}">
+                <h3>Fluxion</h3>
+            </a>
+        </div>
+        
+        <!-- Center: Navigation Links -->
+        <!-- Center: Navigation Links -->
+        <nav class="navbar-center">
+            <ul class="navbar-links navbar-links-left">
+                <li><a href="{% url 'landing' %}" class="{% if request.resolver_match.url_name == 'landing' %}active{% endif %}">Home</a></li>
+                <li><a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">About Us</a></li>
+                <li><a href="{% url 'contact' %}" class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact Us</a></li>
+                <li><a href="{% url 'faq' %}" class="{% if request.resolver_match.url_name == 'faq' %}active{% endif %}">FAQ</a></li>
+            </ul>
+            {% if user.is_authenticated %}
+            <ul class="navbar-links navbar-links-right">
+                <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                <li><a href="{% url 'create_chart' %}" class="{% if request.resolver_match.url_name == 'create_chart' %}active{% endif %}">Create Chart</a></li>
+                <li><a href="{% url 'charts' %}" class="{% if request.resolver_match.url_name == 'charts' %}active{% endif %}">My Charts</a></li>
+                <li><a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Reports</a></li>
+            </ul>
+            {% endif %}
+        </nav>
+        
+        <!-- Right: Profile/Auth Section -->
+        <div class="navbar-profile">
+            {% if user.is_authenticated %}
+                <div class="navbar-user">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <span class="user-name">{{ user.username }}</span>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="{% url 'profile' %}" class="dropdown-item">
+                            <span></span> Profile
+                        </a>
+                        <a href="{% url 'logout' %}" class="dropdown-item">
+                            <span></span> Logout
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="navbar-auth">
+                    <a href="{% url 'login' %}" class="auth-btn login-btn">Login</a>
+                    <a href="{% url 'signup' %}" class="auth-btn signup-btn">Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% include 'partials/messages.html' %}
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Fluxion. Built step by step.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/base.js' %}?v=2"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 

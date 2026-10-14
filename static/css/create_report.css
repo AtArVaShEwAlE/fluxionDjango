@@ -1,0 +1,142 @@
+/* Create Report — page-specific styles (theme tokens/cards/buttons come from app-theme.css) */
+
+body.page-app .page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+}
+
+body.page-app .page-header h1 {
+    margin-top: 40px;
+    margin-bottom: 0.5rem;
+}
+
+body.page-app .page-header p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+body.page-app .report-builder-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+/* Chart picker */
+body.page-app .chart-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 560px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+body.page-app .chart-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.9rem 1rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: #ffffff;
+}
+
+body.page-app .chart-picker-item:hover {
+    border-color: var(--pa-border-strong);
+    background: var(--pa-bg-soft);
+}
+
+body.page-app .chart-picker-item.selected {
+    border-color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+}
+
+body.page-app .chart-picker-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--pa-accent);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+body.page-app .chart-picker-order {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pa-accent);
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+body.page-app .chart-picker-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+body.page-app .chart-picker-title {
+    font-weight: 600;
+    color: var(--pa-ink);
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-app .chart-picker-meta {
+    font-size: 0.8rem;
+    color: var(--pa-ink-soft);
+}
+
+/* Details panel */
+body.page-app .report-details-card .field-group {
+    margin-bottom: 1.25rem;
+}
+
+body.page-app .report-details-card label {
+    display: block;
+    font-weight: 600;
+    color: var(--pa-ink);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+body.page-app .report-selected-summary {
+    background: var(--pa-bg-soft);
+    border: 1px dashed var(--pa-border-strong);
+    border-radius: 9px;
+    padding: 0.85rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--pa-ink-soft);
+    margin-bottom: 1.25rem;
+}
+
+body.page-app .report-selected-summary.has-selection {
+    border-style: solid;
+    border-color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    body.page-app .report-builder-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-app .chart-picker-list {
+        max-height: 400px;
+    }
+}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Upload and manage your datasets</p>
+    </div>
+
+    <!-- Compact Upload Section -->
+    <div class="card upload-card-compact">
+        <div class="upload-area-compact" id="uploadArea">
+            <div class="upload-content-compact">
+                <div class="upload-icon-compact">
+                    <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                </div>
+                <h4>Upload Dataset</h4>
+                <p>Drag & drop or <button class="upload-trigger" onclick="document.getElementById('fileInput').click()">browse</button></p>
+                <div class="file-types">
+                    <span class="file-type">CSV</span>
+                    <span class="file-type">Excel</span>
+                    <span class="file-type">Max 16MB</span>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>Processing your data...</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" id="errorState" style="display: none;">
+            <div class="error-icon">
+                <svg class="icon icon-lg" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-x-icon lucide-circle-x"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            </div>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <!-- Data Preview Section -->
+    <div class="card data-preview-card" id="dataPreview" style="display: none;">
+        <div class="card-header">
+            <h3 class="card-title" id="datasetTitle">
+                <svg class="icon icon-md" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-chart-column-icon lucide-file-chart-column"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 18v-1"/><path d="M12 18v-6"/><path d="M16 18v-3"/></svg>
+                Dataset Preview
+            </h3>
+            <div class="dataset-actions">
+                <button class="btn btn-secondary" id="cleanDataBtn">
+                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v10M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+                    Clean Columns
+                </button>
+                <button class="btn btn-primary" id="createChartBtn">
+                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-column-big-icon lucide-chart-column-big"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="15" y="5" width="4" height="12" rx="1"/><rect x="7" y="8" width="4" height="9" rx="1"/></svg>
+                    Create Chart
+                </button>
+            </div>
+        </div>
+
+        <!-- Dataset Stats -->
+        <div class="dataset-stats">
+            <div class="stat-item">
+                <div class="stat-number" id="rowCount">0</div>
+                <div class="stat-label">Rows</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="colCount">0</div>
+                <div class="stat-label">Columns</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="fileSize">0KB</div>
+                <div class="stat-label">Size</div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="data-table-container">
+            <table class="data-table" id="dataTable">
+                <thead id="tableHead"></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <!-- Per-Column Quick Stats -->
+        <div class="column-stats-section" id="columnStatsSection" style="display: none;">
+            <h4 class="column-stats-title">Column Overview</h4>
+            <div class="column-stats-grid" id="columnStatsGrid"></div>
+        </div>
+
+        <!-- Clean Columns Panel -->
+        <div class="clean-data-panel" id="cleanDataPanel" style="display: none;">
+            <h4 class="clean-data-title">Rename or Drop Columns</h4>
+            <p class="clean-data-hint">Leave a name unchanged to keep it as-is. Dropped columns won't appear in future charts.</p>
+            <div class="clean-data-rows" id="cleanDataRows"></div>
+            <div class="clean-data-actions">
+                <button class="btn btn-secondary" id="cancelCleanBtn">Cancel</button>
+                <button class="btn btn-primary" id="applyCleanBtn">Apply Changes</button>
+            </div>
+        </div>
+
+        <!-- Show More Button -->
+        <div class="table-footer" style="display: none;" id="tableFooter">
+            <button class="btn btn-secondary" id="showMoreBtn">
+                Show More Rows
+            </button>
+        </div>
+    </div>
+
+    <!-- Recent Datasets Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <svg class="icon icon-md" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-text-icon lucide-book-text"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="M8 11h8"/><path d="M8 7h6"/></svg>
+                Recent Datasets
+            </h3>
+        </div>
+        
+        {% if recent_activity %}
+            <div class="table-wrapper">
+                <table class="datasets-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rows</th>
+                            <th>Columns</th>
+                            <th>Uploaded</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in recent_activity %}
+                            <tr>
+                                <td class="dataset-name">{{ activity.name }}</td>
+                                <td>-</td>
+                                <td>-</td>
+                                <td class="dataset-time">{{ activity.time }}</td>
+                                <td class="dataset-actions">
+                                    <a href="{% url 'download_dataset' activity.id %}" 
+                                       class="btn-icon" 
+                                       title="Download"
+                                       download>
+                                        <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-network-icon lucide-chart-network"><path d="m13.11 7.664 1.78 2.672"/><path d="m14.162 12.788-3.324 1.424"/><path d="m20 4-6.06 1.515"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="15" r="2"/></svg>
+                </div>
+                <h4>No datasets yet</h4>
+                <p>Upload your first dataset to get started with data visualization</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

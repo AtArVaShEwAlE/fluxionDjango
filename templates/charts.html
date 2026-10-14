@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Charts - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-charts{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>My Charts</h1>
+        <p>View and manage your saved visualizations</p>
+    </div>
+
+    <!-- Charts Grid -->
+    {% if charts %}
+        <div class="list-controls">
+            <input type="text" id="chartSearchInput" class="form-input list-search-input" placeholder="Search charts by title...">
+            <select id="chartSortSelect" class="form-select list-sort-select">
+                <option value="date-desc">Newest first</option>
+                <option value="date-asc">Oldest first</option>
+                <option value="title-asc">Title A–Z</option>
+                <option value="title-desc">Title Z–A</option>
+            </select>
+        </div>
+        <div class="charts-grid" id="chartsGrid">
+            {% for chart in charts %}
+                <div class="chart-card" data-title="{{ chart.title|lower }}" data-date="{{ chart.created_at.isoformat }}">
+                    <div class="chart-card-body">
+                        <div>
+                            {% if chart.chart_type == 'bar' %}<div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-bar-big-icon lucide-chart-bar-big"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="9" height="4" rx="1"/><rect x="7" y="5" width="12" height="4" rx="1"/></svg></div>
+                            {% elif chart.chart_type == 'line' %}<div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+                            {% elif chart.chart_type == 'pie' %}<div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-pie-icon lucide-chart-pie"><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/></svg></div>
+                            {% elif chart.chart_type == 'scatter' %}<div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-scatter-icon lucide-chart-scatter"><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="18.5" cy="5.5" r=".5" fill="currentColor"/><circle cx="11.5" cy="11.5" r=".5" fill="currentColor"/><circle cx="7.5" cy="16.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="14.5" r=".5" fill="currentColor"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg></div>
+                            {% endif %}
+                        </div>
+                        <h3 class="chart-title">{{ chart.title }}</h3>
+                        <div class="chart-meta">
+                            <span class="chart-date">{{ chart.created_at|date:"M d, Y \a\t h:i A" }}</span>
+                        </div>
+                    </div>
+                    <div class="chart-card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="viewChartModal({{ chart.id }})">
+                            View Chart
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteChart({{ chart.id }}, '{{ chart.title|escapejs }}')">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-network-icon lucide-chart-network"><path d="m13.11 7.664 1.78 2.672"/><path d="m14.162 12.788-3.324 1.424"/><path d="m20 4-6.06 1.515"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="15" r="2"/></svg>
+                </div>
+                <h3>No Charts Yet</h3>
+                <p>You haven't created any charts yet. Upload a dataset and create your first visualization!</p>
+                <div class="empty-actions">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                        Upload Dataset
+                    </a>
+                    <a href="{% url 'create_chart' %}" class="btn btn-secondary">
+                        Create Chart
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Chart Modal -->
+<div class="modal" id="chartModal">
+    <div class="modal-overlay" onclick="closeChartModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalChartTitle">Chart Title</h2>
+            <button class="modal-close" onclick="closeChartModal()" aria-label="Close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-chart-container">
+                <canvas id="modalChartCanvas"></canvas>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeChartModal()">Close</button>
+            <button class="btn btn-secondary" id="shareChartBtn">Share</button>
+            <button class="btn btn-secondary" id="embedChartBtn">Embed</button>
+            <button class="btn btn-secondary" id="downloadChartPNG">PNG</button>
+            <button class="btn btn-secondary" id="downloadChartPDF">PDF</button>
+            <button class="btn btn-primary" id="modalEditBtn">Edit</button>
+        </div>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/charts.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/charts.js' %}"></script>
+{% endblock %}

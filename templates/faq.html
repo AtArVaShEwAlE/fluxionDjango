@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}FAQ - Fluxion{% endblock %}
+{% block body_class %}page-info{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>FAQ & Tutorials</h1>
+        <p>How Fluxion works, step by step</p>
+    </div>
+
+    <div class="faq-list">
+        <details class="faq-item" open>
+            <summary>How do I upload a dataset?</summary>
+            <div class="faq-answer">
+                <p>Go to <a href="{% url 'dashboard' %}" class="auth-link">Dashboard</a>, drag your CSV or Excel file into the upload box (or click browse). Max file size is 16MB. Once uploaded you'll see a preview with row/column counts.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>How do I create a chart?</summary>
+            <div class="faq-answer">
+                <p>After uploading, hit "Create Chart" on the dataset preview. Pick a chart type (bar, line, pie, scatter), choose your X/Y columns (or value/label for pie), give it a title, and hit Update Chart to preview. Save Chart stores it under My Charts.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>What's the difference between a Chart and a Report?</summary>
+            <div class="faq-answer">
+                <p>A Chart is one visualization. A Report bundles several saved charts behind a single shareable link — good for a weekly summary or client update. Build one from the Reports page.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>How do I share a chart or report?</summary>
+            <div class="faq-answer">
+                <p>Open the chart/report from My Charts or Reports, hit Share. This generates a public link — anyone with the link can view it, no login needed. Hit Share again anytime to copy the link.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>Can I embed a chart on my own site?</summary>
+            <div class="faq-answer">
+                <p>Yes. Use the Embed button to copy an <code>&lt;iframe&gt;</code> snippet you can paste into any webpage.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>Can I edit a chart after saving it?</summary>
+            <div class="faq-answer">
+                <p>Yes, open it from My Charts and hit Edit to change axis columns, chart type, or color scheme.</p>
+            </div>
+        </details>
+
+        <details class="faq-item">
+            <summary>What file types are supported?</summary>
+            <div class="faq-answer">
+                <p>CSV and Excel (.xlsx, .xls), up to 16MB.</p>
+            </div>
+        </details>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/info-pages.css' %}">
+{% endblock %}

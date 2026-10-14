@@ -1,0 +1,8 @@
+<!doctype html>
+<title>temp</title>
+<h1>auth dash page</h1>
+{% for m in messages %}<p><b>{{ m.tags }}:</b> {{ m }}</p>{% endfor %}
+<form method="post">{% csrf_token %}{{ form.as_p }}<button>Submit</button></form>
+{% if days_since_joined != None %}<p>Days: {{ days_since_joined }} | Datasets: {{ user.datasets.count }}</p>{% endif %}
+{% if recent_activity %}<ul>{% for a in recent_activity %}<li>{{ a.text }} - {{ a.time }}</li>{% endfor %}</ul>{% endif %}
+<p><a href="/">home</a> <a href="/login">login</a> <a href="/signup">signup</a> <a href="/profile">profile</a> <a href="/change-password">change pw</a> <a href="/logout">logout</a></p>

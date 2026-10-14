@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Live Data - Fluxion{% endblock %}
+{% block body_class %}page-app page-live-data{% endblock %}
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1> Live Data Visualization</h1>
+        <p>Stream and visualize data in real-time</p>
+    </div>
+
+    <!-- Live Data Controls -->
+    <div class="card live-controls-card">
+        <div class="card-header">
+            <h3 class="card-title"> Live Stream Settings</h3>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Disconnected</span>
+            </div>
+        </div>
+        
+        <div class="control-grid">
+            <!-- Data Source Selection -->
+            <div class="control-group">
+                <label class="control-label">Data Source</label>
+                <select id="dataSource" class="form-select">
+                    <option value="simulation">Simulated Data (Demo)</option>
+                    <option value="dataset">My Dataset</option>
+                    <option value="api">API Endpoint</option>
+                </select>
+            </div>
+
+            <!-- Dataset Selection (Hidden by default) -->
+            <div class="control-group" id="datasetGroup" style="display: none;">
+                <label class="control-label">Select Dataset</label>
+                <select id="datasetSelect" class="form-select">
+                    <option value="">Choose dataset...</option>
+                    {% for dataset in datasets %}
+                        <option value="{{ dataset.id }}">{{ dataset.original_filename }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Column Selection (Hidden by default) -->
+            <div class="control-group" id="xColumnGroup" style="display: none;">
+                <label class="control-label">X-Axis Column (Labels)</label>
+                <select id="xColumnSelect" class="form-select">
+                    <option value="">Select column...</option>
+                </select>
+            </div>
+
+            <div class="control-group" id="yColumnGroup" style="display: none;">
+                <label class="control-label">Y-Axis Column (Values)</label>
+                <select id="yColumnSelect" class="form-select">
+                    <option value="">Select column...</option>
+                </select>
+            </div>
+
+            <!-- API Configuration (Hidden by default) -->
+            <div class="control-group" id="apiUrlGroup" style="display: none;">
+                <label class="control-label">API Endpoint URL</label>
+                <input type="text" id="apiUrl" class="form-control" 
+                       placeholder="https://api.example.com/data">
+            </div>
+
+            <div class="control-group" id="apiValuePathGroup" style="display: none;">
+                <label class="control-label">Value Path (JSON)</label>
+                <input type="text" id="apiValuePath" class="form-control" 
+                       placeholder="data.value" value="value">
+                <small class="form-help">Dot notation to access value in JSON response</small>
+            </div>
+
+            <div class="control-group" id="apiLabelPathGroup" style="display: none;">
+                <label class="control-label">Label Path (JSON)</label>
+                <input type="text" id="apiLabelPath" class="form-control" 
+                       placeholder="data.timestamp" value="timestamp">
+                <small class="form-help">Dot notation to access label in JSON response</small>
+            </div>
+
+            <!-- API Test Button -->
+            <div class="control-group" id="apiTestGroup" style="display: none;">
+                <button class="btn btn-secondary btn-sm" id="testApiBtn">
+                    Test API Endpoint
+                </button>
+                <span id="apiTestResult"></span>
+            </div>
+
+            <!-- Chart Type Selection -->
+            <div class="control-group">
+                <label class="control-label">Chart Type</label>
+                <select id="liveChartType" class="form-select">
+                    <option value="line">Line Chart (Real-time)</option>
+                    <option value="bar">Animated Bar Chart</option>
+                    <option value="scatter">Scatter Plot</option>
+                    <option value="gauge">Gauge (Latest Value)</option>
+                </select>
+            </div>
+
+            <!-- Update Interval -->
+            <div class="control-group">
+                <label class="control-label">Update Interval (ms)</label>
+                <input type="number" id="updateInterval" class="form-control" 
+                       value="1000" min="100" max="5000" step="100">
+            </div>
+
+            <!-- Max Data Points -->
+            <div class="control-group">
+                <label class="control-label">Max Data Points</label>
+                <input type="number" id="maxDataPoints" class="form-control" 
+                       value="20" min="10" max="100" step="5">
+            </div>
+
+            <!-- Animation Speed -->
+            <div class="control-group">
+                <label class="control-label">Animation Speed</label>
+                <select id="animationSpeed" class="form-select">
+                    <option value="0">Instant</option>
+                    <option value="300">Fast</option>
+                    <option value="750" selected>Normal</option>
+                    <option value="1500">Slow</option>
+                </select>
+            </div>
+
+            <!-- Color Scheme -->
+            <div class="control-group">
+                <label class="control-label">Color Scheme</label>
+                <select id="liveColorScheme" class="form-select">
+                    <option value="dynamic">Dynamic (Changes)</option>
+                    <option value="gradient">Gradient Flow</option>
+                    <option value="default">Default Green</option>
+                    <option value="blue">Blue Tones</option>
+                    <option value="rainbow">Rainbow</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="live-actions">
+            <button class="btn btn-primary" id="startStreamBtn">
+                 Start Stream
+            </button>
+            <button class="btn btn-secondary" id="pauseStreamBtn" disabled>
+                 Pause
+            </button>
+            <button class="btn btn-danger" id="stopStreamBtn" disabled>
+                 Stop
+            </button>
+            <button class="btn btn-secondary" id="clearDataBtn">
+                 Clear Data
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="preview-actions">
+        <button class="btn btn-secondary btn-sm" id="exportImageBtn">
+             Export Image
+        </button>
+        <button class="btn btn-secondary btn-sm" id="downloadBtn" style="display: none;">
+             Download PNG
+        </button>
+    </div>
+    <!-- Live Chart Display -->
+    <div class="card live-chart-card">
+        <div class="card-header">
+            <h3 class="card-title"> Live Chart</h3>
+            <div class="chart-stats">
+                <span>Data Points: <strong id="dataPointCount">0</strong></span>
+                <span>Latest Value: <strong id="latestValue">--</strong></span>
+                <span>Avg: <strong id="avgValue">--</strong></span>
+            </div>
+        </div>
+
+        <!-- Chart Canvas -->
+        <div class="live-chart-container">
+            <canvas id="liveChart"></canvas>
+            
+            <!-- Initial State -->
+            <div class="chart-placeholder" id="chartPlaceholder">
+                <div class="placeholder-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></div>
+                <h4>Ready to Stream</h4>
+                <p>Click "Start Stream" to begin live data visualization</p>
+            </div>
+        </div>
+    </div>
+    <!-- Data Flow Animation -->
+    <div class="card data-flow-card">
+        <div class="card-header">
+            <h3 class="card-title"> Data Flow Animation</h3>
+        </div>
+        
+        <div class="flow-container">
+            <div class="flow-node" id="sourceNode">
+                <div class="node-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg></div>
+                <div class="node-label">Data Source</div>
+            </div>
+            
+            <div class="flow-path">
+                <svg class="flow-svg" viewBox="0 0 300 100">
+                    <defs>
+                        <linearGradient id="flowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" style="stop-color:#6FC1A3;stop-opacity:0" />
+                            <stop offset="50%" style="stop-color:#6FC1A3;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#6FC1A3;stop-opacity:0" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M 0 50 Q 75 20, 150 50 T 300 50" 
+                          stroke="url(#flowGradient)" 
+                          stroke-width="3" 
+                          fill="none"
+                          class="flow-line"/>
+                </svg>
+                <div class="data-particles" id="dataParticles"></div>
+            </div>
+            
+            <div class="flow-node" id="processNode">
+                <div class="node-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/></svg></div>
+                <div class="node-label">Processing</div>
+            </div>
+            
+            <div class="flow-path">
+                <svg class="flow-svg" viewBox="0 0 300 100">
+                    <path d="M 0 50 Q 75 80, 150 50 T 300 50" 
+                          stroke="url(#flowGradient)" 
+                          stroke-width="3" 
+                          fill="none"
+                          class="flow-line"/>
+                </svg>
+                <div class="data-particles" id="dataParticles2"></div>
+            </div>
+            
+            <div class="flow-node" id="chartNode">
+                <div class="node-icon"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/live_data.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/live_socket.js' %}"></script>
+<script src="{% static 'js/live_data.js' %}"></script>
+{% endblock %}

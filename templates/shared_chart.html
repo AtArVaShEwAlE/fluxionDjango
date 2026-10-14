@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ chart.title }} - Shared Chart</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sc-bg: #FFFFFF;
+            --sc-bg-soft: #F6F9F7;
+            --sc-ink: #10201A;
+            --sc-ink-soft: #55655F;
+            --sc-accent: #1F9D6E;
+            --sc-accent-dark: #157A56;
+            --sc-accent-soft: #E6F5EF;
+            --sc-border: #E3E9E6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--sc-bg);
+            color: var(--sc-ink);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--sc-border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--sc-ink);
+            letter-spacing: -0.02em;
+        }
+
+        .branding {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge {
+            background: var(--sc-accent-soft);
+            color: var(--sc-accent-dark);
+            padding: 0.3rem 0.85rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .chart-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .chart-header h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--sc-ink);
+            letter-spacing: -0.01em;
+            margin-bottom: 1rem;
+        }
+
+        .chart-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            color: var(--sc-ink-soft);
+            font-size: 0.92rem;
+            flex-wrap: wrap;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(16, 32, 26, 0.08);
+            border: 1px solid var(--sc-border);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+        }
+
+        .chart-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background-color: var(--sc-accent);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--sc-accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(31, 157, 110, 0.22);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--sc-ink);
+            border-color: #CBD6D1;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--sc-bg-soft);
+            border-color: var(--sc-ink-soft);
+        }
+
+        .footer {
+            background: var(--sc-bg-soft);
+            border-top: 1px solid var(--sc-border);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer p {
+            color: var(--sc-ink-soft);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--sc-accent-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            color: var(--sc-accent);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .chart-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .chart-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="branding">
+                <span class="logo">Fluxion</span>
+                <span class="badge">Shared Chart</span>
+            </div>
+            <a href="{% url 'landing' %}" class="btn btn-secondary">
+                Sign Up Free
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="chart-header">
+            <h1>{{ chart.title }}</h1>
+            <div class="chart-meta">
+                <span>{{ chart.chart_type|capfirst }} Chart</span>
+                <span>Created {{ chart.created_at|slice:":10" }}</span>
+                <span>{{ chart.dataset.filename }}</span>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-container">
+                <canvas id="sharedChart"></canvas>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="downloadChartPNG()">
+                Download PNG
+            </button>
+            <button class="btn btn-primary" onclick="downloadChartPDF()">
+                Download PDF
+            </button>
+            <a href="{% url 'signup' %}" class="btn btn-secondary">
+                Create Your Own Charts
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>
+            Powered by <a href="{% url 'landing' %}">Fluxion</a> -
+            Transform your data into beautiful visualizations
+        </p>
+    </div>
+    {{ chart|json_script:"chart-data" }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Chart data from server
+        const chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        let sharedChart = null;
+
+        // Color schemes (same as create chart page)
+        const colorSchemes = {
+            default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
+            blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
+            purple: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
+            rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
+        };
+
+        // Get colors
+        function getColors(count, scheme = 'default') {
+            const colors = colorSchemes[scheme] || colorSchemes.default;
+            const result = [];
+            for (let i = 0; i < count; i++) {
+                result.push(colors[i % colors.length]);
+            }
+            return result;
+        }
+
+        // Render chart
+        function renderChart() {
+            const canvas = document.getElementById('sharedChart');
+            const ctx = canvas.getContext('2d');
+
+            const config = chartData.config;
+            const dataset = chartData.dataset;
+
+            let preparedData;
+            if (chartData.chart_type === 'pie') {
+                preparedData = preparePieData(dataset.preview, config.value_column, config.label_column, config.color_scheme);
+            } else {
+                preparedData = prepareAxisData(dataset.preview, config.x_axis, config.y_axis, chartData.chart_type, config.color_scheme);
+            }
+
+            sharedChart = new Chart(ctx, {
+                type: chartData.chart_type,
+                data: preparedData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        title: {
+                            display: false
+                        },
+                        legend: {
+                            display: chartData.chart_type === 'pie',
+                            position: 'bottom',
+                            labels: {
+                                color: '#10201A'
+                            }
+                        }
+                    },
+                    scales: chartData.chart_type !== 'pie' ? {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#E3E9E6' },
+                            ticks: { color: '#55655F' }
+                        },
+                        x: {
+                            grid: { color: '#E3E9E6' },
+                            ticks: { color: '#55655F' }
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        function preparePieData(data, valueColumn, labelColumn, colorScheme) {
+            const labels = [];
+            const values = [];
+            data.forEach(row => {
+                const label = row[labelColumn];
+                const value = parseFloat(row[valueColumn]) || 0;
+                if (label && !isNaN(value)) {
+                    labels.push(label);
+                    values.push(value);
+                }
+            });
+            return {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: getColors(values.length, colorScheme)
+                }]
+            };
+        }
+
+        function prepareAxisData(data, xColumn, yColumn, chartType, colorScheme) {
+            const labels = [];
+            const values = [];
+            data.forEach(row => {
+                const xValue = row[xColumn];
+                const yValue = parseFloat(row[yColumn]) || 0;
+                if (xValue !== undefined && xValue !== '') {
+                    labels.push(xValue);
+                    values.push(yValue);
+                }
+            });
+            return {
+                labels: labels,
+                datasets: [{
+                    label: yColumn,
+                    data: values,
+                    backgroundColor: getColors(values.length, colorScheme),
+                    borderColor: colorSchemes[colorScheme][0],
+                    borderWidth: chartType === 'line' ? 2 : 1,
+                    tension: chartType === 'line' ? 0.4 : 0
+                }]
+            };
+        }
+
+        function downloadChartPNG() {
+            const canvas = document.getElementById('sharedChart');
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `${chartData.title}.png`;
+            link.href = url;
+            link.click();
+        }
+
+        function downloadChartPDF() {
+            if (typeof window.jspdf === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script.onload = () => generatePDF();
+                document.head.appendChild(script);
+            } else {
+                generatePDF();
+            }
+        }
+
+        function generatePDF() {
+            const canvas = document.getElementById('sharedChart');
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'px',
+                format: [canvas.width, canvas.height]
+            });
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`${chartData.title}.pdf`);
+        }
+
+        // Render on load
+        document.addEventListener('DOMContentLoaded', renderChart);
+    </script>
+</body>
+</html>

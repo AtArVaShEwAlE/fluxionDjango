@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Fluxion</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F6F9F7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .error-container {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(16, 32, 26, 0.08);
+            border: 1px solid #E3E9E6;
+            padding: 3rem 2.5rem;
+            max-width: 460px;
+            text-align: center;
+        }
+
+        .error-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #FEF1F0;
+            color: #E1443B;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+        }
+
+        h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #10201A;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: #55655F;
+            font-size: 1.02rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            background: #1F9D6E;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 9px;
+            font-weight: 600;
+            transition: all 0.18s ease;
+        }
+
+        .btn:hover {
+            background: #157A56;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(31, 157, 110, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        </div>
+        <h1>{{ error|default:"Oops! Something went wrong" }}</h1>
+        <p>{{ message|default:"The page you are looking for could not be found." }}</p>
+        <a href="{% url 'landing' %}" class="btn">
+            Go Home
+        </a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+/* Reports — page-specific styles (theme tokens/cards/buttons/modal come from app-theme.css + charts.css) */
+
+body.page-app .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+body.page-app .report-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--pa-border);
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.03);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+body.page-app .report-card:hover {
+    border-color: var(--pa-border-strong);
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.08);
+    transform: translateY(-2px);
+}
+
+body.page-app .report-card-body {
+    padding: 1.75rem 1.5rem 1.25rem;
+    text-align: center;
+    flex: 1;
+}
+
+body.page-app .report-icon {
+    color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin: 0 auto 1rem;
+}
+
+body.page-app .report-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--pa-ink);
+    margin: 0 0 0.6rem 0;
+    font-family: var(--pa-font-display);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-app .report-meta {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .report-chart-count {
+    font-weight: 600;
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .report-card-footer {
+    padding: 1rem;
+    background: var(--pa-bg-soft);
+    border-top: 1px solid var(--pa-border);
+    display: flex;
+    gap: 0.5rem;
+}
+
+body.page-app .report-card-footer .btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+}
+
+/* Wider modal + stacked chart panels for the report view */
+body.page-app .modal-content-wide {
+    max-width: 760px;
+}
+
+body.page-app .report-chart-panel {
+    background: var(--pa-bg-soft);
+    border: 1px solid var(--pa-border);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+body.page-app .report-chart-panel:last-child {
+    margin-bottom: 0;
+}
+
+body.page-app .report-chart-panel h4 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: var(--pa-ink);
+}
+
+body.page-app .report-chart-panel-canvas-wrap {
+    position: relative;
+    height: 320px;
+}
+
+/* Empty state uses shared .card / .empty-state from app-theme.css */

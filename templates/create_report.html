@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Report - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-create-report{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Create Report</h1>
+        <p>Pick the charts to combine — they'll appear in the order you select them</p>
+    </div>
+
+    {% if not charts %}
+        <div class="card no-data-state">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="9" height="4" rx="1"/><rect x="7" y="5" width="12" height="4" rx="1"/></svg>
+                </div>
+                <h4>No saved charts yet</h4>
+                <p>Create and save at least one chart before building a report</p>
+                <a href="{% url 'create_chart' %}" class="btn btn-primary">Create a Chart</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="report-builder-grid">
+            <!-- Left: chart picker -->
+            <div class="card report-picker-card">
+                <div class="card-header">
+                    <h3 class="card-title">Select Charts</h3>
+                </div>
+                <div class="chart-picker-list" id="chartPickerList">
+                    {% for chart in charts %}
+                        <label class="chart-picker-item" data-chart-id="{{ chart.id }}" data-chart-title="{{ chart.title }}">
+                            <input type="checkbox" class="chart-picker-checkbox" value="{{ chart.id }}">
+                            <span class="chart-picker-order" id="order-{{ chart.id }}"></span>
+                            <div class="chart-picker-info">
+                                <span class="chart-picker-title">{{ chart.title }}</span>
+                                <span class="chart-picker-meta">{{ chart.chart_type|capfirst }} chart &middot; {{ chart.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right: report details -->
+            <div class="card report-details-card">
+                <div class="card-header">
+                    <h3 class="card-title">Report Details</h3>
+                </div>
+                <div class="field-group">
+                    <label for="reportTitle">Report Title</label>
+                    <input type="text" id="reportTitle" class="form-input" placeholder="e.g. Weekly Sales Summary">
+                </div>
+                <div class="report-selected-summary" id="reportSelectedSummary">
+                    No charts selected yet
+                </div>
+                <button class="btn btn-primary btn-block" id="saveReportBtn">
+                    Save Report
+                </button>
+                <a href="{% url 'reports' %}" class="btn btn-secondary btn-block" style="margin-top: 0.75rem;">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/create_report.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/create_report.js' %}"></script>
+{% endblock %}

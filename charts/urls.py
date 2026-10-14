@@ -1,0 +1,22 @@
+from django.urls import path
+from . import views
+urlpatterns = [
+    path('create-chart', views.create_chart, name='create_chart'),
+    path('charts', views.charts, name='charts'),
+    path('save-chart', views.save_chart, name='save_chart'),
+    path('update-chart/<int:chart_id>', views.update_chart, name='update_chart'),
+    path('delete-chart/<int:chart_id>', views.delete_chart, name='delete_chart'),
+    path('get-chart/<int:chart_id>', views.get_chart, name='get_chart'),
+    path('share-chart/<int:chart_id>', views.share_chart, name='share_chart'),
+    path('unshare-chart/<int:chart_id>', views.unshare_chart, name='unshare_chart'),
+    path('export-chart-pdf/<int:chart_id>', views.export_chart_pdf, name='export_chart_pdf'),
+    path('shared/<str:share_token>', views.view_shared_chart, name='shared_chart'),
+    path('reports', views.reports, name='reports'),
+    path('create-report', views.create_report, name='create_report'),
+    path('save-report', views.save_report, name='save_report'),
+    path('get-report/<int:report_id>', views.get_report, name='get_report'),
+    path('delete-report/<int:report_id>', views.delete_report, name='delete_report'),
+    path('share-report/<int:report_id>', views.share_report, name='share_report'),
+    path('unshare-report/<int:report_id>', views.unshare_report, name='unshare_report'),
+    path('shared-report/<str:share_token>', views.view_shared_report, name='shared_report'),
+]

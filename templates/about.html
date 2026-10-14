@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}About Us - Fluxion{% endblock %}
+{% block body_class %}page-info{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>About Fluxion</h1>
+        <p>Why we built a data viz tool that gets out of your way</p>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">Our Story</h3>
+        <p>Fluxion started as a simple idea: turning a spreadsheet into a chart shouldn't take twenty clicks and a tutorial video. We wanted something fast enough for a quick look at your data, and polished enough to share with a client.</p>
+    </div>
+
+    <div class="grid grid-3">
+        <div class="card">
+            <h3 class="card-title">Simple</h3>
+            <p>Upload a CSV or Excel file, pick your columns, get a chart. No setup, no config files.</p>
+        </div>
+        <div class="card">
+            <h3 class="card-title">Shareable</h3>
+            <p>Every chart and report gets a public link. Nobody needs an account to view your work.</p>
+        </div>
+        <div class="card">
+            <h3 class="card-title">Yours</h3>
+            <p>Your data stays yours. Datasets and charts are tied to your account only.</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 class="card-title">Get In Touch</h3>
+        <p>Got feedback or a feature request? <a href="{% url 'contact' %}" class="auth-link">Reach out here</a>.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/info-pages.css' %}">
+{% endblock %}

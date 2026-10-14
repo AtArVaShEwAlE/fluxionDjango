@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Fluxion - Turn Spreadsheets Into Answers{% endblock %}
+
+{% block body_class %}page-landing{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/landing.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="ln-hero">
+    <div class="ln-hero-inner">
+        <div class="ln-hero-copy">
+            <span class="ln-eyebrow">Data visualization, simplified</span>
+            <h1>See your data.<br>Instantly clear.</h1>
+            <p class="ln-hero-sub">Fluxion turns a raw spreadsheet into a clean, shareable chart in under a minute. Upload a CSV or Excel file, choose a chart type, map your columns to axes, and adjust the color scheme — all from one screen, with a live preview that updates as you go. No formulas, no dashboard software to learn, and nothing to configure before you start.</p>
+            <div class="ln-hero-actions">
+                <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary">Start free</a>
+                <a href="#how-it-works" class="ln-btn ln-btn-ghost">See how it works</a>
+            </div>
+            <ul class="ln-hero-highlights">
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    No credit card required
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    CSV &amp; Excel files up to 16MB
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Bar, line, pie &amp; scatter charts
+                </li>
+                <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Public share links, no login needed to view
+                </li>
+            </ul>
+        </div>
+
+        <div class="ln-hero-visual" aria-hidden="true">
+            <div class="ln-chart-card">
+                <div class="ln-chart-card-header">
+                    <div>
+                        <span class="ln-chart-card-title">Revenue by Quarter</span>
+                        <span class="ln-chart-card-sub">Uploaded from Q_sales.csv</span>
+                    </div>
+                    <span class="ln-chart-badge">Bar</span>
+                </div>
+                <div class="ln-chart-bars">
+                    <div class="ln-bar" style="--h: 38%; --d: 0s;"><span>Q1</span></div>
+                    <div class="ln-bar" style="--h: 55%; --d: 0.08s;"><span>Q2</span></div>
+                    <div class="ln-bar" style="--h: 47%; --d: 0.16s;"><span>Q3</span></div>
+                    <div class="ln-bar" style="--h: 78%; --d: 0.24s;"><span>Q4</span></div>
+                    <div class="ln-bar" style="--h: 92%; --d: 0.32s;"><span>Q5</span></div>
+                </div>
+            </div>
+            <div class="ln-float-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                Chart saved
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Feature Grid -->
+<section class="ln-features" id="features">
+    <div class="ln-section-head">
+        <span class="ln-eyebrow">Why Fluxion</span>
+        <h2>Everything you need, nothing you don't</h2>
+        <p class="ln-section-sub">Every feature below ships in the free plan — there's no upgrade wall between you and a finished chart.</p>
+    </div>
+    <div class="ln-feature-grid">
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
+            </div>
+            <h3>Drag-and-drop upload</h3>
+            <p>Drop a CSV or Excel file (up to 16MB) and Fluxion reads the columns, detects data types, and shows you the first rows immediately. No manual formatting, no cleaning spreadsheets before you can see your own data.</p>
+        </div>
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
+            </div>
+            <h3>Four chart types</h3>
+            <p>Bar, line, pie, and scatter plots cover most everyday reporting needs. Map any column to an axis, switch chart types without re-uploading, and watch the preview update instantly as you adjust it.</p>
+        </div>
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h10l4 4v10.2a2 2 0 0 1-2 1.8H8a2 2 0 0 1-2-2Z"/><path d="M10 2v4h6"/><path d="M18 18v-7h-8v7"/><path d="M18 22H4a2 2 0 0 1-2-2V6"/></svg>
+            </div>
+            <h3>Save your work</h3>
+            <p>Every chart is saved to your account alongside its source dataset, so you can revisit, tweak the axes, or export it again later without hunting for the original file or rebuilding from scratch.</p>
+        </div>
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+            </div>
+            <h3>Share with a link</h3>
+            <p>Generate a public link to any saved chart in one click. Viewers get a clean, standalone page with the live chart and download options — no Fluxion account or login required on their end.</p>
+        </div>
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+            </div>
+            <h3>Export anywhere</h3>
+            <p>Download any chart as a PNG for quick sharing or a PDF for print-ready reports. Exports render at full resolution, so they hold up fine dropped straight into a slide deck or document.</p>
+        </div>
+        <div class="ln-feature-card">
+            <div class="ln-feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+            </div>
+            <h3>No setup time</h3>
+            <p>There's no workspace to configure, no integration to connect, and no tutorial to sit through. Sign up, upload a file, and your first chart is ready in under a minute — genuinely.</p>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="ln-process" id="how-it-works">
+    <div class="ln-section-head">
+        <span class="ln-eyebrow">The process</span>
+        <h2>Three steps from spreadsheet to shareable chart</h2>
+        <p class="ln-section-sub">No account setup, no data modeling, no waiting on IT. Most people finish all three steps on their first visit.</p>
+    </div>
+    <div class="ln-process-grid">
+        <div class="ln-process-step">
+            <span class="ln-step-num">01</span>
+            <h3>Upload your file</h3>
+            <p>Drop in a CSV or Excel file up to 16MB. Fluxion parses the columns, infers data types, and shows a live preview of your rows within seconds — before you commit to any chart settings.</p>
+        </div>
+        <div class="ln-process-step">
+            <span class="ln-step-num">02</span>
+            <h3>Choose your chart</h3>
+            <p>Pick bar, line, pie, or scatter, then map your columns to the axes (or values and labels, for pie charts). Adjust the color scheme and title, and the preview updates instantly on the right.</p>
+        </div>
+        <div class="ln-process-step">
+            <span class="ln-step-num">03</span>
+            <h3>Save and share</h3>
+            <p>Save the chart to your account so it's there whenever you come back, then generate a public link anyone can open and view — no Fluxion account required on their end, ever.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA -->
+<section class="ln-cta">
+    <div class="ln-cta-card">
+        <h2>Ready to see your data clearly?</h2>
+        <p>Create a free account and turn your first spreadsheet into a chart today.</p>
+        <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary ln-btn-lg">Start creating — it's free</a>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const cards = document.querySelectorAll('.ln-feature-card, .ln-process-step');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('ln-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+    cards.forEach(card => observer.observe(card));
+});
+</script>
+{% endblock %}

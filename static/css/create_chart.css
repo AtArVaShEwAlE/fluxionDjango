@@ -1,0 +1,441 @@
+/* Create Chart — page-specific styles (theme tokens/cards/buttons come from app-theme.css) */
+
+body.page-app .page-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+}
+
+body.page-app .page-header h1 {
+    margin-top: 40px;
+    margin-bottom: 0.5rem;
+}
+
+body.page-app .page-header p {
+    font-size: 1.15rem;
+    margin: 0;
+}
+
+/* No Data State */
+body.page-app .no-data-state {
+    margin-bottom: 2rem;
+}
+
+body.page-app .no-data-state .empty-state {
+    padding: 3rem 2rem;
+}
+
+body.page-app .no-data-state h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+body.page-app .no-data-state p {
+    margin-bottom: 1.5rem;
+}
+
+/* Container adjustments for border-to-border builder */
+body.page-app .chart-builder .container,
+body.page-app .container:has(.chart-config-top) {
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+body.page-app .page-header {
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+/* Top Section */
+body.page-app .chart-config-top {
+    background: var(--pa-bg-soft);
+    border: 1px solid var(--pa-border);
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    padding: 2rem;
+}
+
+body.page-app .edit-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+    border: 1px solid var(--pa-accent);
+    border-radius: 9px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+body.page-app .edit-banner svg {
+    flex-shrink: 0;
+}
+
+body.page-app .dataset-info {
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+body.page-app .dataset-info h4 {
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+}
+
+body.page-app .dataset-meta {
+    color: var(--pa-ink-soft);
+    font-size: 0.9rem;
+}
+
+/* Chart Type Selection */
+body.page-app .config-label {
+    display: block;
+    font-weight: 700;
+    color: var(--pa-ink);
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+body.page-app .chart-type-suggestion {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--pa-accent-dark);
+    background: var(--pa-accent-soft);
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    margin: -0.5rem 0 1rem;
+    max-width: max-content;
+}
+
+body.page-app .chart-type-grid {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+body.page-app .chart-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem 2rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 10px;
+    background: #ffffff;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+    color: var(--pa-ink-soft);
+    min-width: 120px;
+}
+
+body.page-app .chart-type-btn:hover {
+    border-color: var(--pa-accent);
+    color: var(--pa-ink);
+    transform: translateY(-2px);
+}
+
+body.page-app .chart-type-btn.active {
+    border-color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .chart-type-btn span {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.4rem;
+}
+
+/* Chart Title Input */
+body.page-app .chart-title-section {
+    margin-top: 1.5rem;
+}
+
+body.page-app .chart-title-section label {
+    display: block;
+    font-weight: 600;
+    color: var(--pa-ink);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+body.page-app .chart-title-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 1rem;
+    background: #ffffff;
+    color: var(--pa-ink);
+    transition: all 0.15s ease;
+}
+
+body.page-app .chart-title-input::placeholder {
+    color: #9AA6A1;
+}
+
+body.page-app .chart-title-input:focus {
+    outline: none;
+    border-color: var(--pa-accent);
+    box-shadow: 0 0 0 3px var(--pa-accent-soft);
+}
+
+/* Content Grid */
+body.page-app .chart-content-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 0;
+    align-items: start;
+}
+
+/* Axis Panel */
+body.page-app .axis-config-panel {
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-top: none;
+    border-radius: 0;
+    padding: 2rem 1.5rem;
+    height: 100%;
+}
+
+body.page-app .field-group {
+    margin-bottom: 1.25rem;
+}
+
+body.page-app .field-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--pa-ink);
+    margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+}
+
+body.page-app .form-select,
+body.page-app .form-input {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.15s ease;
+    background: #ffffff;
+    color: var(--pa-ink);
+}
+
+body.page-app .form-select option {
+    background: #ffffff;
+    color: var(--pa-ink);
+}
+
+body.page-app .form-select:focus,
+body.page-app .form-input:focus {
+    outline: none;
+    border-color: var(--pa-accent);
+    box-shadow: 0 0 0 3px var(--pa-accent-soft);
+}
+
+body.page-app .color-scheme-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+body.page-app .chart-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+body.page-app .btn-block {
+    width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Preview Panel */
+body.page-app .preview-panel {
+    min-height: 700px;
+    height: 100%;
+}
+
+body.page-app .chart-preview-card {
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-top: none;
+    border-left: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0;
+}
+
+body.page-app .chart-preview-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--pa-bg-soft);
+    padding: 1.5rem;
+    border-radius: 0;
+    border-bottom: 1px solid var(--pa-border);
+    margin-bottom: 0;
+}
+
+body.page-app .preview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+body.page-app .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.88rem;
+}
+
+body.page-app .chart-container {
+    position: relative;
+    min-height: 600px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 0;
+}
+
+body.page-app #chartCanvas {
+    max-width: 100%;
+    max-height: 600px;
+    width: 100%;
+    display: none;
+}
+
+body.page-app #chartCanvas.visible {
+    display: block;
+}
+
+/* No Chart State */
+body.page-app .no-chart-state {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+body.page-app .no-chart-state h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+body.page-app .no-chart-state p {
+    margin: 0;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Loading State */
+body.page-app .loading-chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+}
+
+body.page-app .loading-chart p {
+    color: var(--pa-ink);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    body.page-app .chart-content-grid {
+        grid-template-columns: 260px 1fr;
+    }
+}
+
+@media (max-width: 1024px) {
+    body.page-app .chart-content-grid {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-app .axis-config-panel {
+        order: 2;
+        border-top: 1px solid var(--pa-border);
+    }
+
+    body.page-app .preview-panel {
+        order: 1;
+    }
+
+    body.page-app .chart-preview-card {
+        border-left: 1px solid var(--pa-border);
+    }
+}
+
+@media (max-width: 768px) {
+    body.page-app .page-header {
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    body.page-app .chart-config-top {
+        padding: 1.5rem 1rem;
+    }
+
+    body.page-app .chart-type-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    body.page-app .chart-type-btn {
+        padding: 0.875rem 1rem;
+        min-width: auto;
+    }
+
+    body.page-app .chart-container {
+        min-height: 350px;
+        padding: 1rem;
+    }
+
+    body.page-app .axis-config-panel {
+        padding: 1.5rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body.page-app .chart-type-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    body.page-app .chart-type-btn {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+}
+
+/* Error states */
+body.page-app .form-select.error,
+body.page-app .form-input.error {
+    border-color: var(--pa-danger);
+}
+
+body.page-app .error-message {
+    color: var(--pa-danger);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}

@@ -1,0 +1,321 @@
+/* My Charts — page-specific styles (theme tokens/cards/buttons come from app-theme.css) */
+
+body.page-app .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+}
+
+body.page-app .page-header h1 {
+    margin-bottom: 0.3rem;
+    margin-top: 40px;
+}
+
+body.page-app .page-header p {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* Charts Grid */
+body.page-app .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+body.page-app .list-controls {
+    display: flex;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+body.page-app .list-search-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    background: #ffffff;
+    color: var(--pa-ink);
+}
+
+body.page-app .list-search-input:focus {
+    outline: none;
+    border-color: var(--pa-accent);
+    box-shadow: 0 0 0 3px var(--pa-accent-soft);
+}
+
+body.page-app .list-sort-select {
+    padding: 0.7rem 1rem;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    background: #ffffff;
+    color: var(--pa-ink);
+    min-width: 160px;
+}
+
+body.page-app .chart-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid var(--pa-border);
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.03);
+    overflow: hidden;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+body.page-app .chart-card:hover {
+    border-color: var(--pa-border-strong);
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.08);
+    transform: translateY(-2px);
+}
+
+body.page-app .chart-card-body {
+    padding: 1.75rem 1.5rem 1.25rem;
+    text-align: center;
+    flex: 1;
+}
+
+body.page-app .chart-card-body .icon-lg {
+    color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin: 0 auto 1rem;
+}
+
+body.page-app .chart-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--pa-ink);
+    margin: 0 0 0.6rem 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.6em;
+    font-family: var(--pa-font-display);
+}
+
+body.page-app .chart-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+body.page-app .chart-date {
+    color: var(--pa-ink-soft);
+    font-size: 0.85rem;
+}
+
+body.page-app .chart-card-footer {
+    padding: 1rem;
+    background: var(--pa-bg-soft);
+    border-top: 1px solid var(--pa-border);
+    display: flex;
+    gap: 0.5rem;
+}
+
+body.page-app .chart-card-footer .btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+}
+
+body.page-app .btn-success {
+    background: var(--pa-accent) !important;
+    color: #ffffff !important;
+}
+
+body.page-app .btn-success:hover {
+    background: var(--pa-accent-dark) !important;
+}
+
+/* Modal */
+body.page-app .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    animation: pa-fadeIn 0.25s ease;
+}
+
+body.page-app .modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.page-app .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(16, 32, 26, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+body.page-app .modal-content {
+    position: relative;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(16, 32, 26, 0.25);
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    animation: pa-slideUp 0.25s ease;
+}
+
+body.page-app .modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--pa-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.page-app .modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+body.page-app .modal-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--pa-ink-soft);
+    cursor: pointer;
+    padding: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+}
+
+body.page-app .modal-close:hover {
+    background: var(--pa-bg-soft);
+    color: var(--pa-ink);
+}
+
+body.page-app .modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+body.page-app .modal-chart-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+}
+
+body.page-app .modal-footer {
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--pa-border);
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Empty State */
+body.page-app .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+body.page-app .empty-icon {
+    margin-bottom: 1rem;
+}
+
+body.page-app .empty-state h3 {
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+}
+
+body.page-app .empty-state p {
+    margin-bottom: 2rem;
+    font-size: 1.05rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body.page-app .empty-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@keyframes pa-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pa-slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    body.page-app .page-header {
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+
+    body.page-app .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    body.page-app .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    body.page-app .modal-header {
+        padding: 1rem 1.5rem;
+    }
+
+    body.page-app .modal-body {
+        padding: 1.5rem;
+    }
+
+    body.page-app .modal-chart-container {
+        height: 300px;
+    }
+
+    body.page-app .modal-footer {
+        padding: 1rem 1.5rem;
+        flex-direction: column;
+    }
+
+    body.page-app .modal-footer .btn {
+        width: 100%;
+    }
+
+    body.page-app .empty-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtualenv
+venv/
+.venv/
+
+# Secrets
+.env
+
+# Database
+db.sqlite3
+
+# User data: private datasets and generated files
+uploads/
+media/
+
+# Collected static files (rebuilt by collectstatic)
+staticfiles/
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db

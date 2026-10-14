@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Sign Up - Fluxion{% endblock %}
+
+{% block body_class %}page-auth{% endblock %}
+
+{% block content %}
+<div class="au-shell">
+    <!-- Brand Panel -->
+    <div class="au-panel" aria-hidden="true">
+        <div class="au-panel-top">
+            <span class="au-panel-logo">Fluxion</span>
+        </div>
+        <div class="au-panel-mid">
+            <h2>Turn spreadsheets into shareable charts.</h2>
+            <ul class="au-panel-list au-panel-steps">
+                <li>
+                    <span class="au-step-badge">1</span>
+                    Upload a CSV or Excel file
+                </li>
+                <li>
+                    <span class="au-step-badge">2</span>
+                    Choose a chart type and axes
+                </li>
+                <li>
+                    <span class="au-step-badge">3</span>
+                    Save it and share a link
+                </li>
+            </ul>
+        </div>
+        <div class="au-panel-bottom">
+            <div class="au-panel-card">
+                <span class="au-panel-card-label">Revenue by Quarter</span>
+                <div class="au-panel-bars">
+                    <div style="--h: 40%"></div>
+                    <div style="--h: 62%"></div>
+                    <div style="--h: 50%"></div>
+                    <div style="--h: 85%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Panel -->
+    <div class="au-form-col">
+        <div class="auth-container">
+            <div class="auth-card auth-card-wide">
+                <div class="auth-header">
+                    <h1>Join Fluxion</h1>
+                    <p>Create your account and start visualizing data</p>
+                </div>
+
+                <form method="POST" class="auth-form">
+                    {% csrf_token %}
+
+                    <div class="form-fields-horizontal">
+                        <div class="form-group">
+                            {% include 'partials/field.html' with field=form.username %}
+                        </div>
+
+                        <div class="form-group">
+                            {% include 'partials/field.html' with field=form.full_name %}
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 1.5rem;">
+                        {% include 'partials/field.html' with field=form.email %}
+                    </div>
+
+                    <div class="form-fields-horizontal">
+                        <div class="form-group">
+                            {% include 'partials/field.html' with field=form.password %}
+                        </div>
+
+                        <div class="form-group">
+                            {% include 'partials/field.html' with field=form.password2 %}
+                        </div>
+                    </div>
+
+                    <div class="form-submit-group">
+                        <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                    </div>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="{% url 'login' %}" class="auth-link">Sign in here</a></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Create Chart - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-create-chart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Create Chart</h1>
+        <p>Build beautiful visualizations from your data</p>
+    </div>
+
+    <!-- No Data State -->
+    <div class="card no-data-state" id="noDataState">
+        <div class="empty-state">
+            <div class="empty-icon"><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input-icon lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M2 15h10"/><path d="m9 18 3-3-3 3"/></svg></div>
+            <h4>No dataset loaded</h4>
+            <p>Please upload a dataset first to create charts</p>
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">
+                Go to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Chart Builder -->
+    <div class="chart-builder" id="chartBuilder" style="display: none;">
+        
+        <!-- Top Section: Chart Type and Title -->
+        <div class="chart-config-top">
+            <!-- Edit Mode Banner (shown by JS when editing an existing chart) -->
+            <div class="edit-banner" id="editBanner" style="display: none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                <span>Editing "<strong id="editBannerTitle"></strong>" — changes save to this chart</span>
+            </div>
+
+            <!-- Dataset Info -->
+            <div class="dataset-info">
+                <h4 id="datasetName">Dataset Name</h4>
+                <div class="dataset-meta">
+                    <span id="datasetRows">0 rows</span> • 
+                    <span id="datasetCols">0 columns</span>
+                </div>
+            </div>
+
+            <!-- Chart Type Selection -->
+            <div class="config-section">
+                <label class="config-label">Select Chart Type</label>
+                <span class="chart-type-suggestion" id="chartTypeSuggestion" style="display: none;"></span>
+                <div class="chart-type-grid">
+                    <button class="chart-type-btn active" data-type="bar">
+                        <div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-bar-big-icon lucide-chart-bar-big"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><rect x="7" y="13" width="9" height="4" rx="1"/><rect x="7" y="5" width="12" height="4" rx="1"/></svg></div>
+                        <span>Bar Chart</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="line">
+                        <div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-line-icon lucide-chart-line"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg></div>
+                        <span>Line Chart</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="pie">
+                        <div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-pie-icon lucide-chart-pie"><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"/><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/></svg></div>
+                        <span>Pie Chart</span>
+                    </button>
+                    <button class="chart-type-btn" data-type="scatter">
+                        <div class="icon-lg"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chart-scatter-icon lucide-chart-scatter"><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="18.5" cy="5.5" r=".5" fill="currentColor"/><circle cx="11.5" cy="11.5" r=".5" fill="currentColor"/><circle cx="7.5" cy="16.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="14.5" r=".5" fill="currentColor"/><path d="M3 3v16a2 2 0 0 0 2 2h16"/></svg></div>
+                        <span>Scatter Plot</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chart Title Input -->
+            <div class="chart-title-section">
+                <label for="chartTitle">Chart Title</label>
+                <input type="text" id="chartTitle" class="chart-title-input" placeholder="Enter your chart title...">
+            </div>
+        </div>
+
+        <!-- Bottom Section: Axis Config and Preview -->
+        <div class="chart-content-grid">
+            <!-- Left Panel: Axis Configuration -->
+            <div class="axis-config-panel">
+                <label class="config-label">Data Configuration</label>
+                
+                <!-- X-Axis Selection -->
+                <div class="field-group">
+                    <label for="xAxisSelect">X-Axis (Categories)</label>
+                    <select id="xAxisSelect" class="form-select">
+                        <option value="">Select X-Axis column...</option>
+                    </select>
+                </div>
+
+                <!-- Y-Axis Selection -->
+                <div class="field-group" id="yAxisGroup">
+                    <label for="yAxisSelect">Y-Axis (Values)</label>
+                    <select id="yAxisSelect" class="form-select">
+                        <option value="">Select Y-Axis column...</option>
+                    </select>
+                </div>
+
+                <!-- Value Selection (for pie charts) -->
+                <div class="field-group" id="valueGroup" style="display: none;">
+                    <label for="valueSelect">Values</label>
+                    <select id="valueSelect" class="form-select">
+                        <option value="">Select value column...</option>
+                    </select>
+                </div>
+
+                <!-- Labels Selection (for pie charts) -->
+                <div class="field-group" id="labelGroup" style="display: none;">
+                    <label for="labelSelect">Labels</label>
+                    <select id="labelSelect" class="form-select">
+                        <option value="">Select label column...</option>
+                    </select>
+                </div>
+
+                <!-- Color Scheme -->
+                <div class="color-scheme-section">
+                    <div class="field-group">
+                        <label for="colorScheme">Color Scheme</label>
+                        <select id="colorScheme" class="form-select">
+                            <option value="default">Default (Green)</option>
+                            <option value="blue">Blue Tones</option>
+                            <option value="purple">Purple Tones</option>
+                            <option value="rainbow">Rainbow</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="chart-actions">
+                    <button class="btn btn-primary btn-block" id="updateChartBtn">
+                        Update Chart
+                    </button>
+                    <button class="btn btn-secondary btn-block" id="saveChartBtn" style="display: none;">
+                        Save Chart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Chart Preview -->
+            <div class="preview-panel">
+                <div class="card chart-preview-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Chart Preview</h3>
+                        <div class="preview-actions">
+                            <button class="btn btn-secondary btn-sm" id="downloadBtn" style="display: none;">
+                                <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download-icon lucide-download"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg> Download
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Chart Canvas -->
+                    <div class="chart-container">
+                        <canvas id="chartCanvas" width="400" height="300"></canvas>
+                        
+                        <!-- No Chart State -->
+                        <div class="no-chart-state" id="noChartState">
+                            <h4>No chart yet</h4>
+                            <p>Configure your chart settings and click "Update Chart" to see the preview</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/create_chart.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/create_chart.js' %}"></script>
+{% endblock %}
+
