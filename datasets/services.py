@@ -140,7 +140,7 @@ def load_dataframe(dataset):
 # ---------- Query engine (Phase 10.2) ----------
 
 AGGS = {'sum', 'avg', 'count', 'min', 'max'}
-SORTS = {'x_asc', 'x_desc', 'value_asc', 'value_desc'}
+SORTS = {'none', 'x_asc', 'x_desc', 'value_asc', 'value_desc'}
 BUCKET_FREQ = {'day': 'D', 'week': 'W', 'month': 'M', 'quarter': 'Q', 'year': 'Y'}
 MAX_GROUPS = 500
 MAX_RAW_POINTS = 5000
@@ -194,6 +194,8 @@ def _reduce(vals, agg):
 
 
 def _sort_result(res, sort):
+    if sort == 'none':
+        return res
     if sort in ('value_asc', 'value_desc'):
         return res.sort_values('s0', ascending=(sort == 'value_asc'),
                                na_position='last', kind='stable')
@@ -344,3 +346,4 @@ def run_query(df, spec):
                    for i, s in enumerate(series)],
         'meta': meta,
     }
+

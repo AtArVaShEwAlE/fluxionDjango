@@ -12,7 +12,7 @@ from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 from .models import Dataset
 from .services import (allowed_file, analyze_dataframe, clean_dataframe, delete_cache,
-                       load_dataframe, read_dataframe, save_cache)
+                       load_dataframe, read_dataframe, run_query, save_cache)
 
 logger = logging.getLogger(__name__)
 
@@ -176,3 +176,25 @@ def get_dataset_columns(request, dataset_id):
         'columns': dataset.column_names,
         'dataset_name': dataset.original_filename,
     })
+
+@login_required
+@require_POST
+def dataset_data(request, dataset_id):
+    """Aggregated data for the chart builder. Never returns raw full data."""
+    dataset, error = _owned_dataset(request, dataset_id)
+    if error:
+        return error
+    try:
+        spec = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    try:
+        result = run_query(load_dataframe(dataset), spec)
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except FileNotFoundError:
+        return JsonResponse({'success': False, 'error': 'Dataset file is missing'}, status=404)
+    except Exception as e:
+        logger.exception('Error querying dataset %s', dataset_id)
+        return JsonResponse({'success': False, 'error': f'Error querying data: {e}'}, status=500)
+    return JsonResponse({'success': True, **result})

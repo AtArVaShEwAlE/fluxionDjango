@@ -130,6 +130,21 @@ try:
         check('update-chart owner', r.status_code, 200)
         check('export-chart-pdf owner', A.get(f'/export-chart-pdf/{cid}').status_code, 200)
 
+        r = A.get(f'/chart-data/{cid}')
+        check('chart-data owner', r.status_code, 200)
+        check('chart-data labels', js(r).get('labels'), [['a', 'b', 'c']])
+        check('chart-data values', js(r).get('series', [{}])[0].get('values'), [[10, 20, 30]])
+        check('B chart-data', B.get(f'/chart-data/{cid}').status_code, [403, 404])
+        check('anon chart-data', anon.get(f'/chart-data/{cid}').status_code, 302)
+        spec = {'x': 'name', 'series': [{'column': 'sales', 'agg': 'sum'}]}
+        r = jpost(A, f'/dataset-data/{ds}', spec)
+        check('dataset-data owner', r.status_code, 200)
+        check('dataset-data values', js(r).get('series', [{}])[0].get('values'), [[10, 20, 30]])
+        check('dataset-data bad column', jpost(A, f'/dataset-data/{ds}', {'x': 'nope', 'series': [{'column': 'sales'}]}).status_code, 400)
+        check('dataset-data bad json', A.post(f'/dataset-data/{ds}', 'x', content_type='application/json').status_code, 400)
+        check('B dataset-data', jpost(B, f'/dataset-data/{ds}', spec).status_code, [403, 404])
+        check('anon dataset-data', anon.post(f'/dataset-data/{ds}').status_code, 302)
+
         # other user
         check('B get-chart', B.get(f'/get-chart/{cid}').status_code, [403, 404])
         check('B update-chart', jput(B, f'/update-chart/{cid}', payload).status_code, [403, 404])
@@ -149,9 +164,12 @@ try:
             r = anon.get(f'/shared/{tok}')
             check('shared page anon', r.status_code, 200)
             check('shared page iframe ok', r.get('X-Frame-Options'), None)
+            r = anon.get(f'/shared-data/{tok}')
+            check('shared-data anon', r.status_code, 200)
+            check('shared-data values', js(r).get('series', [{}])[0].get('values'), [[10, 20, 30]])
             check('unshare-chart owner', A.post(f'/unshare-chart/{cid}').status_code, 200)
             check('shared page after unshare', anon.get(f'/shared/{tok}').status_code, 404)
-
+            check('shared-data after unshare', anon.get(f'/shared-data/{tok}').status_code, 404)
         # reports
         r = jpost(A, '/save-report', {'title': 'ZZ report', 'chart_ids': [cid]})
         rid = js(r).get('report_id') or js(r).get('id')
@@ -168,8 +186,11 @@ try:
         rtok = js(r).get('share_token')
         if rtok:
             check('shared-report anon', anon.get(f'/shared-report/{rtok}').status_code, 200)
+            check('shared-report-data anon', anon.get(f'/shared-report-data/{rtok}/{cid}').status_code, 200)
+            check('shared-report-data bad chart', anon.get(f'/shared-report-data/{rtok}/999999').status_code, 404)
             check('unshare-report', A.post(f'/unshare-report/{rid}').status_code, 200)
             check('shared-report after unshare', anon.get(f'/shared-report/{rtok}').status_code, 404)
+            check('shared-report-data after unshare', anon.get(f'/shared-report-data/{rtok}/{cid}').status_code, 404)
         check('delete-report owner', A.delete(f'/delete-report/{rid}').status_code, 200)
     if cid:
         check('delete-chart owner', A.delete(f'/delete-chart/{cid}').status_code, 200)

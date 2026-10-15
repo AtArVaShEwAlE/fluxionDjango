@@ -8,6 +8,8 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from datasets.models import Dataset
+from datasets.services import load_dataframe, run_query
+from .queries import spec_from_chart
 from .models import Chart, Report
 from .models import Chart
 
@@ -294,3 +296,51 @@ def export_chart_pdf(request, chart_id):
         'success': False,
         'message': 'PDF export is done client-side (jsPDF).',
     })
+
+
+
+# ---------- Chart data (aggregated, server-side) ----------
+
+def _run_chart(chart):
+    try:
+        spec = spec_from_chart(chart.chart_type, chart.config)
+        result = run_query(load_dataframe(chart.dataset), spec)
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except FileNotFoundError:
+        return JsonResponse({'success': False, 'error': 'Dataset file is missing'}, status=404)
+    except Exception as e:
+        logger.exception('Error building data for chart %s', chart.pk)
+        return JsonResponse({'success': False, 'error': f'Error building chart data: {e}'}, status=500)
+    return JsonResponse({'success': True, **result})
+
+
+@login_required
+@require_GET
+def chart_data(request, chart_id):
+    chart, error = _owned_chart(request, chart_id)
+    if error:
+        return error
+    return _run_chart(chart)
+
+
+@require_GET
+def shared_chart_data(request, share_token):
+    """Public. Spec comes from the saved config only, never from the visitor."""
+    chart = (Chart.objects.select_related('dataset')
+             .filter(share_token=share_token, is_public=True).first())
+    if chart is None:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
+    return _run_chart(chart)
+
+
+@require_GET
+def shared_report_chart_data(request, share_token, chart_id):
+    """Public. Chart must belong to this shared report."""
+    report = Report.objects.filter(share_token=share_token, is_public=True).first()
+    if report is None or chart_id not in report.chart_ids:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
+    chart = Chart.objects.select_related('dataset').filter(pk=chart_id).first()
+    if chart is None:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
+    return _run_chart(chart)

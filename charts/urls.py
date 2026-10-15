@@ -19,4 +19,8 @@ urlpatterns = [
     path('share-report/<int:report_id>', views.share_report, name='share_report'),
     path('unshare-report/<int:report_id>', views.unshare_report, name='unshare_report'),
     path('shared-report/<str:share_token>', views.view_shared_report, name='shared_report'),
+    path('chart-data/<int:chart_id>', views.chart_data, name='chart_data'),
+    path('shared-data/<str:share_token>', views.shared_chart_data, name='shared_chart_data'),
+    path('shared-report-data/<str:share_token>/<int:chart_id>',
+         views.shared_report_chart_data, name='shared_report_chart_data'),
 ]
