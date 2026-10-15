@@ -62,9 +62,6 @@ body {
     transition: all 0.3s ease;
 }
 
-.logo-link:hover {
-    transform: translateY(-2px);
-}
 
 .logo-image {
     height: 35px;
@@ -74,20 +71,9 @@ body {
 }
 
 .logo-link:hover .logo-image {
-    filter: brightness(1.2);
+    filter: brightness(1.5);
 }
 
-.logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #E2E2E2;
-    line-height: 1;
-    margin: 0;
-}
-
-.navbar-logo h3 {
-    display: none; /* Hide old text-only logo */
-}
 
 /* Responsive Logo */
 @media (max-width: 768px) {
