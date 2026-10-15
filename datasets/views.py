@@ -11,7 +11,8 @@ from django.utils.text import get_valid_filename
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 from .models import Dataset
-from .services import allowed_file, analyze_dataframe, read_dataframe
+from .services import (allowed_file, analyze_dataframe, clean_dataframe, delete_cache,
+                       load_dataframe, read_dataframe, save_cache)
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,10 @@ def upload_file(request):
             file_size=os.path.getsize(filepath),
             **info,
         )
+        try:
+            save_cache(dataset,clean_dataframe(df))
+        except Exception:
+            logger.exception('Could not write cache for dataset %s',dataset.pk)
         return JsonResponse({'success': True, 'data': dataset.to_dict()})
 
     except Exception as e:
@@ -123,7 +128,16 @@ def clean_dataset(request, dataset_id):
         if len(new_columns) != len(set(new_columns)):
             return JsonResponse({'success': False,
                                  'error': 'Column names must be unique after rename'}, status=400)
-
+        
+        try:
+            df = load_dataframe(dataset)
+            df = df[kept]
+            df.columns = new_columns
+            save_cache(dataset, df)
+        except Exception:
+            logger.exception('Cache update failed for dataset %s', dataset.pk)
+            delete_cache(dataset)
+            
         dataset.column_names = new_columns
         dataset.data_types = {final_name(c): data_types.get(c) for c in kept}
         dataset.preview_data = [{final_name(c): row.get(c, '') for c in kept} for row in preview]

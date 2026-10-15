@@ -1,5 +1,10 @@
-import pandas as pd
+import logging
+import os
 
+import pandas as pd
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
 ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'xls'}
 
 
@@ -82,6 +87,51 @@ def analyze_dataframe(df):
         'column_stats': compute_column_stats(df),
     }
 
+def clean_dataframe(df):
+    """Same header cleanup as analyze_dataframe, but keeps NaN
+    (needed for correct aggregation later)."""
+    df = df.copy()
+    df.columns = df.columns.astype(str).str.strip()
+    return df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
+
+def cache_path(dataset):
+    return os.path.join(settings.UPLOAD_ROOT, 'cache', f'{dataset.pk}.pkl')
+
+
+def save_cache(dataset, df):
+    path = cache_path(dataset)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    df.to_pickle(path)
+
+
+def delete_cache(dataset):
+    try:
+        os.remove(cache_path(dataset))
+    except FileNotFoundError:
+        pass
+
+
+def load_dataframe(dataset):
+    """Full cleaned frame. Cache first, else rebuild from the raw upload."""
+    path = cache_path(dataset)
+    if os.path.exists(path):
+        try:
+            return pd.read_pickle(path)
+        except Exception:
+            logger.warning('Bad cache for dataset %s, rebuilding', dataset.pk)
+
+    raw = os.path.join(settings.UPLOAD_ROOT, dataset.filename)
+    ext = dataset.filename.rsplit('.', 1)[1].lower()
+    df = clean_dataframe(read_dataframe(raw, ext))
+
+    # Rebuild cannot know old renames; keep only columns that still match.
+    keep = [c for c in dataset.column_names if c in df.columns]
+    if len(keep) != len(dataset.column_names):
+        logger.warning('Dataset %s: some renamed columns not recoverable from raw file',
+                       dataset.pk)
+    df = df[keep]
+    save_cache(dataset, df)
+    return df
 
 
