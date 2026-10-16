@@ -76,24 +76,35 @@ function closeChartModal() {
 }
 
 // Render Chart in Modal
-function renderModalChart(chartData) {
+// Render Chart in Modal (data comes from the server, aggregated)
+async function renderModalChart(chartData) {
     const canvas = document.getElementById('modalChartCanvas');
     const ctx = canvas.getContext('2d');
-    
+
     if (currentModalChart) {
         currentModalChart.destroy();
+        currentModalChart = null;
     }
-    
-    const config = chartData.config;
-    const dataset = chartData.dataset;
-    
-    let preparedData;
-    if (chartData.chart_type === 'pie') {
-        preparedData = preparePieData(dataset.preview, config.value_column, config.label_column, config.color_scheme);
-    } else {
-        preparedData = prepareAxisData(dataset.preview, config.x_axis, config.y_axis, chartData.chart_type, config.color_scheme);
+
+    let result;
+    try {
+        const response = await fetch(`/chart-data/${chartData.id}`);
+        result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || `Server error (${response.status})`);
+        }
+    } catch (error) {
+        console.error('Error loading chart data:', error);
+        showAlert('Could not load chart data: ' + error.message, 'error');
+        return;
     }
-    
+
+    // Modal closed, or another chart opened, while we waited
+    const modal = document.getElementById('chartModal');
+    if (!modal.classList.contains('show') || currentChartData.id !== chartData.id) return;
+
+    const preparedData = toChartJsData(result, chartData.chart_type, chartData.config.color_scheme);
+
     currentModalChart = new Chart(ctx, {
         type: chartData.chart_type,
         data: preparedData,
@@ -116,49 +127,48 @@ function renderModalChart(chartData) {
     });
 }
 
-// Prepare Pie Chart Data
-function preparePieData(data, valueColumn, labelColumn, colorScheme) {
-    const labels = [];
-    const values = [];
-    
-    data.forEach(row => {
-        const label = row[labelColumn];
-        const value = parseFloat(row[valueColumn]) || 0;
-        
-        if (label && !isNaN(value)) {
-            labels.push(label);
-            values.push(value);
-        }
-    });
-    
-    return {
-        labels: labels,
-        datasets: [{ data: values, backgroundColor: getColors(values.length, colorScheme) }]
-    };
-}
+// Server result {labels, series, meta} -> Chart.js data
+function toChartJsData(result, chartType, colorScheme) {
+    const scheme = colorSchemes[colorScheme] ? colorScheme : 'default';
+    const labels = result.labels;
+    const series = result.series[0];
+    const values = series.values;
 
-// Prepare Axis Chart Data (Bar, Line, Scatter)
-function prepareAxisData(data, xColumn, yColumn, chartType, colorScheme) {
-    const labels = [];
-    const values = [];
-    
-    data.forEach(row => {
-        const xValue = row[xColumn];
-        const yValue = parseFloat(row[yColumn]) || 0;
-        
-        if (xValue !== undefined && xValue !== '') {
-            labels.push(xValue);
-            values.push(yValue);
-        }
-    });
-    
+    if (chartType === 'pie') {
+        const pl = [];
+        const pv = [];
+        labels.forEach((label, i) => {
+            if (values[i] !== null) {
+                pl.push(label);
+                pv.push(values[i]);
+            }
+        });
+        return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length, scheme) }] };
+    }
+
+    if (chartType === 'scatter') {
+        const points = [];
+        labels.forEach((label, i) => {
+            if (values[i] === null) return;
+            const x = Number(label);
+            points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
+        });
+        return {
+            datasets: [{
+                label: series.column,
+                data: points,
+                backgroundColor: colorSchemes[scheme][0]
+            }]
+        };
+    }
+
     return {
         labels: labels,
         datasets: [{
-            label: yColumn,
+            label: series.column,
             data: values,
-            backgroundColor: getColors(values.length, colorScheme),
-            borderColor: colorSchemes[colorScheme][0],
+            backgroundColor: getColors(values.length, scheme),
+            borderColor: colorSchemes[scheme][0],
             borderWidth: chartType === 'line' ? 2 : 1,
             tension: chartType === 'line' ? 0.4 : 0
         }]
@@ -275,10 +285,15 @@ function showAlert(message, type = 'info') {
     
     const alertEl = document.createElement('div');
     alertEl.className = `alert alert-${type}`;
-    alertEl.innerHTML = `
-        ${message}
-        <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
-    `;
+    const text = document.createElement('span');
+    text.textContent = message;
+    alertEl.appendChild(text);
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'alert-close';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => alertEl.remove();
+    alertEl.appendChild(closeBtn);
     
     flashContainer.appendChild(alertEl);
     
