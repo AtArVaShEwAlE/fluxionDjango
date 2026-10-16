@@ -294,20 +294,28 @@
             return result;
         }
 
-        // Render chart
-        function renderChart() {
+        // Render chart (data comes from the server, aggregated)
+        async function renderChart() {
             const canvas = document.getElementById('sharedChart');
             const ctx = canvas.getContext('2d');
 
-            const config = chartData.config;
-            const dataset = chartData.dataset;
-
-            let preparedData;
-            if (chartData.chart_type === 'pie') {
-                preparedData = preparePieData(dataset.preview, config.value_column, config.label_column, config.color_scheme);
-            } else {
-                preparedData = prepareAxisData(dataset.preview, config.x_axis, config.y_axis, chartData.chart_type, config.color_scheme);
+            let result;
+            try {
+                const response = await fetch('/shared-data/' + encodeURIComponent(chartData.share_token));
+                result = await response.json();
+                if (!response.ok || !result.success) {
+                    throw new Error('Server error (' + response.status + ')');
+                }
+            } catch (error) {
+                console.error('Error loading chart data:', error);
+                const msg = document.createElement('p');
+                msg.textContent = 'Could not load this chart.';
+                msg.style.textAlign = 'center';
+                canvas.parentElement.replaceChildren(msg);
+                return;
             }
+
+            const preparedData = toChartJsData(result, chartData.chart_type, chartData.config.color_scheme);
 
             sharedChart = new Chart(ctx, {
                 type: chartData.chart_type,
@@ -316,70 +324,63 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        title: {
-                            display: false
-                        },
+                        title: { display: false },
                         legend: {
                             display: chartData.chart_type === 'pie',
                             position: 'bottom',
-                            labels: {
-                                color: '#10201A'
-                            }
+                            labels: { color: '#10201A' }
                         }
                     },
                     scales: chartData.chart_type !== 'pie' ? {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#E3E9E6' },
-                            ticks: { color: '#55655F' }
-                        },
-                        x: {
-                            grid: { color: '#E3E9E6' },
-                            ticks: { color: '#55655F' }
-                        }
+                        y: { beginAtZero: true, grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } },
+                        x: { grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } }
                     } : {}
                 }
             });
         }
 
-        function preparePieData(data, valueColumn, labelColumn, colorScheme) {
-            const labels = [];
-            const values = [];
-            data.forEach(row => {
-                const label = row[labelColumn];
-                const value = parseFloat(row[valueColumn]) || 0;
-                if (label && !isNaN(value)) {
-                    labels.push(label);
-                    values.push(value);
-                }
-            });
-            return {
-                labels: labels,
-                datasets: [{
-                    data: values,
-                    backgroundColor: getColors(values.length, colorScheme)
-                }]
-            };
-        }
+        // Server result {labels, series, meta} -> Chart.js data
+        function toChartJsData(result, chartType, colorScheme) {
+            const scheme = colorSchemes[colorScheme] ? colorScheme : 'default';
+            const labels = result.labels;
+            const series = result.series[0];
+            const values = series.values;
 
-        function prepareAxisData(data, xColumn, yColumn, chartType, colorScheme) {
-            const labels = [];
-            const values = [];
-            data.forEach(row => {
-                const xValue = row[xColumn];
-                const yValue = parseFloat(row[yColumn]) || 0;
-                if (xValue !== undefined && xValue !== '') {
-                    labels.push(xValue);
-                    values.push(yValue);
-                }
-            });
+            if (chartType === 'pie') {
+                const pl = [];
+                const pv = [];
+                labels.forEach((label, i) => {
+                    if (values[i] !== null) {
+                        pl.push(label);
+                        pv.push(values[i]);
+                    }
+                });
+                return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length, scheme) }] };
+            }
+
+            if (chartType === 'scatter') {
+                const points = [];
+                labels.forEach((label, i) => {
+                    if (values[i] === null) return;
+                    const x = Number(label);
+                    points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
+                });
+                return {
+                    datasets: [{
+                        label: series.column,
+                        data: points,
+                        backgroundColor: colorSchemes[scheme][0]
+                    }]
+                };
+            }
+
             return {
                 labels: labels,
                 datasets: [{
-                    label: yColumn,
+                    label: series.column,
                     data: values,
-                    backgroundColor: getColors(values.length, colorScheme),
-                    borderColor: colorSchemes[colorScheme][0],
+                    backgroundColor: getColors(values.length, scheme),
+                    borderColor: colorSchemes[scheme][0],
                     borderWidth: chartType === 'line' ? 2 : 1,
                     tension: chartType === 'line' ? 0.4 : 0
                 }]
