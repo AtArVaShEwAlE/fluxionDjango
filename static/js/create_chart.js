@@ -145,7 +145,7 @@ async function loadChartForEditing(chartId) {
 
         // Render the chart immediately with the loaded settings
         validateSelections();
-        const chartData = prepareChartData();
+        const chartData = await prepareChartData();
         createChart(chartData);
         showChartSuccess();
 
@@ -269,22 +269,32 @@ function validateSelections() {
     return isValid;
 }
 
-function handleUpdateChart() {
-    const isValid = validateSelections();
-    if (!isValid) {
+async function handleUpdateChart() {
+    if (!validateSelections()) {
         alert('Please select the required data columns');
         return;
     }
     showChartLoading();
-    const chartData = prepareChartData();
-    setTimeout(() => {
+    try {
+        const chartData = await prepareChartData();
         createChart(chartData);
         showChartSuccess();
-    }, 500);
+    } catch (error) {
+        console.error('Error building chart:', error);
+        showChartError(error.message);
+    }
+}
+
+function showChartError(message) {
+    chartCanvas.style.display = 'none';
+    noChartState.style.display = 'block';
+    noChartState.innerHTML = '<h4>Could not build chart</h4><p></p>';
+    noChartState.querySelector('p').textContent = message;
 }
 
 function showChartLoading() {
     chartCanvas.style.display = 'none';
+    noChartState.style.display = 'block';
     noChartState.innerHTML = `
         <div class="loading-chart">
             <div class="loading-spinner"></div>
@@ -301,53 +311,82 @@ function showChartSuccess() {
     downloadBtn.style.display = 'block';
 }
 
-function prepareChartData() {
-    const data = currentDataset.preview;
-    return selectedChartType === 'pie' ? preparePieChartData(data) : prepareAxisChartData(data);
+// Same rules as charts/queries.py, so builder and saved chart match.
+function buildQuerySpec() {
+    if (selectedChartType === 'pie') {
+        return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
+    }
+    if (selectedChartType === 'scatter') {
+        return { x: xAxisSelect.value, series: [{ column: yAxisSelect.value }], raw: true };
+    }
+    return { x: xAxisSelect.value, series: [{ column: yAxisSelect.value, agg: 'sum' }], sort: 'none' };
 }
 
-function preparePieChartData(data) {
-    const valueColumn = valueSelect.value;
-    const labelColumn = labelSelect.value;
-    const labels = [];
-    const values = [];
-    data.forEach(row => {
-        const label = row[labelColumn];
-        const value = parseFloat(row[valueColumn]) || 0;
-        if (label && !isNaN(value)) {
-            labels.push(label);
-            values.push(value);
-        }
+async function fetchChartData() {
+    const response = await fetch(`/dataset-data/${currentDataset.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildQuerySpec())
     });
-    return {
-        labels: labels,
-        datasets: [{ data: values, backgroundColor: getColors(values.length) }]
-    };
+    let result = {};
+    try {
+        result = await response.json();
+    } catch (e) {
+        // non-JSON reply (server error page)
+    }
+    if (!response.ok || !result.success) {
+        throw new Error(result.error || `Server error (${response.status})`);
+    }
+    return result;
 }
 
-function prepareAxisChartData(data) {
-    const xColumn = xAxisSelect.value;
-    const yColumn = yAxisSelect.value;
-    const labels = [];
-    const values = [];
-    data.forEach(row => {
-        const xValue = row[xColumn];
-        const yValue = parseFloat(row[yColumn]) || 0;
-        if (xValue !== undefined && xValue !== '') {
-            labels.push(xValue);
-            values.push(yValue);
-        }
-    });
+function toChartJsData(result) {
+    const labels = result.labels;
+    const series = result.series[0];
+    const values = series.values;
+
+    if (selectedChartType === 'pie') {
+        const pl = [];
+        const pv = [];
+        labels.forEach((label, i) => {
+            if (values[i] !== null) {
+                pl.push(label);
+                pv.push(values[i]);
+            }
+        });
+        return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length) }] };
+    }
+
+    if (selectedChartType === 'scatter') {
+        const points = [];
+        labels.forEach((label, i) => {
+            if (values[i] === null) return;
+            const x = Number(label);
+            points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
+        });
+        return {
+            datasets: [{
+                label: series.column,
+                data: points,
+                backgroundColor: colorSchemes[colorScheme.value][0]
+            }]
+        };
+    }
+
     return {
         labels: labels,
         datasets: [{
-            label: yColumn,
+            label: series.column,
             data: values,
             backgroundColor: getColors(values.length),
             borderColor: colorSchemes[colorScheme.value][0],
             borderWidth: selectedChartType === 'line' ? 2 : 1
         }]
     };
+}
+
+async function prepareChartData() {
+    return toChartJsData(await fetchChartData());
 }
 
 function getColors(count) {
