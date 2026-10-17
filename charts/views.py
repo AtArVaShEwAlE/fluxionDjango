@@ -15,7 +15,7 @@ from .models import Chart
 
 logger = logging.getLogger(__name__)
 
-VALID_TYPES = {'bar', 'line', 'pie', 'scatter'}
+VALID_TYPES = {value for value, _label in Chart.CHART_TYPES}
 
 
 def _json_body(request):

@@ -5,8 +5,11 @@ from django.db import models
 
 
 class Chart(models.Model):
-    CHART_TYPES = [('bar', 'Bar'), ('line', 'Line'), ('pie', 'Pie'), ('scatter', 'Scatter')]
-
+    CHART_TYPES = [
+        ('bar', 'Bar'), ('line', 'Line'), ('pie', 'Pie'), ('scatter', 'Scatter'),
+        ('hbar', 'Horizontal Bar'), ('area', 'Area'),
+        ('doughnut', 'Doughnut'), ('radar', 'Radar'),
+    ]
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                               related_name='charts')
     dataset = models.ForeignKey('datasets.Dataset', on_delete=models.CASCADE,

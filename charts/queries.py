@@ -1,7 +1,7 @@
 def spec_from_chart(chart_type, config):
     """Old saved-chart config -> query spec. Keeps old charts rendering."""
     config = config or {}
-    if chart_type == 'pie':
+    if chart_type in ('pie', 'doughnut'):
         x, y = config.get('label_column'), config.get('value_column')
     else:
         x, y = config.get('x_axis'), config.get('y_axis')
