@@ -163,6 +163,10 @@ try:
         if tok:
             r = anon.get(f'/shared/{tok}')
             check('shared page anon', r.status_code, 200)
+            body = r.content.decode()
+            check('shared page hides preview rows', '"preview"' in body, False)
+            check('shared page hides column stats', '"column_stats"' in body, False)
+            check('shared page shows file name', 'zz_test.csv' in body, True)
             check('shared page iframe ok', r.get('X-Frame-Options'), None)
             r = anon.get(f'/shared-data/{tok}')
             check('shared-data anon', r.status_code, 200)
@@ -185,7 +189,9 @@ try:
         check('share-report owner', r.status_code, 200)
         rtok = js(r).get('share_token')
         if rtok:
-            check('shared-report anon', anon.get(f'/shared-report/{rtok}').status_code, 200)
+            r = anon.get(f'/shared-report/{rtok}')
+            check('shared-report anon', r.status_code, 200)
+            check('shared report hides preview rows', '"preview"' in r.content.decode(), False)
             check('shared-report-data anon', anon.get(f'/shared-report-data/{rtok}/{cid}').status_code, 200)
             check('shared-report-data bad chart', anon.get(f'/shared-report-data/{rtok}/999999').status_code, 404)
             check('unshare-report', A.post(f'/unshare-report/{rid}').status_code, 200)

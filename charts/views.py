@@ -42,7 +42,17 @@ def _build_config(data):
         'chart_options': data.get('chart_options', {}),
     }
 
-
+def _public_chart(chart):
+    """Only what a public page needs. No dataset rows or stats."""
+    return {
+        'id': chart.id,
+        'title': chart.title,
+        'chart_type': chart.chart_type,
+        'config': chart.config,
+        'created_at': chart.created_at.isoformat(),
+        'share_token': chart.share_token,
+        'dataset': {'filename': chart.dataset.original_filename},
+    }
 # ---------- Pages ----------
 
 @login_required
@@ -175,7 +185,7 @@ def view_shared_chart(request, share_token):
             'error': 'Chart not found or no longer shared',
             'message': 'This chart may have been made private or deleted.',
         }, status=404)
-    return render(request, 'shared_chart.html', {'chart': chart.to_dict()})
+    return render(request, 'shared_chart.html', {'chart': _public_chart(chart)})
 
 # ---------- Reports ----------
 
@@ -284,7 +294,19 @@ def view_shared_report(request, share_token):
             'error': 'Report not found or no longer shared',
             'message': 'This report may have been made private or deleted.',
         }, status=404)
-    return render(request, 'shared_report.html', {'report': report.to_dict()})
+    charts_by_id = {
+        c.id: c for c in
+        Chart.objects.filter(id__in=report.chart_ids).select_related('dataset')
+    }
+    charts = [_public_chart(charts_by_id[i]) for i in report.chart_ids if i in charts_by_id]
+    payload = {
+        'id': report.id,
+        'title': report.title,
+        'chart_count': len(charts),
+        'charts': charts,
+        'share_token': report.share_token,
+    }
+    return render(request, 'shared_report.html', {'report': payload})
 
 @login_required
 @require_GET
