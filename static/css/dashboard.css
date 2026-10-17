@@ -419,11 +419,11 @@ body.page-app .datasets-table th {
     border-bottom: 2px solid var(--pa-border);
 }
 
-body.page-app .datasets-table th:nth-child(1) { width: 40%; }
-body.page-app .datasets-table th:nth-child(2) { width: 12%; }
-body.page-app .datasets-table th:nth-child(3) { width: 12%; }
-body.page-app .datasets-table th:nth-child(4) { width: 20%; }
-body.page-app .datasets-table th:nth-child(5) { width: 16%; }
+body.page-app .datasets-table th:nth-child(1) { width: 34%; }
+body.page-app .datasets-table th:nth-child(2) { width: 10%; }
+body.page-app .datasets-table th:nth-child(3) { width: 10%; }
+body.page-app .datasets-table th:nth-child(4) { width: 22%; }
+body.page-app .datasets-table th:nth-child(5) { width: 24%; }
 
 body.page-app .datasets-table td {
     color: var(--pa-ink);
@@ -534,4 +534,25 @@ body.page-app .empty-icon {
     body.page-app .clean-data-row svg {
         display: none;
     }
+}
+
+/* Dataset row buttons */
+body.page-app td.dataset-actions {
+    gap: 0.5rem;
+}
+
+body.page-app button.btn-icon {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+body.page-app .btn-icon-danger {
+    background: var(--pa-danger-soft);
+    color: var(--pa-danger);
+}
+
+body.page-app .btn-icon-danger:hover {
+    background: var(--pa-danger);
+    color: #ffffff;
 }

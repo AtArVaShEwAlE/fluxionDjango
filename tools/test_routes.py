@@ -109,6 +109,11 @@ try:
     if ds:
         r = A.get(f'/get-dataset-columns/{ds}')
         check('get-dataset-columns', r.status_code, 200)
+        r = A.get(f'/get-dataset/{ds}')
+        check('get-dataset owner', r.status_code, 200)
+        check('get-dataset id matches', js(r).get('data', {}).get('id'), ds)
+        check('B get-dataset', B.get(f'/get-dataset/{ds}').status_code, [403, 404])
+        check('anon get-dataset', anon.get(f'/get-dataset/{ds}').status_code, 302)
         check('download-dataset owner', A.get(f'/download-dataset/{ds}').status_code, 200)
         r = A.post(f'/clean-dataset/{ds}', json.dumps({}), content_type='application/json')
         check('clean-dataset no 500', r.status_code < 500, True)
@@ -201,6 +206,21 @@ try:
     if cid:
         check('delete-chart owner', A.delete(f'/delete-chart/{cid}').status_code, 200)
         check('get-chart after delete', A.get(f'/get-chart/{cid}').status_code, 404)
+    if ds:
+        from datasets.models import Dataset
+        from datasets.services import cache_path
+        obj = Dataset.objects.get(pk=ds)
+        raw_path = os.path.join(settings.UPLOAD_ROOT, obj.filename)
+        cache_file = cache_path(obj)
+        check('raw file exists before delete', os.path.exists(raw_path), True)
+        check('cache exists before delete', os.path.exists(cache_file), True)
+        check('B delete-dataset', B.delete(f'/delete-dataset/{ds}').status_code, [403, 404])
+        check('anon delete-dataset', anon.delete(f'/delete-dataset/{ds}').status_code, 302)
+        r = A.delete(f'/delete-dataset/{ds}')
+        check('delete-dataset owner', r.status_code, 200)
+        check('raw file removed', os.path.exists(raw_path), False)
+        check('cache removed', os.path.exists(cache_file), False)
+        check('get-dataset after delete', A.get(f'/get-dataset/{ds}').status_code, 404)
 
     # ---- debug-routes gate ----
     check('debug-routes DEBUG on', A.get('/debug-routes').status_code, 200)

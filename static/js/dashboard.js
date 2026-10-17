@@ -19,6 +19,7 @@ let currentDataset = null;
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     initializeUpload();
+    initDatasetTable();
 });
 
 function initializeUpload() {
@@ -460,4 +461,68 @@ function resetUpload() {
     if (dataPreview) dataPreview.style.display = 'none';
     if (fileInput) fileInput.value = '';
     currentDataset = null;
+}
+
+
+
+// ---------- Recent datasets table: Use + Delete ----------
+function initDatasetTable() {
+    document.querySelectorAll('.js-use-dataset').forEach(btn => {
+        btn.addEventListener('click', () => useDataset(btn));
+    });
+    document.querySelectorAll('.js-delete-dataset').forEach(btn => {
+        btn.addEventListener('click', () => deleteDataset(btn));
+    });
+}
+
+async function useDataset(btn) {
+    btn.disabled = true;
+    try {
+        const response = await fetch(`/get-dataset/${btn.dataset.id}`);
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || `Server error (${response.status})`);
+        }
+        sessionStorage.setItem('currentDataset', JSON.stringify(result.data));
+        window.location.href = '/create-chart';
+    } catch (error) {
+        console.error('Error loading dataset:', error);
+        alert('Could not load dataset: ' + error.message);
+        btn.disabled = false;
+    }
+}
+
+async function deleteDataset(btn) {
+    const name = btn.dataset.name;
+    const charts = parseInt(btn.dataset.charts, 10) || 0;
+    const warning = charts > 0
+        ? `\n\nThis also deletes ${charts} saved chart${charts === 1 ? '' : 's'} built from it, and their share links stop working.`
+        : '';
+    if (!confirm(`Delete "${name}"?${warning}\n\nThis cannot be undone.`)) return;
+
+    const row = btn.closest('tr');
+    row.style.opacity = '0.5';
+    row.style.pointerEvents = 'none';
+    try {
+        const response = await fetch(`/delete-dataset/${btn.dataset.id}`, { method: 'DELETE' });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || `Server error (${response.status})`);
+        }
+        // Don't leave a dead dataset id for the Create Chart page to find
+        try {
+            const saved = JSON.parse(sessionStorage.getItem('currentDataset') || 'null');
+            if (saved && String(saved.id) === btn.dataset.id) {
+                sessionStorage.removeItem('currentDataset');
+            }
+        } catch (e) {
+            // ignore unreadable storage
+        }
+        window.location.reload();
+    } catch (error) {
+        console.error('Error deleting dataset:', error);
+        alert('Could not delete dataset: ' + error.message);
+        row.style.opacity = '1';
+        row.style.pointerEvents = 'auto';
+    }
 }

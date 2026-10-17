@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-
+import os
 from .services import delete_cache
 
 class Dataset(models.Model):
@@ -43,3 +43,7 @@ class Dataset(models.Model):
 @receiver(post_delete, sender=Dataset)
 def remove_dataset_cache(sender, instance, **kwargs):
     delete_cache(instance)
+    try:    # also remove the raw upload, so deletes leave no orphan file
+        os.remove(os.path.join(settings.UPLOAD_ROOT, os.path.basename(instance.filename)))
+    except OSError:
+        pass

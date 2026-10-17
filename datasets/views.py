@@ -8,7 +8,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils.text import get_valid_filename
-from django.views.decorators.http import require_GET, require_POST
+from django.db.models import Count
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.utils import timezone
 from .models import Dataset
 from .services import (allowed_file, analyze_dataframe, clean_dataframe, delete_cache,
@@ -27,7 +28,7 @@ def _owned_dataset(request, dataset_id):
 
 @login_required
 def dashboard(request):
-    recent = request.user.datasets.all()[:5]   # Meta ordering = newest first
+    recent = request.user.datasets.annotate(n_charts=Count('charts'))[:5]
     recent_activity = [
         {
             'icon': '📊',
@@ -35,6 +36,9 @@ def dashboard(request):
             'text': f'Uploaded "{d.original_filename}"',
                         'time': timezone.localtime(d.upload_date).strftime('%B %d, %Y at %I:%M %p'),
             'id': d.id,
+            'rows': d.rows,
+            'columns': d.columns,
+            'charts': d.n_charts,
         }
         for d in recent
     ]
@@ -198,3 +202,26 @@ def dataset_data(request, dataset_id):
         logger.exception('Error querying dataset %s', dataset_id)
         return JsonResponse({'success': False, 'error': f'Error querying data: {e}'}, status=500)
     return JsonResponse({'success': True, **result})
+
+
+
+@login_required
+@require_GET
+def get_dataset(request, dataset_id):
+    dataset, error = _owned_dataset(request, dataset_id)
+    if error:
+        return error 
+    return JsonResponse({'success': True, 'data': dataset.to_dict()})
+
+
+@login_required
+@require_http_methods(['DELETE'])
+def delete_dataset(request, dataset_id):
+    """Deletes the dataset, its saved charts (cascade) and its files (signal)."""
+    dataset, error = _owned_dataset(request, dataset_id)
+    if error:
+        return error
+    charts_deleted = dataset.charts.count()
+    dataset.delete()
+    return JsonResponse({'success': True, 'charts_deleted': charts_deleted,
+                         'message': 'Dataset deleted successfully!'})
