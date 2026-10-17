@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -271,28 +272,11 @@
     </div>
     {{ chart|json_script:"chart-data" }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/chart_render.js' %}"></script>
     <script>
         // Chart data from server
         const chartData = JSON.parse(document.getElementById('chart-data').textContent);
         let sharedChart = null;
-
-        // Color schemes (same as create chart page)
-        const colorSchemes = {
-            default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
-            blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
-            purple: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
-            rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
-        };
-
-        // Get colors
-        function getColors(count, scheme = 'default') {
-            const colors = colorSchemes[scheme] || colorSchemes.default;
-            const result = [];
-            for (let i = 0; i < count; i++) {
-                result.push(colors[i % colors.length]);
-            }
-            return result;
-        }
 
         // Render chart (data comes from the server, aggregated)
         async function renderChart() {
@@ -315,76 +299,15 @@
                 return;
             }
 
-            const preparedData = toChartJsData(result, chartData.chart_type, chartData.config.color_scheme);
-
-            sharedChart = new Chart(ctx, {
-                type: chartData.chart_type,
-                data: preparedData,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        title: { display: false },
-                        legend: {
-                            display: chartData.chart_type === 'pie',
-                            position: 'bottom',
-                            labels: { color: '#10201A' }
-                        }
-                    },
-                    scales: chartData.chart_type !== 'pie' ? {
-                        y: { beginAtZero: true, grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } },
-                        x: { grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } }
-                    } : {}
-                }
-            });
-        }
-
-        // Server result {labels, series, meta} -> Chart.js data
-        function toChartJsData(result, chartType, colorScheme) {
-            const scheme = colorSchemes[colorScheme] ? colorScheme : 'default';
-            const labels = result.labels;
-            const series = result.series[0];
-            const values = series.values;
-
-            if (chartType === 'pie') {
-                const pl = [];
-                const pv = [];
-                labels.forEach((label, i) => {
-                    if (values[i] !== null) {
-                        pl.push(label);
-                        pv.push(values[i]);
-                    }
-                });
-                return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length, scheme) }] };
-            }
-
-            if (chartType === 'scatter') {
-                const points = [];
-                labels.forEach((label, i) => {
-                    if (values[i] === null) return;
-                    const x = Number(label);
-                    points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
-                });
-                return {
-                    datasets: [{
-                        label: series.column,
-                        data: points,
-                        backgroundColor: colorSchemes[scheme][0]
-                    }]
-                };
-            }
-
-            return {
-                labels: labels,
-                datasets: [{
-                    label: series.column,
-                    data: values,
-                    backgroundColor: getColors(values.length, scheme),
-                    borderColor: colorSchemes[scheme][0],
-                    borderWidth: chartType === 'line' ? 2 : 1,
-                    tension: chartType === 'line' ? 0.4 : 0
-                }]
-            };
+            sharedChart = new Chart(
+                ctx,
+                FluxionChart.buildConfig(
+                    result,
+                    chartData.chart_type,
+                    chartData.config.color_scheme,
+                    { maintainAspectRatio: true }
+                )
+            );
         }
 
         function downloadChartPNG() {
