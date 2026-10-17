@@ -49,14 +49,8 @@ function openChartModal(chartData) {
     downloadPDFBtn.onclick = () => downloadChartAsPDF(chartData.title);
     shareBtn.onclick = () => shareChart(chartData.id, chartData.is_public);
     embedBtn.onclick = () => embedChart(chartData.id, chartData.is_public);
-    
-    if (chartData.is_public && chartData.share_token) {
-        shareBtn.textContent = 'Copy Link';
-        shareBtn.classList.add('btn-success');
-    } else {
-        shareBtn.textContent = 'Share';
-        shareBtn.classList.remove('btn-success');
-    }
+    document.getElementById('unshareChartBtn').onclick = () => unshareChart(chartData.id);
+    refreshShareButtons(chartData);
     
     setTimeout(() => {
         renderModalChart(chartData);
@@ -216,6 +210,7 @@ async function embedChart(chartId, isCurrentlyPublic) {
 
     const embedCode = `<iframe src="${shareUrl}" width="100%" height="600" frameborder="0" style="border:1px solid #E3E9E6;border-radius:12px;"></iframe>`;
     copyToClipboard(embedCode);
+    refreshShareButtons(currentChartData);
     showAlert('Embed code copied to clipboard!', 'success');
 }
 
@@ -392,6 +387,7 @@ async function shareChart(chartId, isCurrentlyPublic) {
             currentChartData.is_public = true;
             currentChartData.share_token = data.share_token;
             
+            refreshShareButtons(currentChartData);
             showAlert('Chart is now public! Link copied to clipboard.', 'success');
         } else {
             showAlert(data.error || 'Failed to generate share link', 'error');
@@ -401,6 +397,43 @@ async function shareChart(chartId, isCurrentlyPublic) {
         showAlert('Error generating share link', 'error');
     } finally {
         shareBtn.disabled = false;
+    }
+}
+// One place decides what the Share / Unshare buttons look like
+function refreshShareButtons(chartData) {
+    const shareBtn = document.getElementById('shareChartBtn');
+    const unshareBtn = document.getElementById('unshareChartBtn');
+    const isPublic = !!(chartData.is_public && chartData.share_token);
+    shareBtn.textContent = isPublic ? 'Copy Link' : 'Share';
+    shareBtn.classList.toggle('btn-success', isPublic);
+    unshareBtn.style.display = isPublic ? '' : 'none';
+}
+
+// Unshare Chart: the public link and any embeds stop working
+async function unshareChart(chartId) {
+    if (!confirm('Stop sharing this chart?\n\nAnyone with the link, and any page that embeds it, will lose access.')) return;
+
+    const unshareBtn = document.getElementById('unshareChartBtn');
+    unshareBtn.disabled = true;
+    try {
+        const response = await fetch(`/unshare-chart/${chartId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || `Server error (${response.status})`);
+        }
+        if (currentChartData && currentChartData.id === chartId) {
+            currentChartData.is_public = false;
+            refreshShareButtons(currentChartData);
+        }
+        showAlert('Chart is now private.', 'success');
+    } catch (error) {
+        console.error('Error unsharing chart:', error);
+        showAlert('Could not unshare: ' + error.message, 'error');
+    } finally {
+        unshareBtn.disabled = false;
     }
 }
 

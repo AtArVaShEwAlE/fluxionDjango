@@ -65,14 +65,8 @@ function openReportModal(report) {
 
     shareBtn.onclick = () => shareReport(report.id, report.is_public);
     embedBtn.onclick = () => embedReport(report.id, report.is_public);
-    if (report.is_public && report.share_token) {
-        shareBtn.textContent = 'Copy Link';
-        shareBtn.classList.add('btn-success');
-    } else {
-        shareBtn.textContent = 'Share';
-        shareBtn.classList.remove('btn-success');
-    }
-
+    document.getElementById('unshareReportBtn').onclick = () => unshareReport(report.id);
+    refreshShareButtons(report);
     setTimeout(() => {
         renderModalCharts(report);
     }, 100);
@@ -279,6 +273,7 @@ async function embedReport(reportId, isCurrentlyPublic) {
 
     const embedCode = `<iframe src="${shareUrl}" width="100%" height="800" frameborder="0" style="border:1px solid #E3E9E6;border-radius:12px;"></iframe>`;
     copyToClipboard(embedCode);
+    refreshShareButtons(currentReportData);
     showAlert('Embed code copied to clipboard!', 'success');
 }
 
@@ -310,6 +305,7 @@ async function shareReport(reportId, isCurrentlyPublic) {
             shareBtn.classList.add('btn-success');
             currentReportData.is_public = true;
             currentReportData.share_token = data.share_token;
+            refreshShareButtons(currentReportData);
             showAlert('Report is now public! Link copied to clipboard.', 'success');
         } else {
             showAlert(data.error || 'Failed to generate share link', 'error');
@@ -319,6 +315,44 @@ async function shareReport(reportId, isCurrentlyPublic) {
         showAlert('Error generating share link', 'error');
     } finally {
         shareBtn.disabled = false;
+    }
+}
+
+// One place decides what the Share / Unshare buttons look like
+function refreshShareButtons(report) {
+    const shareBtn = document.getElementById('shareReportBtn');
+    const unshareBtn = document.getElementById('unshareReportBtn');
+    const isPublic = !!(report.is_public && report.share_token);
+    shareBtn.textContent = isPublic ? 'Copy Link' : 'Share';
+    shareBtn.classList.toggle('btn-success', isPublic);
+    unshareBtn.style.display = isPublic ? '' : 'none';
+}
+
+// Unshare report: the public link and any embeds stop working
+async function unshareReport(reportId) {
+    if (!confirm('Stop sharing this report?\n\nAnyone with the link, and any page that embeds it, will lose access.')) return;
+
+    const unshareBtn = document.getElementById('unshareReportBtn');
+    unshareBtn.disabled = true;
+    try {
+        const response = await fetch(`/unshare-report/${reportId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || `Server error (${response.status})`);
+        }
+        if (currentReportData && currentReportData.id === reportId) {
+            currentReportData.is_public = false;
+            refreshShareButtons(currentReportData);
+        }
+        showAlert('Report is now private.', 'success');
+    } catch (error) {
+        console.error('Error unsharing report:', error);
+        showAlert('Could not unshare: ' + error.message, 'error');
+    } finally {
+        unshareBtn.disabled = false;
     }
 }
 
