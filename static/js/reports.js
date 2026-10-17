@@ -4,13 +4,6 @@ let modalChartInstances = [];
 let currentReportData = null;
 let renderToken = 0; 
 
-const colorSchemes = {
-    default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
-    blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
-    purple: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
-    rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
-};
-
 // View report in modal
 async function viewReportModal(reportId) {
     try {
@@ -102,28 +95,15 @@ async function renderOneModalChart(chart, index, myToken) {
     const modal = document.getElementById('reportModal');
     if (myToken !== renderToken || !modal.classList.contains('show')) return;
 
-    const preparedData = toChartJsData(result, chart.chart_type, chart.config.color_scheme);
-
-    modalChartInstances.push(new Chart(canvas.getContext('2d'), {
-        type: chart.chart_type,
-        data: preparedData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: { display: false },
-                legend: {
-                    display: chart.chart_type === 'pie',
-                    position: 'bottom',
-                    labels: { color: '#10201A' }
-                }
-            },
-            scales: chart.chart_type !== 'pie' ? {
-                y: { beginAtZero: true, grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } },
-                x: { grid: { color: '#E3E9E6' }, ticks: { color: '#55655F' } }
-            } : {}
-        }
-    }));
+    modalChartInstances.push(new Chart(
+        canvas.getContext('2d'),
+        FluxionChart.buildConfig(
+            result,
+            chart.chart_type,
+            chart.config.color_scheme,
+            { maintainAspectRatio: false }
+        )
+    ));
 }
 
 function destroyModalCharts() {
@@ -137,64 +117,6 @@ function closeReportModal() {
     document.body.style.overflow = 'auto';
     destroyModalCharts();
 }
-
-// Server result {labels, series, meta} -> Chart.js data
-function toChartJsData(result, chartType, colorScheme) {
-    const scheme = colorSchemes[colorScheme] ? colorScheme : 'default';
-    const labels = result.labels;
-    const series = result.series[0];
-    const values = series.values;
-
-    if (chartType === 'pie') {
-        const pl = [];
-        const pv = [];
-        labels.forEach((label, i) => {
-            if (values[i] !== null) {
-                pl.push(label);
-                pv.push(values[i]);
-            }
-        });
-        return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length, scheme) }] };
-    }
-
-    if (chartType === 'scatter') {
-        const points = [];
-        labels.forEach((label, i) => {
-            if (values[i] === null) return;
-            const x = Number(label);
-            points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
-        });
-        return {
-            datasets: [{
-                label: series.column,
-                data: points,
-                backgroundColor: colorSchemes[scheme][0]
-            }]
-        };
-    }
-
-    return {
-        labels: labels,
-        datasets: [{
-            label: series.column,
-            data: values,
-            backgroundColor: getColors(values.length, scheme),
-            borderColor: colorSchemes[scheme][0],
-            borderWidth: chartType === 'line' ? 2 : 1,
-            tension: chartType === 'line' ? 0.4 : 0
-        }]
-    };
-}
-
-function getColors(count, scheme = 'default') {
-    const colors = colorSchemes[scheme] || colorSchemes.default;
-    const result = [];
-    for (let i = 0; i < count; i++) {
-        result.push(colors[i % colors.length]);
-    }
-    return result;
-}
-
 // Delete report
 function deleteReport(reportId, reportTitle) {
     const confirmed = confirm(`Are you sure you want to delete "${reportTitle}"?\n\nThis only deletes the report — the individual charts inside it are kept.`);
