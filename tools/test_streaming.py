@@ -66,13 +66,19 @@ async def main(username):
     ds = await database_sync_to_async(lambda: Dataset.objects.filter(owner=user).first())()
     if ds:
         cols = ds.column_names
+        nums = [c for c in cols if str(ds.data_types.get(c, '')).startswith(('int', 'float'))]
+        ycol = nums[-1] if nums else cols[-1]
         await comm.send_json_to({'event': 'stream_from_dataset', 'data': {
             'session_id': 's3', 'dataset_id': ds.id, 'interval': 100,
-            'x_column': cols[0], 'y_column': cols[-1]}})
+            'x_column': cols[0], 'y_column': ycol}})
         got = [(await event(comm))[0] for _ in range(3)]
         print('7. dataset stream events:       ', got)
         await comm.send_json_to({'event': 'stop_stream', 'data': {'session_id': 's3'}})
         await drain(comm)
+        await comm.send_json_to({'event': 'stream_from_dataset', 'data': {
+            'session_id': 's4', 'dataset_id': ds.id, 'interval': 100,
+            'x_column': 'no_such_col', 'y_column': ycol}})
+        print('7b. bad column ->               ', (await event(comm)), '(expect error)')
 
     await comm.send_json_to({'event': 'test_api_endpoint', 'data': {'api_url': 'ftp://example.com'}})
     print('8. bad scheme ->                ', (await event(comm))[0], '(expect api_test_failed)')

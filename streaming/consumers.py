@@ -1,14 +1,17 @@
 import asyncio
 import logging
+import math
 import random
 import re
 import time
 
+import pandas as pd
 import requests
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from datasets.models import Dataset
+from datasets.services import load_dataframe
 
 from .services import extract_json_value, fetch_json, is_allowed_api_url
 
@@ -20,7 +23,7 @@ API_MAX_REQUESTS = 60
 MIN_INTERVAL_MS = 100
 MAX_INTERVAL_MS = 60_000
 MAX_STREAMS = 5
-
+MAX_STREAM_ROWS = 5000 
 
 class StreamConsumer(AsyncJsonWebsocketConsumer):
     """One instance per browser connection. Messages both ways: {"event": str, "data": dict}."""
@@ -159,14 +162,14 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
         session_id = data.get('session_id')
         if not await self.valid_session(session_id):
             return
-        rows = await self.get_dataset_rows(data.get('dataset_id'))
+        x_column, y_column = data.get('x_column'), data.get('y_column')
+        rows, error = await self.get_dataset_rows(data.get('dataset_id'), x_column, y_column)
         if rows is None:
-            await self.emit('error', {'message': 'Dataset not found or unauthorized'})
+            await self.emit('error', {'message': error})
             return
         interval = self.clean_interval(data.get('interval'), 1000)
-        x_column, y_column = data.get('x_column'), data.get('y_column')
         started = await self.launch(
-            session_id, lambda: self.stream_rows(session_id, rows, interval, x_column, y_column))
+            session_id, lambda: self.stream_rows(session_id, rows, interval))
         if started:
             await self.emit('dataset_stream_started', {'session_id': session_id})
 
@@ -208,12 +211,34 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
     # ---------- background streams ----------
 
     @database_sync_to_async
-    def get_dataset_rows(self, dataset_id):
-        """Preview rows of a dataset owned by this user, else None."""
+    def get_dataset_rows(self, dataset_id, x_column, y_column):
+        """(x, y) pairs from the full cached dataset, up to MAX_STREAM_ROWS.
+        Returns (pairs, None) or (None, error message).
+        Runs in a worker thread, so pandas never blocks the event loop."""
         try:
-            return Dataset.objects.get(pk=dataset_id, owner=self.user).preview_data
+            dataset = Dataset.objects.get(pk=dataset_id, owner=self.user)
         except (Dataset.DoesNotExist, ValueError, TypeError):
-            return None
+            return None, 'Dataset not found or unauthorized'
+        try:
+            df = load_dataframe(dataset)
+        except Exception:
+            logger.exception('Could not load dataset %s for streaming', dataset_id)
+            return None, 'Dataset file could not be loaded'
+
+        for col in (x_column, y_column):
+            if not isinstance(col, str) or col not in df.columns:
+                return None, f'Unknown column: {col}'
+
+        xs = df[x_column].head(MAX_STREAM_ROWS)
+        ys = pd.to_numeric(df[y_column].head(MAX_STREAM_ROWS), errors='coerce')
+        pairs = []
+        for x, y in zip(xs, ys):
+            if not math.isfinite(y):      # NaN / inf would break JSON in the browser
+                continue                   # skip missing values instead of faking 0
+            pairs.append(('' if pd.isna(x) else str(x), float(y)))
+        if not pairs:
+            return None, f"Column '{y_column}' has no numeric values"
+        return pairs, None
 
     async def simulate(self, session_id, interval_ms):
         start = time.monotonic()
@@ -228,16 +253,11 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
             await self.broadcast(session_id, 'new_data_point', {'data': point, 'session_id': session_id})
             await asyncio.sleep(interval_ms / 1000)
 
-    async def stream_rows(self, session_id, rows, interval_ms, x_column, y_column):
+    async def stream_rows(self, session_id, rows, interval_ms):
         try:
-            for index, row in enumerate(rows):
-                x_value = row.get(x_column, '')
-                try:
-                    y_value = float(row.get(y_column, 0))
-                except (TypeError, ValueError):
-                    y_value = 0
-                point = {'timestamp': str(x_value), 'value': y_value,
-                         'label': str(x_value), 'row_index': index}
+            for index, (x_value, y_value) in enumerate(rows):
+                point = {'timestamp': x_value, 'value': y_value,
+                         'label': x_value, 'row_index': index}
                 await self.broadcast(session_id, 'new_data_point', {'data': point, 'session_id': session_id})
                 await asyncio.sleep(interval_ms / 1000)
         except asyncio.CancelledError:
