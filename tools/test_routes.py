@@ -231,7 +231,7 @@ try:
         check('doughnut ignores y_axes (1 series)', len(res.get('series', [])), 1)
 
         # New chart types save and read back
-        for t in ['hbar', 'area', 'radar']:
+        for t in ['hbar', 'area', 'radar', 'stacked']:
             tid, st = p11_save(t, x_axis='name', y_axis='sales')
             check(f'save-chart {t}', st, 200)
             check(f'chart-data {t}', A.get(f'/chart-data/{tid}').status_code, 200)
