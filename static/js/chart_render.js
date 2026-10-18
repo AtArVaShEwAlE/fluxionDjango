@@ -63,6 +63,26 @@ window.FluxionChart = (function () {
                 }]
             };
         }
+        if (result.series.length > 1) {
+            const filled = chartType === 'area' || chartType === 'radar';
+            return {
+                labels: labels,
+                datasets: result.series.map((s, i) => {
+                    const color = palette[i % palette.length];
+                    return {
+                        label: s.column,
+                        data: s.values,
+                        backgroundColor: filled ? withAlpha(color, 0.25) : color,
+                        borderColor: color,
+                        borderWidth: (chartType === 'bar' || chartType === 'hbar') ? 1 : 2,
+                        fill: filled,
+                        tension: (chartType === 'line' || chartType === 'area') ? 0.4 : 0,
+                        pointBackgroundColor: color
+                    };
+                })
+            };
+        }
+
         if (chartType === 'area' || chartType === 'radar') {
             return {
                 labels: labels,
@@ -111,7 +131,7 @@ window.FluxionChart = (function () {
                     title: opts.title
                         ? { display: true, text: opts.title, font: { size: 16, weight: 'bold' }, color: '#10201A' }
                         : { display: false },
-                    legend: { display: isRound, position: 'bottom', labels: { color: '#55655F' } }
+                    legend: { display: isRound || result.series.length > 1, position: 'bottom', labels: { color: '#55655F' } }
                 },
                 scales: isRound ? {} : isRadar ? {
                     r: { beginAtZero: true, grid: grid, angleLines: grid, pointLabels: { color: '#55655F' }, ticks: { color: '#55655F', backdropColor: 'transparent' } }
