@@ -35,7 +35,8 @@ function usesLabelValue(type) {
 
 const TYPE_TITLES = {
     bar: 'Bar', line: 'Line', pie: 'Pie', scatter: 'Scatter',
-    hbar: 'Horizontal Bar', area: 'Area', doughnut: 'Doughnut', radar: 'Radar'
+    hbar: 'Horizontal Bar', area: 'Area', doughnut: 'Doughnut', radar: 'Radar',
+    stacked: 'Stacked Bar'
 };
 
 function defaultTitle() {
@@ -249,7 +250,7 @@ function addOptionToSelects(selects, value, text) {
 const MAX_Y = 10;   // same as MAX_SERIES in datasets/services.py
 
 function supportsMultiY(type) {
-    return ['bar', 'hbar', 'line', 'area', 'radar'].includes(type);
+    return ['bar', 'hbar', 'line', 'area', 'radar', 'stacked'].includes(type);
 }
 
 function updateMultiYVisibility() {
