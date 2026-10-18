@@ -439,3 +439,54 @@ body.page-app .error-message {
     font-size: 0.85rem;
     margin-top: 0.25rem;
 }
+
+/* Multiple Y columns */
+body.page-app .y-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+body.page-app .y-row .form-select {
+    flex: 1;
+    min-width: 0;
+}
+
+body.page-app .y-row-remove {
+    flex-shrink: 0;
+    width: 38px;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 9px;
+    background: #ffffff;
+    color: var(--pa-ink-soft);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+body.page-app .y-row-remove:hover {
+    border-color: var(--pa-danger);
+    color: var(--pa-danger);
+}
+
+body.page-app .btn-add-y {
+    margin-top: 0.6rem;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--pa-accent-dark);
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+body.page-app .btn-add-y:hover:not(:disabled) {
+    text-decoration: underline;
+}
+
+body.page-app .btn-add-y:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

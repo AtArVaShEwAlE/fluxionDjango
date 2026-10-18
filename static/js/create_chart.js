@@ -18,6 +18,8 @@ const downloadBtn = document.getElementById('downloadBtn');
 const chartCanvas = document.getElementById('chartCanvas');
 const noChartState = document.getElementById('noChartState');
 const yAxisGroup = document.getElementById('yAxisGroup');
+const extraYRows = document.getElementById('extraYRows');
+const addYBtn = document.getElementById('addYBtn');
 const valueGroup = document.getElementById('valueGroup');
 const labelGroup = document.getElementById('labelGroup');
 const editBanner = document.getElementById('editBanner');
@@ -137,7 +139,10 @@ async function loadChartForEditing(chartId) {
             labelSelect.value = config.label_column || '';
         } else {
             xAxisSelect.value = config.x_axis || '';
-            yAxisSelect.value = config.y_axis || '';
+            const savedYs = (Array.isArray(config.y_axes) && config.y_axes.length) ? config.y_axes : [config.y_axis || ''];
+            yAxisSelect.value = savedYs[0] || '';
+            clearExtraYRows();
+            savedYs.slice(1).forEach(column => addYRow(column));
         }
         colorScheme.value = config.color_scheme || 'default';
 
@@ -195,6 +200,10 @@ function initializeChartBuilder() {
 
     xAxisSelect.addEventListener('change', validateSelections);
     yAxisSelect.addEventListener('change', validateSelections);
+    addYBtn.addEventListener('click', () => {
+        addYRow('');
+        validateSelections();
+    });
     valueSelect.addEventListener('change', validateSelections);
     labelSelect.addEventListener('change', validateSelections);
 }
@@ -236,6 +245,75 @@ function addOptionToSelects(selects, value, text) {
     });
 }
 
+// ---------- Multiple Y columns ----------
+const MAX_Y = 10;   // same as MAX_SERIES in datasets/services.py
+
+function supportsMultiY(type) {
+    return ['bar', 'hbar', 'line', 'area', 'radar'].includes(type);
+}
+
+function updateMultiYVisibility() {
+    const show = supportsMultiY(selectedChartType);
+    extraYRows.style.display = show ? 'block' : 'none';
+    addYBtn.style.display = show ? 'inline-block' : 'none';
+}
+
+function refreshAddYButton() {
+    addYBtn.disabled = (1 + extraYRows.children.length) >= MAX_Y;
+}
+
+function addYRow(value) {
+    if (1 + extraYRows.children.length >= MAX_Y) return;
+
+    const row = document.createElement('div');
+    row.className = 'y-row';
+
+    const select = document.createElement('select');
+    select.className = 'form-select';
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = 'Select Y-Axis column...';
+    select.appendChild(blank);
+    currentDataset.column_names.forEach(column => {
+        const option = document.createElement('option');
+        option.value = column;
+        option.textContent = column;
+        select.appendChild(option);
+    });
+    select.value = value || '';
+    select.addEventListener('change', validateSelections);
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'y-row-remove';
+    remove.setAttribute('aria-label', 'Remove column');
+    remove.textContent = '\u00d7';
+    remove.addEventListener('click', () => {
+        row.remove();
+        refreshAddYButton();
+        validateSelections();
+    });
+
+    row.appendChild(select);
+    row.appendChild(remove);
+    extraYRows.appendChild(row);
+    refreshAddYButton();
+}
+
+function clearExtraYRows() {
+    extraYRows.innerHTML = '';
+    refreshAddYButton();
+}
+
+// Chosen Y columns, no blanks, no duplicates. Only row 1 for types without multi-Y.
+function getYColumns() {
+    const cols = [yAxisSelect.value];
+    if (supportsMultiY(selectedChartType)) {
+        extraYRows.querySelectorAll('select').forEach(s => cols.push(s.value));
+    }
+    return cols.filter((c, i) => c !== '' && cols.indexOf(c) === i);
+}
+
 function initializeChartTypes() {
     chartTypeButtons.forEach(btn => {
         btn.addEventListener('click', function() {
@@ -258,6 +336,7 @@ function updateFormFields() {
         valueGroup.style.display = 'none';
         labelGroup.style.display = 'none';
     }
+    updateMultiYVisibility();
 }
 
 function validateSelections() {
@@ -265,7 +344,7 @@ function validateSelections() {
     if (usesLabelValue(selectedChartType)) {
         isValid = valueSelect.value !== '' && labelSelect.value !== '';
     } else {
-        isValid = xAxisSelect.value !== '' && yAxisSelect.value !== '';
+        isValid = xAxisSelect.value !== '' && getYColumns().length > 0;
     }
     updateChartBtn.disabled = !isValid;
     if (!isValid) {
@@ -326,9 +405,9 @@ function buildQuerySpec() {
         return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
     }
     if (selectedChartType === 'scatter') {
-        return { x: xAxisSelect.value, series: [{ column: yAxisSelect.value }], raw: true };
+        return { x: xAxisSelect.value, series: [{ column: getYColumns()[0] }], raw: true };
     }
-    return { x: xAxisSelect.value, series: [{ column: yAxisSelect.value, agg: 'sum' }], sort: 'none' };
+    return { x: xAxisSelect.value, series: getYColumns().map(column => ({ column: column, agg: 'sum' })), sort: 'none' };
 }
 
 async function fetchChartData() {
@@ -456,8 +535,10 @@ function buildChartConfigPayload() {
         chartConfig.value_column = valueSelect.value;
         chartConfig.label_column = labelSelect.value;
     } else {
+        const yColumns = getYColumns();
         chartConfig.x_axis = xAxisSelect.value;
-        chartConfig.y_axis = yAxisSelect.value;
+        chartConfig.y_axes = yColumns;
+        chartConfig.y_axis = yColumns[0] || '';
     }
 
     return chartConfig;
