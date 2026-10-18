@@ -26,12 +26,21 @@ const editBannerTitle = document.getElementById('editBannerTitle');
 const chartTypeButtons = document.querySelectorAll('.chart-type-btn');
 let selectedChartType = 'bar';
 
-const colorSchemes = {
-    default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
-    blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
-    purple: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
-    rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
+// Types that use Labels + Values (like pie) instead of X / Y
+function usesLabelValue(type) {
+    return type === 'pie' || type === 'doughnut';
+}
+
+const TYPE_TITLES = {
+    bar: 'Bar', line: 'Line', pie: 'Pie', scatter: 'Scatter',
+    hbar: 'Horizontal Bar', area: 'Area', doughnut: 'Doughnut', radar: 'Radar'
 };
+
+function defaultTitle() {
+    return `${TYPE_TITLES[selectedChartType] || 'Chart'} Chart`;
+}
+
+// Colour palettes live in chart_render.js (FluxionChart.colorSchemes)
 
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
@@ -123,7 +132,7 @@ async function loadChartForEditing(chartId) {
 
         // Prefill axis / value / label selects
         const config = chart.config || {};
-        if (chart.chart_type === 'pie') {
+        if (usesLabelValue(chart.chart_type)) {
             valueSelect.value = config.value_column || '';
             labelSelect.value = config.label_column || '';
         } else {
@@ -240,7 +249,7 @@ function initializeChartTypes() {
 }
 
 function updateFormFields() {
-    if (selectedChartType === 'pie') {
+    if (usesLabelValue(selectedChartType)) {
         yAxisGroup.style.display = 'none';
         valueGroup.style.display = 'block';
         labelGroup.style.display = 'block';
@@ -253,7 +262,7 @@ function updateFormFields() {
 
 function validateSelections() {
     let isValid = false;
-    if (selectedChartType === 'pie') {
+    if (usesLabelValue(selectedChartType)) {
         isValid = valueSelect.value !== '' && labelSelect.value !== '';
     } else {
         isValid = xAxisSelect.value !== '' && yAxisSelect.value !== '';
@@ -313,7 +322,7 @@ function showChartSuccess() {
 
 // Same rules as charts/queries.py, so builder and saved chart match.
 function buildQuerySpec() {
-    if (selectedChartType === 'pie') {
+    if (usesLabelValue(selectedChartType)) {
         return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
     }
     if (selectedChartType === 'scatter') {
@@ -340,103 +349,21 @@ async function fetchChartData() {
     return result;
 }
 
-function toChartJsData(result) {
-    const labels = result.labels;
-    const series = result.series[0];
-    const values = series.values;
-
-    if (selectedChartType === 'pie') {
-        const pl = [];
-        const pv = [];
-        labels.forEach((label, i) => {
-            if (values[i] !== null) {
-                pl.push(label);
-                pv.push(values[i]);
-            }
-        });
-        return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length) }] };
-    }
-
-    if (selectedChartType === 'scatter') {
-        const points = [];
-        labels.forEach((label, i) => {
-            if (values[i] === null) return;
-            const x = Number(label);
-            points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
-        });
-        return {
-            datasets: [{
-                label: series.column,
-                data: points,
-                backgroundColor: colorSchemes[colorScheme.value][0]
-            }]
-        };
-    }
-
-    return {
-        labels: labels,
-        datasets: [{
-            label: series.column,
-            data: values,
-            backgroundColor: getColors(values.length),
-            borderColor: colorSchemes[colorScheme.value][0],
-            borderWidth: selectedChartType === 'line' ? 2 : 1
-        }]
-    };
-}
-
+// Returns the raw server result; FluxionChart (chart_render.js) turns it into a chart.
 async function prepareChartData() {
-    return toChartJsData(await fetchChartData());
+    return await fetchChartData();
 }
 
-function getColors(count) {
-    const scheme = colorSchemes[colorScheme.value];
-    const colors = [];
-    for (let i = 0; i < count; i++) {
-        colors.push(scheme[i % scheme.length]);
-    }
-    return colors;
-}
-
-function createChart(data) {
+function createChart(result) {
     if (currentChart) {
         currentChart.destroy();
     }
-    const ctx = chartCanvas.getContext('2d');
-    const title = chartTitle.value || `${selectedChartType.charAt(0).toUpperCase() + selectedChartType.slice(1)} Chart`;
-    const config = {
-        type: selectedChartType,
-        data: data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: title,
-                    font: { size: 16, weight: 'bold' },
-                    color: '#10201A'
-                },
-                legend: {
-                    display: selectedChartType === 'pie',
-                    position: 'bottom',
-                    labels: { color: '#55655F' }
-                }
-            },
-            scales: selectedChartType !== 'pie' ? {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#E3E9E6' },
-                    ticks: { color: '#55655F' }
-                },
-                x: {
-                    grid: { color: '#E3E9E6' },
-                    ticks: { color: '#55655F' }
-                }
-            } : {}
-        }
-    };
-    currentChart = new Chart(ctx, config);
+    const title = chartTitle.value || defaultTitle();
+    const config = FluxionChart.buildConfig(result, selectedChartType, colorScheme.value, {
+        title: title,
+        maintainAspectRatio: false
+    });
+    currentChart = new Chart(chartCanvas.getContext('2d'), config);
 }
 
 // Save as a brand new chart (normal, non-edit flow)
@@ -519,13 +446,13 @@ function handleUpdateExistingChart() {
 
 function buildChartConfigPayload() {
     const chartConfig = {
-        title: chartTitle.value || `${selectedChartType.charAt(0).toUpperCase() + selectedChartType.slice(1)} Chart`,
+        title: chartTitle.value || defaultTitle(),
         chart_type: selectedChartType,
         dataset_id: currentDataset.id,
         color_scheme: colorScheme.value
     };
 
-    if (selectedChartType === 'pie') {
+    if (usesLabelValue(selectedChartType)) {
         chartConfig.value_column = valueSelect.value;
         chartConfig.label_column = labelSelect.value;
     } else {
