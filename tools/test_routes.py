@@ -95,7 +95,7 @@ try:
         check(f'user GET {p}', A.get(p).status_code, 200)
 
     # ---- upload ----
-    csv = SimpleUploadedFile('zz_test.csv', b'name,sales\na,10\nb,20\nc,30\n', content_type='text/csv')
+    csv = SimpleUploadedFile('zz_test.csv', b'name,sales,cost\na,10,1\nb,20,2\nc,30,3\n', content_type='text/csv')
     r = A.post('/upload', {'file': csv})
     d = js(r).get('data', {})
     check('upload ok', r.status_code, 200)
@@ -179,6 +179,77 @@ try:
             check('unshare-chart owner', A.post(f'/unshare-chart/{cid}').status_code, 200)
             check('shared page after unshare', anon.get(f'/shared/{tok}').status_code, 404)
             check('shared-data after unshare', anon.get(f'/shared-data/{tok}').status_code, 404)
+
+        # ---- Phase 11: chart types + multiple Y columns ----
+        from charts.models import Chart
+        from datasets.models import Dataset
+
+        def p11_save(chart_type, **cfg):
+            body = {'title': 'ZZ p11', 'chart_type': chart_type, 'dataset_id': ds,
+                    'color_scheme': 'default', **cfg}
+            r = jpost(A, '/save-chart', body)
+            return js(r).get('chart_id'), r.status_code
+
+        def p11_data(chart_id):
+            return js(A.get(f'/chart-data/{chart_id}'))
+
+        def p11_cfg(chart_id):
+            return js(A.get(f'/get-chart/{chart_id}')).get('chart', {}).get('config', {})
+
+        # Old saved chart: config has NO y_axes key (saved before 11.3a)
+        old = Chart.objects.create(owner=ua, dataset=Dataset.objects.get(pk=ds), title='ZZ legacy',
+                                   chart_type='bar',
+                                   config={'x_axis': 'name', 'y_axis': 'sales', 'color_scheme': 'default'})
+        r = A.get(f'/chart-data/{old.id}')
+        check('legacy config (no y_axes) chart-data', r.status_code, 200)
+        check('legacy config labels', js(r).get('labels'), [['a', 'b', 'c']])
+        check('legacy config values', js(r).get('series', [{}])[0].get('values'), [[10, 20, 30]])
+
+        # Two Y columns
+        mid, st = p11_save('bar', x_axis='name', y_axes=['sales', 'cost'])
+        check('save-chart multi y_axes', st, 200)
+        cfg = p11_cfg(mid)
+        check('multi saved y_axes', cfg.get('y_axes'), [['sales', 'cost']])
+        check('multi saved y_axis = first', cfg.get('y_axis'), 'sales')
+        res = p11_data(mid)
+        check('multi series columns', [s.get('column') for s in res.get('series', [])], [['sales', 'cost']])
+        check('multi series values', [s.get('values') for s in res.get('series', [])], [[[10, 20, 30], [1, 2, 3]]])
+
+        # Dirty y_axes are cleaned on save
+        did, st = p11_save('bar', x_axis='name', y_axes=['sales', 'sales', '', 5, 'cost'])
+        check('y_axes cleaned (dupes, blanks, non-strings)', p11_cfg(did).get('y_axes'), [['sales', 'cost']])
+
+        # y_axes without y_axis
+        lid, st = p11_save('line', x_axis='name', y_axes=['cost'])
+        check('y_axes only: y_axis filled', p11_cfg(lid).get('y_axis'), 'cost')
+        check('y_axes only: values', p11_data(lid).get('series', [{}])[0].get('values'), [[1, 2, 3]])
+
+        # Doughnut stays single series even if y_axes is sent
+        pid, st = p11_save('doughnut', label_column='name', value_column='sales', y_axes=['sales', 'cost'])
+        res = p11_data(pid)
+        check('doughnut values', res.get('series', [{}])[0].get('values'), [[10, 20, 30]])
+        check('doughnut ignores y_axes (1 series)', len(res.get('series', [])), 1)
+
+        # New chart types save and read back
+        for t in ['hbar', 'area', 'radar']:
+            tid, st = p11_save(t, x_axis='name', y_axis='sales')
+            check(f'save-chart {t}', st, 200)
+            check(f'chart-data {t}', A.get(f'/chart-data/{tid}').status_code, 200)
+        check('save-chart invalid type', p11_save('banana', x_axis='name', y_axis='sales')[1], 400)
+
+        # Scatter stays single series; unknown column is a clean 400
+        sid, st = p11_save('scatter', x_axis='name', y_axes=['sales', 'cost'])
+        check('scatter stays 1 series', len(p11_data(sid).get('series', [])), 1)
+        bid, st = p11_save('bar', x_axis='name', y_axes=['sales', 'nope'])
+        check('unknown column in y_axes -> 400', A.get(f'/chart-data/{bid}').status_code, 400)
+
+        # Shared multi-series chart
+        mtok = js(A.post(f'/share-chart/{mid}')).get('share_token')
+        r = anon.get(f'/shared-data/{mtok}')
+        check('shared-data multi status', r.status_code, 200)
+        check('shared-data multi values', [s.get('values') for s in js(r).get('series', [])], [[[10, 20, 30], [1, 2, 3]]])
+        check('B chart-data multi', B.get(f'/chart-data/{mid}').status_code, [403, 404])
+
         # reports
         r = jpost(A, '/save-report', {'title': 'ZZ report', 'chart_ids': [cid]})
         rid = js(r).get('report_id') or js(r).get('id')
