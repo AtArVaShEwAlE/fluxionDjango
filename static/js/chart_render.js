@@ -9,7 +9,7 @@ window.FluxionChart = (function () {
         rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
     };
     // Chart.js has no 'hbar' / 'area' type: they are bar / line plus options.
-    const JS_TYPE = { hbar: 'bar', area: 'line' };
+    const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar' };
 
     function withAlpha(hex, alpha) {
         const n = parseInt(hex.slice(1), 16);
@@ -74,7 +74,7 @@ window.FluxionChart = (function () {
                         data: s.values,
                         backgroundColor: filled ? withAlpha(color, 0.25) : color,
                         borderColor: color,
-                        borderWidth: (chartType === 'bar' || chartType === 'hbar') ? 1 : 2,
+                        borderWidth: (chartType === 'bar' || chartType === 'hbar' || chartType === 'stacked') ? 1 : 2,
                         fill: filled,
                         tension: (chartType === 'line' || chartType === 'area') ? 0.4 : 0,
                         pointBackgroundColor: color
@@ -117,6 +117,7 @@ window.FluxionChart = (function () {
         const isRound = chartType === 'pie' || chartType === 'doughnut';
         const isRadar = chartType === 'radar';
         const isHBar = chartType === 'hbar';
+        const isStacked = chartType === 'stacked';
         const grid = { color: '#E3E9E6' };
         const ticks = { color: '#55655F' };
 
@@ -139,8 +140,8 @@ window.FluxionChart = (function () {
                     x: { beginAtZero: true, grid: grid, ticks: ticks },
                     y: { grid: grid, ticks: ticks }
                 } : {
-                    y: { beginAtZero: true, grid: grid, ticks: ticks },
-                    x: { grid: grid, ticks: ticks }
+                    y: { stacked: isStacked, beginAtZero: true, grid: grid, ticks: ticks },
+                    x: { stacked: isStacked, grid: grid, ticks: ticks }
                 }
             }
         };
