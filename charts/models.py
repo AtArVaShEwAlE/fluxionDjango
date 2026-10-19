@@ -9,7 +9,7 @@ class Chart(models.Model):
         ('bar', 'Bar'), ('line', 'Line'), ('pie', 'Pie'), ('scatter', 'Scatter'),
         ('hbar', 'Horizontal Bar'), ('area', 'Area'),
         ('doughnut', 'Doughnut'), ('radar', 'Radar'),
-        ('stacked', 'Stacked Bar'),
+        ('stacked', 'Stacked Bar'), ('combo', 'Combo'),
     ]
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                               related_name='charts')
