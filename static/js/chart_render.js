@@ -9,7 +9,7 @@ window.FluxionChart = (function () {
         rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
     };
     // Chart.js has no 'hbar' / 'area' type: they are bar / line plus options.
-    const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar' };
+    const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar', combo: 'bar' };
 
     function withAlpha(hex, alpha) {
         const n = parseInt(hex.slice(1), 16);
@@ -69,15 +69,17 @@ window.FluxionChart = (function () {
                 labels: labels,
                 datasets: result.series.map((s, i) => {
                     const color = palette[i % palette.length];
+                    const isCombo = chartType === 'combo';
                     return {
                         label: s.column,
                         data: s.values,
                         backgroundColor: filled ? withAlpha(color, 0.25) : color,
                         borderColor: color,
-                        borderWidth: (chartType === 'bar' || chartType === 'hbar' || chartType === 'stacked') ? 1 : 2,
+                        borderWidth: (chartType === 'bar' || chartType === 'hbar' || chartType === 'stacked' || (isCombo && i === 0)) ? 1 : 2,
                         fill: filled,
-                        tension: (chartType === 'line' || chartType === 'area') ? 0.4 : 0,
-                        pointBackgroundColor: color
+                        tension: (chartType === 'line' || chartType === 'area' || (isCombo && i > 0)) ? 0.4 : 0,
+                        pointBackgroundColor: color,
+                        ...(isCombo ? { type: i === 0 ? 'bar' : 'line', order: i === 0 ? 1 : 0 } : {})
                     };
                 })
             };
