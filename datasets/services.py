@@ -145,6 +145,8 @@ BUCKET_FREQ = {'day': 'D', 'week': 'W', 'month': 'M', 'quarter': 'Q', 'year': 'Y
 MAX_GROUPS = 500
 MAX_RAW_POINTS = 5000
 MAX_SERIES = 10
+DEFAULT_BINS = 10
+MAX_BINS = 50
 
 
 def _py(value):
@@ -212,6 +214,39 @@ def _series_name(col, agg):
     return col if agg == 'sum' else f'{col} ({agg})'
 
 
+def _edge_label(value):
+    """12.5 -> '12.5', 1000000.0 -> '1,000,000', 10.0 -> '10'."""
+    return f'{round(float(value), 2) + 0.0:,.2f}'.rstrip('0').rstrip('.')
+
+
+def _histogram(df, x, bins):
+    """Count values of one numeric column in equal-width bins."""
+    try:
+        bins = int(bins) if bins else DEFAULT_BINS
+    except (TypeError, ValueError):
+        raise ValueError('bins must be a number')
+    bins = max(2, min(bins, MAX_BINS))
+
+    raw = df[x]
+    if pd.api.types.is_datetime64_any_dtype(raw):
+        raise ValueError(f"Column '{x}' is a date column, not numeric")
+    num = pd.to_numeric(raw, errors='coerce').astype(float)
+    num = num[np.isfinite(num)]   # drops NaN and +-inf
+    if num.empty:
+        raise ValueError(f"Column '{x}' has no numeric values")
+
+    counts, edges = np.histogram(num, bins=bins)
+    labels = [f'{_edge_label(lo)} to {_edge_label(hi)}'
+              for lo, hi in zip(edges[:-1], edges[1:])]
+    return {
+        'labels': labels,
+        'series': [{'name': 'count', 'column': x, 'agg': 'count',
+                    'values': [int(c) for c in counts]}],
+        'meta': {'mode': 'histogram', 'rows_in': len(df), 'x': x, 'bins': bins,
+                 'values_used': int(len(num)), 'edges': [_py(e) for e in edges]},
+    }
+
+
 def run_query(df, spec):
     """Aggregate a full dataframe server-side.
 
@@ -232,6 +267,9 @@ def run_query(df, spec):
     x = spec.get('x')
     if not isinstance(x, str) or x not in df.columns:
         raise ValueError(f'Unknown column: {x}')
+
+    if spec.get('histogram'):
+        return _histogram(df, x, spec.get('bins'))
 
     raw_series = spec.get('series')
     if not isinstance(raw_series, list) or not raw_series:
