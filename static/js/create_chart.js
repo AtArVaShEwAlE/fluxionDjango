@@ -2,6 +2,7 @@
 
 let currentDataset = null;
 let currentChart = null;
+let builderReady = false;
 let editingChartId = null; // set when we're editing an existing chart instead of creating a new one
 
 const noDataState = document.getElementById('noDataState');
@@ -47,6 +48,7 @@ function defaultTitle() {
 
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
+    initializeNoDataActions();
 });
 
 function initializePage() {
@@ -184,8 +186,96 @@ function showChartBuilder() {
     document.getElementById('datasetCols').textContent = `${currentDataset.columns} columns`;
 }
 
+// ---------- No dataset yet: pick a recent one or upload a new one ----------
+const MAX_UPLOAD_BYTES = 16 * 1024 * 1024;
+
+function initializeNoDataActions() {
+    const addBtn = document.getElementById('addDatasetBtn');
+    const fileInput = document.getElementById('chartFileInput');
+    addBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => uploadDataset(fileInput));
+    document.querySelectorAll('.js-recent-use').forEach(btn => {
+        btn.addEventListener('click', () => useRecentDataset(btn));
+    });
+}
+
+function setNoDataStatus(message, isError) {
+    const el = document.getElementById('addDatasetStatus');
+    el.textContent = message;
+    el.classList.toggle('error', !!isError);
+}
+
+// Same steps as the Dashboard "Use" button, but without a page reload
+function openDataset(dataset) {
+    editingChartId = null;   // a failed edit load must not turn this into an update
+    currentDataset = dataset;
+    sessionStorage.setItem('currentDataset', JSON.stringify(dataset));
+    showChartBuilder();
+    initializeChartBuilder();
+    applySuggestedChartType();
+}
+
+async function useRecentDataset(btn) {
+    btn.disabled = true;
+    setNoDataStatus('', false);
+    try {
+        const response = await fetch(`/get-dataset/${btn.dataset.id}`);
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || `Server error (${response.status})`);
+        }
+        openDataset(result.data);
+    } catch (error) {
+        console.error('Error loading dataset:', error);
+        setNoDataStatus('Could not load dataset: ' + error.message, true);
+        btn.disabled = false;
+    }
+}
+
+async function uploadDataset(fileInput) {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+        setNoDataStatus('Invalid file type. Please upload CSV or Excel files only.', true);
+        fileInput.value = '';
+        return;
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+        setNoDataStatus('File size exceeds 16MB limit.', true);
+        fileInput.value = '';
+        return;
+    }
+
+    const addBtn = document.getElementById('addDatasetBtn');
+    addBtn.disabled = true;
+    setNoDataStatus('Processing your data...', false);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('/upload', { method: 'POST', body: formData });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.success) {
+            throw new Error(result.error || `Server error (${response.status})`);
+        }
+        setNoDataStatus('', false);
+        openDataset(result.data);
+    } catch (error) {
+        console.error('Upload error:', error);
+        setNoDataStatus('Upload failed: ' + error.message, true);
+    } finally {
+        addBtn.disabled = false;
+        fileInput.value = '';
+    }
+}
+
 function initializeChartBuilder() {
     populateColumnSelects();
+    if (builderReady) return;   // listeners already attached (failed edit load), do not double them
+    builderReady = true;
     initializeChartTypes();
 
     updateChartBtn.addEventListener('click', handleUpdateChart);

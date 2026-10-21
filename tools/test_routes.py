@@ -104,6 +104,9 @@ try:
     r = A.post('/upload', {'file': SimpleUploadedFile('x.txt', b'hi')})
     check('upload bad type', r.status_code, 400)
     check('upload no file', A.post('/upload').status_code, 400)
+    if ds:
+        check('create-chart lists own recent dataset', 'zz_test.csv' in A.get('/create-chart').content.decode(), True)
+        check('create-chart hides other users datasets', 'zz_test.csv' in B.get('/create-chart').content.decode(), False)
 
     cid = rid = tok = rtok = None
     if ds:

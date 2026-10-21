@@ -59,7 +59,8 @@ def _public_chart(chart):
 
 @login_required
 def create_chart(request):
-    return render(request, 'create_chart.html')
+    recent = request.user.datasets.all()[:5]   # Meta ordering = newest first
+    return render(request, 'create_chart.html', {'recent_datasets': recent})
 
 
 @login_required

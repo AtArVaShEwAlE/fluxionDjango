@@ -18,10 +18,26 @@
         <div class="empty-state">
             <div class="empty-icon"><svg class="icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-input-icon lucide-file-input"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M2 15h10"/><path d="m9 18 3-3-3 3"/></svg></div>
             <h4>No dataset loaded</h4>
-            <p>Please upload a dataset first to create charts</p>
-            <a href="{% url 'dashboard' %}" class="btn btn-primary">
-                Go to Dashboard
-            </a>
+            <p>Pick a recent dataset or add a new one to start charting</p>
+            <button type="button" class="btn btn-primary" id="addDatasetBtn">Add dataset</button>
+            <input type="file" id="chartFileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+            <p class="add-dataset-status" id="addDatasetStatus"></p>
+            {% if recent_datasets %}
+            <div class="recent-datasets">
+                <h5>Recent datasets</h5>
+                <ul class="recent-list">
+                    {% for d in recent_datasets %}
+                    <li class="recent-item">
+                        <div class="recent-info">
+                            <span class="recent-name">{{ d.original_filename }}</span>
+                            <span class="recent-meta">{{ d.rows }} rows &middot; {{ d.columns }} columns &middot; {{ d.upload_date|date:"M d, Y" }}</span>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm js-recent-use" data-id="{{ d.id }}">Use</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
 

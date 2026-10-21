@@ -490,3 +490,71 @@ body.page-app .btn-add-y:disabled {
     opacity: 0.45;
     cursor: not-allowed;
 }
+
+
+/* No dataset yet: Add dataset + recent datasets */
+body.page-app .no-data-state .add-dataset-status {
+    min-height: 1.4rem;
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .no-data-state .add-dataset-status.error {
+    color: var(--pa-danger);
+}
+
+body.page-app .recent-datasets {
+    max-width: 560px;
+    margin: 2rem auto 0;
+    text-align: left;
+}
+
+body.page-app .recent-datasets h5 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--pa-ink);
+    margin-bottom: 0.75rem;
+}
+
+body.page-app .recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--pa-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+body.page-app .recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+body.page-app .recent-item:last-child {
+    border-bottom: none;
+}
+
+body.page-app .recent-info {
+    min-width: 0;
+}
+
+body.page-app .recent-name {
+    display: block;
+    font-weight: 600;
+    color: var(--pa-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-app .recent-meta {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--pa-ink-soft);
+}
