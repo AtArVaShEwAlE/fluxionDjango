@@ -9,7 +9,7 @@ window.FluxionChart = (function () {
         rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
     };
     // Chart.js has no 'hbar' / 'area' type: they are bar / line plus options.
-    const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar', combo: 'bar' };
+    const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar', combo: 'bar', histogram: 'bar' };
 
     function withAlpha(hex, alpha) {
         const n = parseInt(hex.slice(1), 16);
@@ -63,6 +63,21 @@ window.FluxionChart = (function () {
                 }]
             };
         }
+        if (chartType === 'histogram') {
+            return {
+                labels: labels,
+                datasets: [{
+                    label: series.column,
+                    data: values,
+                    backgroundColor: palette[0],
+                    borderColor: '#FFFFFF',
+                    borderWidth: 1,
+                    barPercentage: 1,
+                    categoryPercentage: 1
+                }]
+            };
+        }
+
         if (result.series.length > 1) {
             const filled = chartType === 'area' || chartType === 'radar';
             return {
@@ -120,6 +135,7 @@ window.FluxionChart = (function () {
         const isRadar = chartType === 'radar';
         const isHBar = chartType === 'hbar';
         const isStacked = chartType === 'stacked';
+        const isHistogram = chartType === 'histogram';
         const grid = { color: '#E3E9E6' };
         const ticks = { color: '#55655F' };
 
@@ -142,8 +158,8 @@ window.FluxionChart = (function () {
                     x: { beginAtZero: true, grid: grid, ticks: ticks },
                     y: { grid: grid, ticks: ticks }
                 } : {
-                    y: { stacked: isStacked, beginAtZero: true, grid: grid, ticks: ticks },
-                    x: { stacked: isStacked, grid: grid, ticks: ticks }
+                    y: { stacked: isStacked, beginAtZero: true, grid: grid, ticks: ticks, ...(isHistogram ? { ticks: { color: '#55655F', precision: 0 }, title: { display: true, text: 'Count', color: '#55655F' } } : {}) },
+                    x: { stacked: isStacked, grid: grid, ticks: ticks, ...(isHistogram ? { title: { display: true, text: result.series[0].column, color: '#55655F' } } : {}) }
                 }
             }
         };
