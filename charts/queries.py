@@ -12,6 +12,11 @@ def clean_y_axes(value):
 def spec_from_chart(chart_type, config):
     """Saved-chart config -> query spec. Old configs (only y_axis) keep rendering."""
     config = config or {}
+    if chart_type == 'histogram':   # one numeric column, no Y
+        x = config.get('x_axis')
+        if not x:
+            raise ValueError('Chart config is incomplete')
+        return {'x': x, 'histogram': True}
     if chart_type in ('pie', 'doughnut'):
         x, y = config.get('label_column'), config.get('value_column')
         ys = [y] if y else []

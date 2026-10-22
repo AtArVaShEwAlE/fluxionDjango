@@ -240,6 +240,20 @@ try:
             check(f'chart-data {t}', A.get(f'/chart-data/{tid}').status_code, 200)
         check('save-chart invalid type', p11_save('banana', x_axis='name', y_axis='sales')[1], 400)
 
+        # Histogram: one numeric column, counted in bins
+        hid, st = p11_save('histogram', x_axis='sales')
+        check('save-chart histogram', st, 200)
+        res = p11_data(hid)
+        check('histogram chart-data bins', len(res.get('labels', [])), 10)
+        check('histogram chart-data total', sum(res.get('series', [{}])[0].get('values', [])), 3)
+        check('histogram chart-data mode', res.get('meta', {}).get('mode'), 'histogram')
+        hbad, st = p11_save('histogram', x_axis='name')
+        check('histogram on text column -> 400', A.get(f'/chart-data/{hbad}').status_code, 400)
+        hno, st = p11_save('histogram')
+        check('histogram without column -> 400', A.get(f'/chart-data/{hno}').status_code, 400)
+        hs = js(A.post(f'/share-chart/{hid}')).get('share_token')
+        check('shared-data histogram', js(anon.get(f'/shared-data/{hs}')).get('meta', {}).get('mode'), 'histogram')
+
         # Scatter stays single series; unknown column is a clean 400
         sid, st = p11_save('scatter', x_axis='name', y_axes=['sales', 'cost'])
         check('scatter stays 1 series', len(p11_data(sid).get('series', [])), 1)
