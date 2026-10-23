@@ -37,7 +37,7 @@ function usesLabelValue(type) {
 const TYPE_TITLES = {
     bar: 'Bar', line: 'Line', pie: 'Pie', scatter: 'Scatter',
     hbar: 'Horizontal Bar', area: 'Area', doughnut: 'Doughnut', radar: 'Radar',
-    stacked: 'Stacked Bar', combo: 'Combo'
+    stacked: 'Stacked Bar', combo: 'Combo', histogram: 'Histogram'
 };
 
 function defaultTitle() {
@@ -398,6 +398,7 @@ function clearExtraYRows() {
 
 // Chosen Y columns, no blanks, no duplicates. Only row 1 for types without multi-Y.
 function getYColumns() {
+    if (selectedChartType === 'histogram') return [];   // one column only, no Y
     const cols = [yAxisSelect.value];
     if (supportsMultiY(selectedChartType)) {
         extraYRows.querySelectorAll('select').forEach(s => cols.push(s.value));
@@ -423,10 +424,12 @@ function updateFormFields() {
         valueGroup.style.display = 'block';
         labelGroup.style.display = 'block';
     } else {
-        yAxisGroup.style.display = 'block';
+        yAxisGroup.style.display = selectedChartType === 'histogram' ? 'none' : 'block';
         valueGroup.style.display = 'none';
         labelGroup.style.display = 'none';
     }
+    document.querySelector('label[for="xAxisSelect"]').textContent =
+        selectedChartType === 'histogram' ? 'Column (numbers)' : 'X-Axis (Categories)';
     updateMultiYVisibility();
 }
 
@@ -434,6 +437,8 @@ function validateSelections() {
     let isValid = false;
     if (usesLabelValue(selectedChartType)) {
         isValid = valueSelect.value !== '' && labelSelect.value !== '';
+    } else if (selectedChartType === 'histogram') {
+        isValid = xAxisSelect.value !== '';
     } else {
         isValid = xAxisSelect.value !== '' && getYColumns().length > 0;
     }
@@ -494,6 +499,9 @@ function showChartSuccess() {
 function buildQuerySpec() {
     if (usesLabelValue(selectedChartType)) {
         return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
+    }
+    if (selectedChartType === 'histogram') {
+        return { x: xAxisSelect.value, histogram: true };
     }
     if (selectedChartType === 'scatter') {
         return { x: xAxisSelect.value, series: [{ column: getYColumns()[0] }], raw: true };
