@@ -25,6 +25,17 @@ MAX_INTERVAL_MS = 60_000
 MAX_STREAMS = 5
 MAX_STREAM_ROWS = 5000 
 
+def to_finite_number(value):
+    """API value -> float, or None if missing, not numeric, NaN or inf. Never invents data."""
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
 class StreamConsumer(AsyncJsonWebsocketConsumer):
     """One instance per browser connection. Messages both ways: {"event": str, "data": dict}."""
 
@@ -271,18 +282,23 @@ class StreamConsumer(AsyncJsonWebsocketConsumer):
         start = time.monotonic()
         made = 0
         while time.monotonic() - start < API_STREAM_SECONDS and made < API_MAX_REQUESTS:
+            made += 1   # every request counts toward the cap, even failed or unusable ones
             try:
                 api_data = await asyncio.to_thread(fetch_json, api_url)
-                value = extract_json_value(api_data, value_path)
-                label = extract_json_value(api_data, label_path)   # Flask used value_path here (bug)
-                timestamp = time.strftime('%H:%M:%S')
-                point = {
-                    'timestamp': timestamp,
-                    'value': float(value) if value else random.randint(10, 100),
-                    'label': str(label) if label else timestamp,
-                }
-                await self.broadcast(session_id, 'new_data_point', {'data': point, 'session_id': session_id})
-                made += 1
+                value = to_finite_number(extract_json_value(api_data, value_path))
+                if value is None:
+                    await self.broadcast(session_id, 'api_error', {
+                        'message': f"No numeric value at '{value_path}' in the API reply; point skipped",
+                        'session_id': session_id})
+                else:
+                    label = extract_json_value(api_data, label_path)   # Flask used value_path here (bug)
+                    timestamp = time.strftime('%H:%M:%S')
+                    point = {
+                        'timestamp': timestamp,
+                        'value': value,
+                        'label': timestamp if label is None or label == '' else str(label),
+                    }
+                    await self.broadcast(session_id, 'new_data_point', {'data': point, 'session_id': session_id})
             except asyncio.CancelledError:
                 raise
             except requests.RequestException as exc:

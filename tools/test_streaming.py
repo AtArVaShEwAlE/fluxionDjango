@@ -14,7 +14,8 @@ from django.contrib.auth.models import AnonymousUser
 
 from accounts.models import User
 from datasets.models import Dataset
-from streaming.consumers import StreamConsumer
+import streaming.consumers as sc
+from streaming.consumers import StreamConsumer, to_finite_number
 
 
 def make(user):
@@ -84,6 +85,30 @@ async def main(username):
     print('8. bad scheme ->                ', (await event(comm))[0], '(expect api_test_failed)')
     await comm.send_json_to({'event': 'test_api_endpoint', 'data': {'api_url': 'http://127.0.0.1:1/'}})
     print('9. closed port ->               ', (await event(comm))[0], '(expect api_test_failed)')
+
+    # 10. API stream: a real 0 is kept, missing / non-numeric values are skipped, never faked
+    print('10. number helper:              ',
+          [to_finite_number(v) for v in (0, '3.5', None, 'abc', float('nan'), float('inf'), True, '')],
+          '(expect [0.0, 3.5, None, None, None, None, None, None])')
+    replies = iter([{'value': 0, 'label': 'zero'}, {'other': 1}, {'value': 'abc'},
+                    {'value': 42.5, 'label': None}])
+    real_allowed, real_fetch = sc.is_allowed_api_url, sc.fetch_json
+    sc.is_allowed_api_url = lambda url: True
+    sc.fetch_json = lambda url: next(replies, {'value': 1})
+    try:
+        await comm.send_json_to({'event': 'stream_from_api', 'data': {
+            'session_id': 's5', 'api_url': 'http://example.test/', 'interval': 100}})
+        got = [await event(comm) for _ in range(4)]
+    finally:
+        sc.is_allowed_api_url, sc.fetch_json = real_allowed, real_fetch
+        await comm.send_json_to({'event': 'stop_stream', 'data': {'session_id': 's5'}})
+        await drain(comm)
+    pts = [g[1].get('data', {}) for g in got]
+    print('10b. API stream events:         ', [g[0] for g in got],
+          '(expect new_data_point, api_error, api_error, new_data_point)')
+    print('   real 0 and label kept?        ', pts[0].get('value') == 0 and pts[0].get('label') == 'zero', '(expect True)')
+    print('   missing + bad value skipped?  ', got[1][0] == 'api_error' and got[2][0] == 'api_error', '(expect True)')
+    print('   null label -> timestamp?      ', pts[3].get('value') == 42.5 and len(str(pts[3].get('label'))) == 8, '(expect True)')
 
     await comm.disconnect()
     print('done')
