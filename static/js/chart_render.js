@@ -16,6 +16,18 @@ window.FluxionChart = (function () {
         return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + alpha + ')';
     }
 
+    // Scatter X that is not all numbers (text, dates): use a category axis
+    function isCategorical(labels) {
+        return labels.some(l => !Number.isFinite(Number(l)));
+    }
+
+    // one tick per distinct value, dates sorted
+    function categoryLabels(labels) {
+        const uniq = [...new Set(labels.map(String))];
+        if (uniq.every(l => /^\d{4}-\d{2}-\d{2}$/.test(l))) uniq.sort();
+        return uniq;
+    }
+
     function schemeName(name) {
         return colorSchemes[name] ? name : 'default';
     }
@@ -49,11 +61,11 @@ window.FluxionChart = (function () {
         }
 
         if (chartType === 'scatter') {
+            const categorical = isCategorical(labels);
             const points = [];
             labels.forEach((label, i) => {
                 if (values[i] === null) return;
-                const x = Number(label);
-                points.push({ x: Number.isFinite(x) ? x : i, y: values[i] });
+                points.push({ x: categorical ? String(label) : Number(label), y: values[i] });
             });
             return {
                 datasets: [{
@@ -136,6 +148,7 @@ window.FluxionChart = (function () {
         const isHBar = chartType === 'hbar';
         const isStacked = chartType === 'stacked';
         const isHistogram = chartType === 'histogram';
+        const scatterCategorical = chartType === 'scatter' && isCategorical(result.labels);
         const grid = { color: '#E3E9E6' };
         const ticks = { color: '#55655F' };
 
@@ -159,7 +172,7 @@ window.FluxionChart = (function () {
                     y: { grid: grid, ticks: ticks }
                 } : {
                     y: { stacked: isStacked, beginAtZero: true, grid: grid, ticks: ticks, ...(isHistogram ? { ticks: { color: '#55655F', precision: 0 }, title: { display: true, text: 'Count', color: '#55655F' } } : {}) },
-                    x: { stacked: isStacked, grid: grid, ticks: ticks, ...(isHistogram ? { title: { display: true, text: result.series[0].column, color: '#55655F' } } : {}) }
+                    x: { stacked: isStacked, grid: grid, ticks: ticks, ...(scatterCategorical ? { type: 'category', labels: categoryLabels(result.labels) } : {}), ...(isHistogram ? { title: { display: true, text: result.series[0].column, color: '#55655F' } } : {}) }
                 }
             }
         };
