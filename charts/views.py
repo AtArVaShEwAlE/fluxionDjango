@@ -10,6 +10,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from datasets.models import Dataset
 from datasets.services import load_dataframe, run_query
 from .queries import spec_from_chart, clean_y_axes
+from .options import clean_options
 from .models import Chart, Report
 from .models import Chart
 
@@ -32,7 +33,7 @@ def _owned_chart(request, chart_id):
     return chart, None
 
 
-def _build_config(data):
+def _build_config(data, keep_options=None):
     y_axes = clean_y_axes(data.get('y_axes'))
     return {
         'x_axis': data.get('x_axis'),
@@ -41,7 +42,8 @@ def _build_config(data):
         'value_column': data.get('value_column'),
         'label_column': data.get('label_column'),
         'color_scheme': data.get('color_scheme', 'default'),
-        'chart_options': data.get('chart_options', {}),
+        'chart_options': (clean_options(data['chart_options']) if 'chart_options' in data
+                          else (keep_options or {})),
     }
 
 def _public_chart(chart):
@@ -123,7 +125,7 @@ def update_chart(request, chart_id):
 
         chart.title = data.get('title', chart.title)
         chart.chart_type = chart_type
-        chart.config = _build_config(data)
+        chart.config = _build_config(data, (chart.config or {}).get('chart_options'))
         chart.save()
         return JsonResponse({'success': True, 'chart_id': chart.id,
                              'message': 'Chart updated successfully!'})

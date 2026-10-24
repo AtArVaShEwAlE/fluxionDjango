@@ -265,7 +265,41 @@ try:
         r = anon.get(f'/shared-data/{mtok}')
         check('shared-data multi status', r.status_code, 200)
         check('shared-data multi values', [s.get('values') for s in js(r).get('series', [])], [[[10, 20, 30], [1, 2, 3]]])
-        check('B chart-data multi', B.get(f'/chart-data/{mid}').status_code, [403, 404])
+                check('B chart-data multi', B.get(f'/chart-data/{mid}').status_code, [403, 404])
+
+        # ---- Phase 12A: chart_options ----
+        good_opts = {'show_title': True, 'title_text': 'Hello', 'legend': {'show': False, 'position': 'top'},
+                     'x_title': 'Name', 'y_title': 'Sales', 'grid': False, 'font_size': 14,
+                     'series_colors': ['#112233', '#AABBCC'], 'smooth': False}
+        oid, st = p11_save('bar', x_axis='name', y_axes=['sales', 'cost'], chart_options=good_opts)
+        check('save-chart with options', st, 200)
+        check('options roundtrip', p11_cfg(oid).get('chart_options'), good_opts)
+        check('chart-data unaffected by options', [s.get('values') for s in p11_data(oid).get('series', [])], [[[10, 20, 30], [1, 2, 3]]])
+
+        dirty = {'show_title': 'yes', 'title_text': 'x' * 121, 'font_size': 99, 'series_colors': ['red'],
+                 'evil': 1, 'legend': {'position': 'diagonal', 'show': True}}
+        dopt, st = p11_save('bar', x_axis='name', y_axis='sales', chart_options=dirty)
+        check('dirty options saved ok', st, 200)
+        check('dirty options cleaned', p11_cfg(dopt).get('chart_options'), {'legend': {'show': True}})
+        nopt, st = p11_save('bar', x_axis='name', y_axis='sales')
+        check('no options -> empty dict', p11_cfg(nopt).get('chart_options'), {})
+        jopt, st = p11_save('bar', x_axis='name', y_axis='sales', chart_options='junk')
+        check('non-dict options -> empty dict', p11_cfg(jopt).get('chart_options'), {})
+
+        otok = js(A.post(f'/share-chart/{oid}')).get('share_token')
+        r = anon.get(f'/shared/{otok}')
+        check('shared page with options', r.status_code, 200)
+        check('shared page carries options', '"series_colors"' in r.content.decode(), True)
+        check('shared-data with options', anon.get(f'/shared-data/{otok}').status_code, 200)
+
+        upd = {'title': 'ZZ p12', 'chart_type': 'bar', 'x_axis': 'name', 'y_axes': ['sales'], 'color_scheme': 'default'}
+        check('update w/o options', jput(A, f'/update-chart/{oid}', upd).status_code, 200)
+        check('update w/o options keeps saved', p11_cfg(oid).get('chart_options'), good_opts)
+        jput(A, f'/update-chart/{oid}', {**upd, 'chart_options': {'grid': False}})
+        check('update replaces options', p11_cfg(oid).get('chart_options'), {'grid': False})
+        jput(A, f'/update-chart/{oid}', {**upd, 'chart_options': {}})
+        check('update with {} clears options', p11_cfg(oid).get('chart_options'), {})
+        check('legacy config has no options key', 'chart_options' not in p11_cfg(old.id), True)
 
         # reports
         r = jpost(A, '/save-report', {'title': 'ZZ report', 'chart_ids': [cid]})

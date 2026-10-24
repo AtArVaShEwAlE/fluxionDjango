@@ -41,9 +41,12 @@ window.FluxionChart = (function () {
         return colors;
     }
 
-    function toChartJsData(result, chartType, name) {
+    function toChartJsData(result, chartType, name, extra) {
         const scheme = schemeName(name);
-        const palette = colorSchemes[scheme];
+        const custom = (extra && extra.colors) || [];
+        const base = colorSchemes[scheme];
+        const palette = Array.from({ length: Math.max(base.length, custom.length) }, (_, i) => custom[i] || base[i]);
+        const curve = (extra && extra.smooth === false) ? 0 : 0.4;
         const labels = result.labels;
         const series = result.series[0];
         const values = series.values;
@@ -57,7 +60,7 @@ window.FluxionChart = (function () {
                     pv.push(values[i]);
                 }
             });
-            return { labels: pl, datasets: [{ data: pv, backgroundColor: getColors(pv.length, scheme) }] };
+            return { labels: pl, datasets: [{ data: pv, backgroundColor: pv.map((_, i) => palette[i % palette.length]) }] };
         }
 
         if (chartType === 'scatter') {
@@ -104,7 +107,7 @@ window.FluxionChart = (function () {
                         borderColor: color,
                         borderWidth: (chartType === 'bar' || chartType === 'hbar' || chartType === 'stacked' || (isCombo && i === 0)) ? 1 : 2,
                         fill: filled,
-                        tension: (chartType === 'line' || chartType === 'area' || (isCombo && i > 0)) ? 0.4 : 0,
+                        tension: (chartType === 'line' || chartType === 'area' || (isCombo && i > 0)) ? curve : 0,
                         pointBackgroundColor: color,
                         ...(isCombo ? { type: i === 0 ? 'bar' : 'line', order: i === 0 ? 1 : 0 } : {})
                     };
@@ -122,7 +125,7 @@ window.FluxionChart = (function () {
                     borderColor: palette[0],
                     borderWidth: 2,
                     fill: true,
-                    tension: chartType === 'area' ? 0.4 : 0,
+                    tension: chartType === 'area' ? curve : 0,
                     pointBackgroundColor: palette[0]
                 }]
             };
@@ -132,17 +135,18 @@ window.FluxionChart = (function () {
             datasets: [{
                 label: series.column,
                 data: values,
-                backgroundColor: getColors(values.length, scheme),
+                backgroundColor: custom.length ? palette[0] : getColors(values.length, scheme),
                 borderColor: palette[0],
                 borderWidth: chartType === 'line' ? 2 : 1,
-                tension: chartType === 'line' ? 0.4 : 0
+                tension: chartType === 'line' ? curve : 0
             }]
         };
     }
 
     // opts: { title: 'text' (omit for no title), maintainAspectRatio: true|false }
-    function buildConfig(result, chartType, name, opts) {
+    function buildBaseConfig(result, chartType, name, opts) {
         opts = opts || {};
+        const extra = extraFrom(opts.options);
         const isRound = chartType === 'pie' || chartType === 'doughnut';
         const isRadar = chartType === 'radar';
         const isHBar = chartType === 'hbar';
@@ -154,7 +158,7 @@ window.FluxionChart = (function () {
 
         return {
             type: JS_TYPE[chartType] || chartType,
-            data: toChartJsData(result, chartType, name),
+            data: toChartJsData(result, chartType, name, extra),
             options: {
                 indexAxis: isHBar ? 'y' : 'x',
                 responsive: true,
@@ -176,6 +180,112 @@ window.FluxionChart = (function () {
                 }
             }
         };
+    }
+
+        function extraFrom(o) {
+        o = o || {};
+        return { colors: Array.isArray(o.series_colors) ? o.series_colors : [], smooth: o.smooth };
+    }
+
+    // Customisation panel options (charts/options.py whitelist) on top of the base config.
+    // Only keys the user set change anything.
+    function applyOptions(config, o, opts) {
+        const plugins = config.options.plugins;
+        const scales = config.options.scales || {};
+        const size = o.font_size;
+
+        const text = o.title_text || opts.title || opts.chartTitle || '';
+        const showTitle = o.show_title === undefined ? !!opts.title : (o.show_title && !!text);
+        plugins.title = showTitle
+            ? { display: true, text: text, font: { size: size ? size + 4 : 16, weight: 'bold' }, color: '#10201A' }
+            : { display: false };
+
+        if (o.legend) {
+            if (typeof o.legend.show === 'boolean') plugins.legend.display = o.legend.show;
+            if (o.legend.position) plugins.legend.position = o.legend.position;
+        }
+        if (o.grid === false) {
+            Object.values(scales).forEach(ax => {
+                ax.grid = Object.assign({}, ax.grid, { display: false });
+                if (ax.angleLines) ax.angleLines = Object.assign({}, ax.angleLines, { display: false });
+            });
+        }
+        [['x', o.x_title], ['y', o.y_title]].forEach(pair => {
+            if (pair[1] && scales[pair[0]]) {
+                scales[pair[0]].title = { display: true, text: pair[1], color: '#55655F' };
+            }
+        });
+        if (size) {
+            const font = { size: size };
+            plugins.legend.labels = Object.assign({}, plugins.legend.labels, { font: font });
+            Object.values(scales).forEach(ax => {
+                ax.ticks = Object.assign({}, ax.ticks, { font: font });
+                if (ax.title) ax.title = Object.assign({}, ax.title, { font: font });
+                if (ax.pointLabels) ax.pointLabels = Object.assign({}, ax.pointLabels, { font: font });
+            });
+        }
+    }
+
+    // opts also takes: options (chart_options dict), chartTitle (fallback title text)
+    function buildConfig(result, chartType, name, opts) {
+        opts = opts || {};
+        const config = buildBaseConfig(result, chartType, name, opts);
+        const o = opts.options;
+        if (o && Object.keys(o).length) applyOptions(config, o, opts);
+        return config;
+    }
+
+        function extraFrom(o) {
+        o = o || {};
+        return { colors: Array.isArray(o.series_colors) ? o.series_colors : [], smooth: o.smooth };
+    }
+
+    // Customisation panel options (charts/options.py whitelist) on top of the base config.
+    // Only keys the user set change anything.
+    function applyOptions(config, o, opts) {
+        const plugins = config.options.plugins;
+        const scales = config.options.scales || {};
+        const size = o.font_size;
+
+        const text = o.title_text || opts.title || opts.chartTitle || '';
+        const showTitle = o.show_title === undefined ? !!opts.title : (o.show_title && !!text);
+        plugins.title = showTitle
+            ? { display: true, text: text, font: { size: size ? size + 4 : 16, weight: 'bold' }, color: '#10201A' }
+            : { display: false };
+
+        if (o.legend) {
+            if (typeof o.legend.show === 'boolean') plugins.legend.display = o.legend.show;
+            if (o.legend.position) plugins.legend.position = o.legend.position;
+        }
+        if (o.grid === false) {
+            Object.values(scales).forEach(ax => {
+                ax.grid = Object.assign({}, ax.grid, { display: false });
+                if (ax.angleLines) ax.angleLines = Object.assign({}, ax.angleLines, { display: false });
+            });
+        }
+        [['x', o.x_title], ['y', o.y_title]].forEach(pair => {
+            if (pair[1] && scales[pair[0]]) {
+                scales[pair[0]].title = { display: true, text: pair[1], color: '#55655F' };
+            }
+        });
+        if (size) {
+            const font = { size: size };
+            plugins.legend.labels = Object.assign({}, plugins.legend.labels, { font: font });
+            Object.values(scales).forEach(ax => {
+                ax.ticks = Object.assign({}, ax.ticks, { font: font });
+                if (ax.title) ax.title = Object.assign({}, ax.title, { font: font });
+                if (ax.pointLabels) ax.pointLabels = Object.assign({}, ax.pointLabels, { font: font });
+            });
+        }
+    }
+
+    // opts also takes: options (chart_options dict), chartTitle (fallback title text)
+    function buildConfig(result, chartType, name, opts) {
+        opts = opts || {};
+        const config = buildBaseConfig(result, chartType, name, opts);
+        const o = opts.options;
+        if (o && Object.keys(o).length) applyOptions(config, o, opts);
+        return config;
     }
 
     return { colorSchemes, getColors, toChartJsData, buildConfig };

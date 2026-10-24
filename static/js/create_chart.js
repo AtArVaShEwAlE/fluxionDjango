@@ -3,6 +3,7 @@
 let currentDataset = null;
 let currentChart = null;
 let builderReady = false;
+let chartOptions = {};
 let editingChartId = null; // set when we're editing an existing chart instead of creating a new one
 
 const noDataState = document.getElementById('noDataState');
@@ -148,6 +149,7 @@ async function loadChartForEditing(chartId) {
             savedYs.slice(1).forEach(column => addYRow(column));
         }
         colorScheme.value = config.color_scheme || 'default';
+                chartOptions = config.chart_options || {};
 
         // Show the edit banner
         if (editBanner && editBannerTitle) {
@@ -539,6 +541,7 @@ function createChart(result) {
     const title = chartTitle.value || defaultTitle();
     const config = FluxionChart.buildConfig(result, selectedChartType, colorScheme.value, {
         title: title,
+        options: chartOptions,
         maintainAspectRatio: false
     });
     currentChart = new Chart(chartCanvas.getContext('2d'), config);
@@ -627,7 +630,8 @@ function buildChartConfigPayload() {
         title: chartTitle.value || defaultTitle(),
         chart_type: selectedChartType,
         dataset_id: currentDataset.id,
-        color_scheme: colorScheme.value
+        color_scheme: colorScheme.value,
+        chart_options: chartOptions
     };
 
     if (usesLabelValue(selectedChartType)) {

@@ -1,4 +1,4 @@
-{% load static %}/**
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,7 +256,7 @@
                     result,
                     chart.chart_type,
                     chart.config.color_scheme,
-                    { maintainAspectRatio: false }
+                    { maintainAspectRatio: false, options: chart.config.chart_options, chartTitle: chart.title }
                 )
             );
         }

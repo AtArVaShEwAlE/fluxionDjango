@@ -101,7 +101,7 @@ async function renderOneModalChart(chart, index, myToken) {
             result,
             chart.chart_type,
             chart.config.color_scheme,
-            { maintainAspectRatio: false }
+            { maintainAspectRatio: false, options: chart.config.chart_options, chartTitle: chart.title }
         )
     ));
 }
