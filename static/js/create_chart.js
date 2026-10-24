@@ -3,7 +3,7 @@
 let currentDataset = null;
 let currentChart = null;
 let builderReady = false;
-let chartOptions = {};
+let lastResult = null;   // last server result: option changes re-render without a refetch
 let editingChartId = null; // set when we're editing an existing chart instead of creating a new one
 
 const noDataState = document.getElementById('noDataState');
@@ -149,7 +149,7 @@ async function loadChartForEditing(chartId) {
             savedYs.slice(1).forEach(column => addYRow(column));
         }
         colorScheme.value = config.color_scheme || 'default';
-                chartOptions = config.chart_options || {};
+                FluxionOptionsPanel.load(config.chart_options || {});
 
         // Show the edit banner
         if (editBanner && editBannerTitle) {
@@ -212,6 +212,7 @@ function openDataset(dataset) {
     editingChartId = null;   // a failed edit load must not turn this into an update
     currentDataset = dataset;
     sessionStorage.setItem('currentDataset', JSON.stringify(dataset));
+    FluxionOptionsPanel.load({});   // new dataset = fresh customisation
     showChartBuilder();
     initializeChartBuilder();
     applySuggestedChartType();
@@ -299,6 +300,17 @@ function initializeChartBuilder() {
     });
     valueSelect.addEventListener('change', validateSelections);
     labelSelect.addEventListener('change', validateSelections);
+
+    FluxionOptionsPanel.init({
+        getType: () => selectedChartType,
+        getScheme: () => colorScheme.value,
+        getSeriesNames: getSeriesNames,
+        onChange: rerenderPreview
+    });
+    colorScheme.addEventListener('change', () => {
+        FluxionOptionsPanel.refresh();
+        rerenderPreview();
+    });
 }
 
 function populateColumnSelects() {
@@ -444,6 +456,7 @@ function validateSelections() {
     } else {
         isValid = xAxisSelect.value !== '' && getYColumns().length > 0;
     }
+    FluxionOptionsPanel.refresh();
     updateChartBtn.disabled = !isValid;
     if (!isValid) {
         updateChartBtn.textContent = 'Select Data to Update Chart';
@@ -534,14 +547,27 @@ async function prepareChartData() {
     return await fetchChartData();
 }
 
+// One name per colour picker in the Customise panel
+function getSeriesNames() {
+    if (selectedChartType === 'histogram') return [xAxisSelect.value || 'Value'];
+    const ys = getYColumns();
+    if (!ys.length) return ['Series 1'];
+    return selectedChartType === 'scatter' ? [ys[0]] : ys;
+}
+
+// Re-draw with the last server result (no refetch), e.g. after a Customise change
+function rerenderPreview() {
+    if (lastResult && currentChart) createChart(lastResult);
+}
+
 function createChart(result) {
     if (currentChart) {
         currentChart.destroy();
     }
     const title = chartTitle.value || defaultTitle();
     const config = FluxionChart.buildConfig(result, selectedChartType, colorScheme.value, {
-        title: title,
-        options: chartOptions,
+        chartTitle: title,
+        options: FluxionOptionsPanel.get(),
         maintainAspectRatio: false
     });
     currentChart = new Chart(chartCanvas.getContext('2d'), config);
@@ -631,7 +657,7 @@ function buildChartConfigPayload() {
         chart_type: selectedChartType,
         dataset_id: currentDataset.id,
         color_scheme: colorScheme.value,
-        chart_options: chartOptions
+        chart_options: FluxionOptionsPanel.get()
     };
 
     if (usesLabelValue(selectedChartType)) {

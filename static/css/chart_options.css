@@ -1,0 +1,103 @@
+/* Create Chart: Customise panel */
+
+body.page-app .customise-panel {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+body.page-app .customise-panel summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--pa-ink);
+}
+
+body.page-app .customise-panel summary::-webkit-details-marker {
+    display: none;
+}
+
+body.page-app .customise-panel summary::after {
+    content: '+';
+    font-size: 1.2rem;
+    line-height: 1;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .customise-panel[open] summary::after {
+    content: '\2212';
+}
+
+body.page-app .customise-body {
+    margin-top: 1rem;
+}
+
+body.page-app .opt-group {
+    margin-bottom: 1rem;
+}
+
+body.page-app .opt-group > label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--pa-ink);
+    margin: 0.6rem 0 0.4rem;
+}
+
+body.page-app .opt-group > label:first-child {
+    margin-top: 0;
+}
+
+body.page-app .opt-group > label.opt-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    cursor: pointer;
+}
+
+body.page-app .opt-check input {
+    accent-color: var(--pa-accent);
+}
+
+body.page-app .opt-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+body.page-app .opt-row .form-select {
+    flex: 1;
+    min-width: 0;
+}
+
+body.page-app .opt-color-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+    font-size: 0.88rem;
+    color: var(--pa-ink);
+    cursor: pointer;
+}
+
+body.page-app .opt-color-row input[type="color"] {
+    flex-shrink: 0;
+    width: 36px;
+    height: 28px;
+    padding: 0;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 6px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+body.page-app .opt-color-row span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
