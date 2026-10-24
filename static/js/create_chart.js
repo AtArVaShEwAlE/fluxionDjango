@@ -60,6 +60,7 @@ function initializePage() {
         loadChartForEditing(parseInt(editId, 10));
     } else {
         const datasetJson = sessionStorage.getItem('currentDataset');
+        if (datasetJson) verifyStoredDataset(datasetJson);
         if (datasetJson) {
             currentDataset = JSON.parse(datasetJson);
             showChartBuilder();
@@ -107,7 +108,32 @@ function applySuggestedChartType() {
     }
 }
 
+// The stored dataset can be stale: deleted, or cleaned, since it was saved.
+// Builder opens at once from storage. Server copy replaces it only if gone or columns differ.
+async function verifyStoredDataset(json) {
+    let stored;
+    try { stored = JSON.parse(json); } catch (e) { return; }
+    if (!stored || !stored.id) return;
+    try {
+        const response = await fetch(`/get-dataset/${stored.id}`);
+        if (response.status >= 400 && response.status < 500) {
+            sessionStorage.removeItem('currentDataset');
+            currentDataset = null;
+            showNoDataState();
+            return;
+        }
+        const result = await response.json();
+        if (!response.ok || !result.success) return;
+        if (JSON.stringify(result.data.column_names) !== JSON.stringify(stored.column_names)) {
+            openDataset(result.data);
+        }
+    } catch (e) {
+        // offline or non-JSON reply: keep the stored copy
+    }
+}
+
 // Load an existing chart's dataset + config so it can be edited in place
+
 async function loadChartForEditing(chartId) {
     try {
         const response = await fetch(`/get-chart/${chartId}`);

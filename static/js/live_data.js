@@ -8,6 +8,8 @@ let isStreaming = false;
 let isPaused = false;
 let dataBuffer = [];
 let animationFrame = null;
+let apiErrorCount = 0;     // API replies skipped this run (bad value / request failed)
+let lastApiNotice = 0;     // ms timestamp of last notice shown
 
 // DOM Elements
 const exportImageBtn = document.getElementById('exportImageBtn');
@@ -87,11 +89,17 @@ function initializeWebSocket() {
     });
     
     socket.on('error', function(data) {
-        console.error('Socket error:', data);
-        alert('Error: ' + data.message);
+        if (!data || data.session_id !== sessionId) return;
+        apiErrorCount++;
+        const now = Date.now();
+        if (now - lastApiNotice < 5000) return;
+        lastApiNotice = now;
+        const safe = String(data.message || '').replace(/[&<>"']/g,
+        c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        showNotification('API problem (' + apiErrorCount + ' skipped so far): ' + safe, 'error');
     });
 
-    socket.on('api_test_success', function(data) {
+    socket.on('error', function(data) {
         testApiBtn.disabled = false;
         testApiBtn.textContent = '✅ API Ready';
         testApiBtn.style.background = '#10b981';
@@ -284,7 +292,9 @@ function startStream() {
         });
     }
     
-    isStreaming = true;
+    apiErrorCount = 0;
+        lastApiNotice = 0;
+        isStreaming = true;
     isPaused = false;
     
     // Update UI
@@ -340,7 +350,8 @@ function stopStream() {
         testApiBtn.style.background = '';
         testApiBtn.style.color = '';
     }
-    
+
+    socket.emit('stop_stream', { session_id: sessionId });
     // Leave session
     socket.emit('leave_live_session', { session_id: sessionId });
     
