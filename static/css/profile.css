@@ -52,7 +52,8 @@ body.page-app .form-label {
     font-size: 0.9rem;
 }
 
-body.page-app .form-control {
+body.page-app .form-control,
+body.page-app .profile-form input:not([type="checkbox"]):not([type="submit"]):not([type="hidden"]) {
     width: 100%;
     padding: 0.8rem 0.9rem;
     border: 1.5px solid var(--pa-border);
@@ -64,13 +65,15 @@ body.page-app .form-control {
     color: var(--pa-ink);
 }
 
-body.page-app .form-control:focus {
+body.page-app .form-control:focus,
+body.page-app .profile-form input:not([type="checkbox"]):not([type="submit"]):not([type="hidden"]):focus {
     outline: none;
     border-color: var(--pa-accent);
     box-shadow: 0 0 0 3px var(--pa-accent-soft);
 }
 
-body.page-app .form-control:read-only {
+body.page-app .form-control:read-only,
+body.page-app .profile-form input:read-only {
     background-color: var(--pa-bg-soft);
     color: var(--pa-ink-faint);
     cursor: not-allowed;
