@@ -7,7 +7,15 @@
     <meta name="theme-color" content="#1F9D6E">
     <link rel="icon" type="image/png" href="{% static 'img/fluxionicon.png' %}">
     <link rel="apple-touch-icon" href="{% static 'img/fluxionicon.png' %}">
-    <title>{{ chart.title }} - Shared Chart</title>
+    <title>{{ chart.title }} - Fluxion</title>
+    <meta name="description" content="Interactive chart shared with Fluxion.">
+    <meta property="og:site_name" content="Fluxion">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ chart.title }}">
+    <meta property="og:description" content="Interactive chart shared with Fluxion.">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/greenlogo.png' %}">
+    <meta name="twitter:card" content="summary">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

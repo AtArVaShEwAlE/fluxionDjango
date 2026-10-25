@@ -5,6 +5,17 @@
 
 {% block body_class %}page-landing{% endblock %}
 
+{% block head_meta %}
+<meta name="description" content="Upload a CSV or Excel file and turn it into a clean, shareable chart in under a minute. No formulas, no setup.">
+<meta property="og:site_name" content="Fluxion">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fluxion - Turn Spreadsheets Into Answers">
+<meta property="og:description" content="Upload a CSV or Excel file and turn it into a clean, shareable chart in under a minute.">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/greenlogo.png' %}">
+<meta name="twitter:card" content="summary">
+{% endblock %}
+
 {% block extra_css %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
