@@ -54,7 +54,15 @@ body {
                 0 6px 30px rgba(0, 0, 0, 0.3);
 }
 
+.logo-link.logo-fallback {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #1F9D6E;
+}
+
 .logo-link {
+    width: fit-content;
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -71,7 +79,7 @@ body {
 }
 
 .logo-link:hover .logo-image {
-    filter: brightness(1.5);
+    opacity: 0.8;
 }
 
 
@@ -81,7 +89,7 @@ body {
         height: 28px;
     }
     
-    .logo-text {
+    .logo-link.logo-fallback {
         font-size: 1.25rem;
     }
 }
@@ -439,6 +447,7 @@ p {
     }
     
     .navbar-logo {
+        display: flex;
         justify-content: center;
     }
     
