@@ -1,8 +1,12 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1F9D6E">
+    <link rel="icon" type="image/png" href="{% static 'img/fluxionicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/fluxionicon.png' %}">
     <title>Error - Fluxion</title>
 
     <!-- Google Fonts -->
@@ -36,6 +40,18 @@
             padding: 3rem 2.5rem;
             max-width: 460px;
             text-align: center;
+        }
+
+        .error-logo {
+            display: block;
+            width: fit-content;
+            margin: 0 auto 1.5rem;
+        }
+
+        .error-logo img {
+            height: 44px;
+            width: auto;
+            display: block;
         }
 
         .error-icon {
@@ -85,6 +101,7 @@
 </head>
 <body>
     <div class="error-container">
+        <a href="{% url 'landing' %}" class="error-logo"><img src="{% static 'img/greenlogo.png' %}" alt="Fluxion" width="44" height="44"></a>
         <div class="error-icon">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
         </div>

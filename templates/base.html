@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="theme-color" content="#1F9D6E">
+    <link rel="icon" type="image/png" href="{% static 'img/fluxionicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/fluxionicon.png' %}">
     <title>{% block title %}Fluxion - Data Visualization Platform{% endblock %}</title>
     
     <!-- Google Fonts -->
@@ -22,7 +25,7 @@
         <!-- Left: Logo Section -->
         <div class="navbar-logo">
             <a href="{% url 'landing' %}" class="logo-link">
-                <img src="{% static 'img/greenlogo.png' %}" alt="Fluxion" class="logo-image">
+                <img src="{% static 'img/greenlogo.png' %}" alt="Fluxion" class="logo-image" width="35" height="35" onerror="this.onerror=null;this.parentNode.classList.add('logo-fallback');this.replaceWith('Fluxion')">
             </a>
         </div>
         
@@ -78,7 +81,7 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
-            <p>&copy; 2024 Fluxion. Built step by step.</p>
+            <p>&copy; {% now "Y" %} Fluxion. Built step by step.</p>
         </div>
     </footer>
 

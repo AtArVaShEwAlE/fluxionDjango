@@ -123,6 +123,12 @@ body.page-auth .btn-secondary:hover {
     font-family: var(--au-font-body);
 }
 
+.au-panel-logo-img {
+    display: block;
+    height: 40px;
+    width: auto;
+}
+
 .au-panel-logo {
     font-family: var(--au-font-display);
     font-size: 1.4rem;

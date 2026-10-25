@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1F9D6E">
+    <link rel="icon" type="image/png" href="{% static 'img/fluxionicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/fluxionicon.png' %}">
     <title>{{ chart.title }} - Shared Chart</title>
 
     <!-- Google Fonts -->
@@ -57,6 +60,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .logo-link {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo-image {
+            height: 36px;
+            width: auto;
+            display: block;
         }
 
         .logo {
@@ -226,7 +241,7 @@
     <div class="header">
         <div class="header-content">
             <div class="branding">
-                <span class="logo">Fluxion</span>
+                <a href="{% url 'landing' %}" class="logo logo-link"><img src="{% static 'img/greenlogo.png' %}" alt="Fluxion" class="logo-image" width="36" height="36" onerror="this.onerror=null;this.replaceWith('Fluxion')"></a>
                 <span class="badge">Shared Chart</span>
             </div>
             <a href="{% url 'landing' %}" class="btn btn-secondary">
