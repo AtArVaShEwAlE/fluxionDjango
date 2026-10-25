@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import dashboards, views
 urlpatterns = [
     path('create-chart', views.create_chart, name='create_chart'),
     path('charts', views.charts, name='charts'),
@@ -11,6 +11,14 @@ urlpatterns = [
     path('unshare-chart/<int:chart_id>', views.unshare_chart, name='unshare_chart'),
     path('export-chart-pdf/<int:chart_id>', views.export_chart_pdf, name='export_chart_pdf'),
     path('shared/<str:share_token>', views.view_shared_chart, name='shared_chart'),
+    path('boards', dashboards.boards, name='boards'),
+    path('create-board', dashboards.create_board, name='create_board'),
+    path('edit-board/<int:board_id>', dashboards.edit_board, name='edit_board'),
+    path('save-board', dashboards.save_board, name='save_board'),
+    path('update-board/<int:board_id>', dashboards.update_board, name='update_board'),
+    path('delete-board/<int:board_id>', dashboards.delete_board, name='delete_board'),
+    path('get-board/<int:board_id>', dashboards.get_board, name='get_board'),
+    path('view-board/<int:board_id>', dashboards.view_board, name='view_board'),
     path('reports', views.reports, name='reports'),
     path('create-report', views.create_report, name='create_report'),
     path('save-report', views.save_report, name='save_report'),

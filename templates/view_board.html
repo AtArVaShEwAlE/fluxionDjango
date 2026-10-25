@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ board_json.title }} - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-view-board{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{{ board_json.title }}</h1>
+        <p id="boardStatus">Loading...</p>
+        <div class="board-view-actions">
+            <button class="btn btn-primary" id="refreshBoardBtn">Refresh</button>
+            <a href="{% url 'edit_board' board_json.id %}" class="btn btn-secondary">Edit</a>
+            <a href="{% url 'boards' %}" class="btn btn-secondary">All Boards</a>
+        </div>
+    </div>
+
+    <div class="board-grid" id="boardGrid"></div>
+</div>
+{{ board_json|json_script:"boardData" }}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/view_board.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/chart_render.js' %}"></script>
+<script src="{% static 'js/view_board.js' %}"></script>
+{% endblock %}

@@ -265,7 +265,7 @@ try:
         r = anon.get(f'/shared-data/{mtok}')
         check('shared-data multi status', r.status_code, 200)
         check('shared-data multi values', [s.get('values') for s in js(r).get('series', [])], [[[10, 20, 30], [1, 2, 3]]])
-                check('B chart-data multi', B.get(f'/chart-data/{mid}').status_code, [403, 404])
+        check('B chart-data multi', B.get(f'/chart-data/{mid}').status_code, [403, 404])
 
         # ---- Phase 12A: chart_options ----
         good_opts = {'show_title': True, 'title_text': 'Hello', 'legend': {'show': False, 'position': 'top'},
@@ -325,6 +325,65 @@ try:
             check('shared-report after unshare', anon.get(f'/shared-report/{rtok}').status_code, 404)
             check('shared-report-data after unshare', anon.get(f'/shared-report-data/{rtok}/{cid}').status_code, 404)
         check('delete-report owner', A.delete(f'/delete-report/{rid}').status_code, 200)
+    if cid:
+        # ---- Phase 14A: boards ----
+        def p14_board(board_id):
+            return js(A.get(f'/get-board/{board_id}')).get('board', {})
+
+        for p in ['/boards', '/create-board', '/get-board/1', '/view-board/1']:
+            check(f'anon GET {p}', anon.get(p).status_code, 302)
+        check('anon POST /save-board', anon.post('/save-board').status_code, 302)
+        for p in ['/boards', '/create-board']:
+            check(f'user GET {p}', A.get(p).status_code, 200)
+        items = [{'chart_id': cid, 'size': 'l'}, {'chart_id': mid, 'size': 'zz'}]
+        r = jpost(A, '/save-board', {'title': 'ZZ board', 'items': items, 'refresh_seconds': 60})
+        check('save-board', r.status_code, 200)
+        bid = js(r).get('board_id')
+        check('save-board json shape', bool(bid), True)
+        if bid:
+            b = p14_board(bid)
+            check('get-board owner', A.get(f'/get-board/{bid}').status_code, 200)
+            check('board item order kept', [i['chart_id'] for i in b.get('items', [])], [[cid, mid]])
+            check('board sizes whitelisted', [i['size'] for i in b.get('items', [])], [['l', 'm']])
+            check('board refresh saved', b.get('refresh_seconds'), 60)
+            check('board chart_count', b.get('chart_count'), 2)
+            check('boards page lists title', 'ZZ board' in A.get('/boards').content.decode(), True)
+            check('edit-board owner', A.get(f'/edit-board/{bid}').status_code, 200)
+            r = A.get(f'/view-board/{bid}')
+            check('view-board owner', r.status_code, 200)
+            vb = r.content.decode()
+            check('view-board has board data', 'id="boardData"' in vb, True)
+            check('view-board has chart title', 'ZZ renamed' in vb, True)
+            check('view-board hides preview rows', '"preview"' in vb, False)
+            check('B view-board', B.get(f'/view-board/{bid}').status_code, 404)
+            check('B edit-board', B.get(f'/edit-board/{bid}').status_code, 404)
+            check('B get-board', B.get(f'/get-board/{bid}').status_code, [403, 404])
+            check('B update-board', jput(B, f'/update-board/{bid}', {'title': 'x'}).status_code, [403, 404])
+            check('B delete-board', B.delete(f'/delete-board/{bid}').status_code, [403, 404])
+            check('B save-board with A chart', jpost(B, '/save-board', {'title': 'x', 'items': [{'chart_id': cid}]}).status_code, 403)
+            check('save-board no items', jpost(A, '/save-board', {'title': 'x', 'items': []}).status_code, 400)
+            check('save-board junk items', jpost(A, '/save-board', {'title': 'x', 'items': 'junk'}).status_code, 400)
+
+            r = jpost(A, '/save-board', {'title': 'ZZ dup', 'items': [{'chart_id': cid}, {'chart_id': cid, 'size': 's'}], 'refresh_seconds': 7})
+            check('save-board dup items', r.status_code, 200)
+            b2 = p14_board(js(r).get('board_id'))
+            check('dup items deduped', len(b2.get('items', [])), 1)
+            check('bad refresh -> 0', b2.get('refresh_seconds'), 0)
+
+            xid, _ = p11_save('bar', x_axis='name', y_axis='sales')
+            r = jpost(A, '/save-board', {'title': 'ZZ gone', 'items': [{'chart_id': xid}, {'chart_id': mid}]})
+            xb = js(r).get('board_id')
+            A.delete(f'/delete-chart/{xid}')
+            check('board survives chart delete (count)', p14_board(xb).get('chart_count'), 1)
+
+            r = jput(A, f'/update-board/{bid}', {'title': 'ZZ board 2', 'items': [{'chart_id': mid, 'size': 's'}], 'refresh_seconds': 30})
+            check('update-board owner', r.status_code, 200)
+            b = p14_board(bid)
+            check('update-board title', b.get('title'), 'ZZ board 2')
+            check('update-board items', [i['chart_id'] for i in b.get('items', [])], [[mid]])
+
+            check('delete-board owner', A.delete(f'/delete-board/{bid}').status_code, 200)
+            check('get-board after delete', A.get(f'/get-board/{bid}').status_code, 404)
     if cid:
         check('delete-chart owner', A.delete(f'/delete-chart/{cid}').status_code, 200)
         check('get-chart after delete', A.get(f'/get-chart/{cid}').status_code, 404)

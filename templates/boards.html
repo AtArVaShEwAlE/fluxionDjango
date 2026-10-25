@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Boards - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-boards{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Boards</h1>
+        <p>Arrange your saved charts into one grid you can refresh in a click</p>
+        <a href="{% url 'create_board' %}" class="btn btn-primary" style="margin-top: 1rem;">
+            <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            New Board
+        </a>
+    </div>
+
+    {% if boards %}
+        <div class="list-controls">
+            <input type="text" id="boardSearchInput" class="form-input list-search-input" placeholder="Search boards by title...">
+            <select id="boardSortSelect" class="form-select list-sort-select">
+                <option value="date-desc">Newest first</option>
+                <option value="date-asc">Oldest first</option>
+                <option value="title-asc">Title A-Z</option>
+                <option value="title-desc">Title Z-A</option>
+            </select>
+        </div>
+        <div class="reports-grid" id="boardsGrid">
+            {% for board in boards %}
+                <div class="report-card" data-title="{{ board.title|lower }}" data-name="{{ board.title }}" data-date="{{ board.created_at }}">
+                    <div class="report-card-body">
+                        <div class="report-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                        </div>
+                        <h3 class="report-title">{{ board.title }}</h3>
+                        <div class="report-meta">
+                            <span class="report-chart-count">{{ board.chart_count }} chart{{ board.chart_count|pluralize }}</span>
+                            <span class="report-date">{{ board.created_at|slice:":10" }}</span>
+                        </div>
+                    </div>
+                    <div class="report-card-footer">
+                        <a href="{% url 'view_board' board.id %}" class="btn btn-primary btn-sm">View</a>
+                        <a href="{% url 'edit_board' board.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteBoard(this, {{ board.id }})">Delete</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <svg class="icon icon-xl" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                </div>
+                <h3>No Boards Yet</h3>
+                <p>A board puts several saved charts in one grid, with sizes and order you pick. You need at least one saved chart first.</p>
+                <div class="empty-actions">
+                    <a href="{% url 'charts' %}" class="btn btn-secondary">View My Charts</a>
+                    <a href="{% url 'create_board' %}" class="btn btn-primary">Create a Board</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/charts.css' %}">
+<link rel="stylesheet" href="{% static 'css/reports.css' %}">
+<link rel="stylesheet" href="{% static 'css/boards.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/boards.js' %}"></script>
+{% endblock %}
