@@ -23,3 +23,5 @@ staticfiles/
 .vscode/
 .idea/
 Thumbs.db
+static/img/favicon_io.zip
+static/img/favicon_io/
