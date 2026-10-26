@@ -45,6 +45,7 @@
                 <li><a href="{% url 'create_chart' %}" class="{% if request.resolver_match.url_name == 'create_chart' %}active{% endif %}">Create Chart</a></li>
                 <li><a href="{% url 'charts' %}" class="{% if request.resolver_match.url_name == 'charts' %}active{% endif %}">My Charts</a></li>
                 <li><a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">Reports</a></li>
+                <li><a href="{% url 'boards' %}" class="{% if request.resolver_match.url_name == 'boards' %}active{% endif %}">Boards</a></li>
             </ul>
             {% endif %}
         </nav>

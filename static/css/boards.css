@@ -1,0 +1,215 @@
+/* Create / Edit Board - builder styles (theme tokens, cards, buttons come from app-theme.css) */
+
+/* Form fields (scoped: create_report.css not loaded here) */
+body.page-create-board .field-group {
+    margin-bottom: 1.25rem;
+}
+
+body.page-create-board .field-group > label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--pa-ink);
+}
+
+body.page-create-board .form-input,
+body.page-create-board .form-select {
+    width: 100%;
+    padding: 0.7rem 0.85rem;
+    background: #ffffff;
+    color: var(--pa-ink);
+    border: 1px solid var(--pa-border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.15s ease;
+}
+
+body.page-create-board .form-input:focus,
+body.page-create-board .form-select:focus {
+    outline: none;
+    border-color: var(--pa-accent);
+    box-shadow: 0 0 0 3px var(--pa-accent-soft);
+}
+
+/* Boards list: anchor button centres like the Delete button */
+body.page-boards .report-card-footer a.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+body.page-app .board-builder-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+body.page-app .board-picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 520px;
+    overflow-y: auto;
+}
+
+body.page-app .board-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+body.page-app .board-picker-item:hover {
+    border-color: var(--pa-border-strong);
+}
+
+body.page-app .board-picker-item.selected {
+    border-color: var(--pa-accent);
+    background: var(--pa-accent-soft);
+}
+
+body.page-app .board-picker-checkbox {
+    accent-color: var(--pa-accent);
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+body.page-app .board-picker-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+body.page-app .board-picker-title {
+    font-weight: 600;
+    color: var(--pa-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-app .board-picker-meta {
+    font-size: 0.8rem;
+    color: var(--pa-ink-soft);
+}
+
+/* Layout rows */
+body.page-app .board-layout-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+body.page-app .board-layout-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 110px auto auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--pa-bg-soft);
+    border: 1px solid var(--pa-border);
+    border-radius: 10px;
+}
+
+body.page-app .board-order-badge {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pa-accent);
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+body.page-app .board-layout-title {
+    font-weight: 600;
+    color: var(--pa-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.page-app .board-size-select {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.85rem;
+}
+
+body.page-app .board-row-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    color: var(--pa-ink);
+    border: 1px solid var(--pa-border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.15s ease;
+}
+
+body.page-app .board-row-btn:hover:not(:disabled) {
+    border-color: var(--pa-accent);
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .board-row-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+body.page-app .board-layout-empty {
+    margin: 0;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--pa-ink-soft);
+    border: 1px dashed var(--pa-border);
+    border-radius: 10px;
+}
+
+body.page-app .board-summary {
+    margin: 1rem 0;
+    padding: 0.75rem 1rem;
+    background: var(--pa-bg-soft);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .board-summary.has-selection {
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+    font-weight: 600;
+}
+
+@media (max-width: 900px) {
+    body.page-app .board-builder-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    body.page-app .board-layout-row {
+        grid-template-columns: 28px 1fr auto auto auto;
+    }
+    body.page-app .board-size-select {
+        grid-column: 2 / -1;
+        grid-row: 2;
+    }
+}

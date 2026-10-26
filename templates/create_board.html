@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if board_json %}Edit Board{% else %}Create Board{% endif %} - Fluxion{% endblock %}
+
+{% block body_class %}page-app page-create-board{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{% if board_json %}Edit Board{% else %}Create Board{% endif %}</h1>
+        <p>Tick charts, set a tile size for each, and order them</p>
+    </div>
+
+    {% if not charts %}
+        <div class="card no-data-state">
+            <div class="empty-state">
+                <h4>No saved charts yet</h4>
+                <p>Create and save at least one chart before building a board</p>
+                <a href="{% url 'create_chart' %}" class="btn btn-primary">Create a Chart</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="board-builder-grid">
+            <!-- Left: chart picker -->
+            <div class="card board-picker-card">
+                <div class="card-header">
+                    <h3 class="card-title">Select Charts</h3>
+                </div>
+                <div class="board-picker-list" id="boardPickerList">
+                    {% for chart in charts %}
+                        <label class="board-picker-item" data-chart-title="{{ chart.title }}" data-chart-type="{{ chart.chart_type }}">
+                            <input type="checkbox" class="board-picker-checkbox" value="{{ chart.id }}">
+                            <div class="board-picker-info">
+                                <span class="board-picker-title">{{ chart.title }}</span>
+                                <span class="board-picker-meta">{{ chart.chart_type|capfirst }} chart &middot; {{ chart.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Right: details + layout -->
+            <div class="card board-details-card">
+                <div class="card-header">
+                    <h3 class="card-title">Board Details</h3>
+                </div>
+                <div class="field-group">
+                    <label for="boardTitle">Board Title</label>
+                    <input type="text" id="boardTitle" class="form-input" maxlength="255" placeholder="e.g. Sales Overview">
+                </div>
+                <div class="field-group">
+                    <label for="boardRefresh">Auto-refresh</label>
+                    <select id="boardRefresh" class="form-select">
+                        <option value="0">Manual only</option>
+                        <option value="30">Every 30 seconds</option>
+                        <option value="60">Every minute</option>
+                        <option value="300">Every 5 minutes</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Layout (top to bottom, left to right)</label>
+                    <div class="board-layout-list" id="boardLayoutList"></div>
+                </div>
+                <div class="board-summary" id="boardSummary">No charts selected yet</div>
+                <button class="btn btn-primary btn-block" id="saveBoardBtn">Save Board</button>
+                <a href="{% url 'boards' %}" class="btn btn-secondary btn-block" style="margin-top: 0.75rem;">Cancel</a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% if board_json %}{{ board_json|json_script:"boardData" }}{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
+<link rel="stylesheet" href="{% static 'css/boards.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/create_board.js' %}"></script>
+{% endblock %}

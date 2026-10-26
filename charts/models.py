@@ -2,7 +2,7 @@ import secrets
 
 from django.conf import settings
 from django.db import models
-
+from .board_models import Dashboard  # noqa: F401  (registers the model)
 
 class Chart(models.Model):
     CHART_TYPES = [
