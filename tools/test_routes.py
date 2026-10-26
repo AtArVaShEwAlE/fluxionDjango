@@ -94,6 +94,13 @@ try:
               '/live-data', '/profile', '/change-password']:
         check(f'user GET {p}', A.get(p).status_code, 200)
 
+    # ---- navbar (Phase 15A) ----
+    nav = A.get('/boards').content.decode()
+    check('navbar has live link', 'href="/live-data"' in nav, True)
+    check('navbar new user menu', 'id="nvTrigger"' in nav, True)
+    check('navbar old user menu gone', 'id="userDropdown"' in nav, False)
+    check('anon navbar has no user menu', 'nvTrigger' in anon.get('/').content.decode(), False)
+
     # ---- upload ----
     csv = SimpleUploadedFile('zz_test.csv', b'name,sales,cost\na,10,1\nb,20,2\nc,30,3\n', content_type='text/csv')
     r = A.post('/upload', {'file': csv})

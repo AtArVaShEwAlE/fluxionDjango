@@ -1,0 +1,279 @@
+/* Navbar user menu (avatar trigger + dropdown).
+   Loaded after base.css. Classes are nv-* so the per-theme navbar overrides
+   (app-theme / landing / auth / info-pages) never touch it. */
+
+.nv-user {
+    --nv-bg: #FFFFFF;
+    --nv-bg-soft: #F6F9F7;
+    --nv-ink: #10201A;
+    --nv-ink-soft: #55655F;
+    --nv-accent: #1F9D6E;
+    --nv-accent-dark: #157A56;
+    --nv-accent-soft: #E6F5EF;
+    --nv-border: #E3E9E6;
+    --nv-border-strong: #CBD6D1;
+    --nv-danger: #B3261E;
+    --nv-danger-soft: #FEF1F0;
+
+    position: relative;
+    font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+}
+
+/* ---- Trigger ---- */
+.nv-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.28rem 0.7rem 0.28rem 0.28rem;
+    background: var(--nv-bg);
+    color: var(--nv-ink);
+    border: 1px solid var(--nv-border);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+
+.nv-trigger:hover {
+    border-color: var(--nv-border-strong);
+    box-shadow: 0 4px 14px rgba(16, 32, 26, 0.08);
+}
+
+.nv-trigger:active {
+    transform: scale(0.98);
+}
+
+.nv-trigger:focus-visible {
+    outline: 2px solid var(--nv-accent);
+    outline-offset: 2px;
+}
+
+.nv-user.open .nv-trigger {
+    border-color: var(--nv-accent);
+    box-shadow: 0 0 0 3px rgba(31, 157, 110, 0.14);
+}
+
+.nv-avatar {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #34C08D 0%, #1F9D6E 100%);
+    color: #FFFFFF;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.nv-avatar-lg {
+    width: 42px;
+    height: 42px;
+    font-size: 1.05rem;
+}
+
+.nv-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nv-caret {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--nv-ink-soft);
+    transition: transform 0.25s ease;
+}
+
+.nv-user.open .nv-caret {
+    transform: rotate(180deg);
+}
+
+/* ---- Menu ---- */
+.nv-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    z-index: 1100;
+    min-width: 260px;
+    padding: 0.5rem;
+    background: var(--nv-bg);
+    border: 1px solid var(--nv-border);
+    border-radius: 16px;
+    box-shadow: 0 18px 40px rgba(16, 32, 26, 0.14), 0 2px 6px rgba(16, 32, 26, 0.06);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.97);
+    transform-origin: top right;
+    transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0.2s;
+}
+
+.nv-user.open .nv-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 0.18s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), visibility 0s linear 0s;
+}
+
+/* little pointer toward the trigger */
+.nv-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 24px;
+    width: 12px;
+    height: 12px;
+    background: var(--nv-bg);
+    border-left: 1px solid var(--nv-border);
+    border-top: 1px solid var(--nv-border);
+    transform: rotate(45deg);
+}
+
+.nv-menu-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 0.35rem;
+    background: var(--nv-accent-soft);
+    border-radius: 12px;
+}
+
+.nv-menu-id {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.nv-menu-name {
+    color: var(--nv-ink);
+    font-size: 0.95rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nv-menu-email {
+    color: var(--nv-ink-soft);
+    font-size: 0.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.navbar-container .nv-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    color: var(--nv-ink);
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.navbar-container .nv-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--nv-ink-soft);
+    transition: color 0.15s ease, transform 0.2s ease;
+}
+
+.navbar-container .nv-item:hover,
+.navbar-container .nv-item:focus-visible {
+    background: var(--nv-bg-soft);
+    color: var(--nv-accent-dark);
+    outline: none;
+    transform: translateX(2px);
+}
+
+.navbar-container .nv-item:hover svg,
+.navbar-container .nv-item:focus-visible svg {
+    color: var(--nv-accent);
+    transform: scale(1.1);
+}
+
+.navbar-container .nv-item-danger:hover,
+.navbar-container .nv-item-danger:focus-visible {
+    background: var(--nv-danger-soft);
+    color: var(--nv-danger);
+}
+
+.navbar-container .nv-item-danger:hover svg,
+.navbar-container .nv-item-danger:focus-visible svg {
+    color: var(--nv-danger);
+}
+
+.nv-sep {
+    height: 1px;
+    margin: 0.35rem 0.5rem;
+    background: var(--nv-border);
+}
+
+/* items slide in one after another when the menu opens */
+.nv-user.open .nv-menu > * {
+    animation: nv-item-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.nv-user.open .nv-menu > *:nth-child(1) { animation-delay: 0.02s; }
+.nv-user.open .nv-menu > *:nth-child(2) { animation-delay: 0.06s; }
+.nv-user.open .nv-menu > *:nth-child(3) { animation-delay: 0.10s; }
+.nv-user.open .nv-menu > *:nth-child(4) { animation-delay: 0.14s; }
+
+@keyframes nv-item-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* ---- Small screens: navbar is one centred column, centre the menu under it ---- */
+@media (max-width: 768px) {
+    .nv-user {
+        margin: 0 auto;
+    }
+
+    .nv-menu {
+        right: 50%;
+        transform: translateX(50%) translateY(-8px) scale(0.97);
+        transform-origin: top center;
+    }
+
+    .nv-user.open .nv-menu {
+        transform: translateX(50%);
+    }
+
+    .nv-menu::before {
+        right: calc(50% - 6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nv-trigger,
+    .nv-caret,
+    .nv-menu,
+    .navbar-container .nv-item,
+    .navbar-container .nv-item svg {
+        transition: none !important;
+    }
+
+    .nv-user.open .nv-menu > * {
+        animation: none !important;
+    }
+}
