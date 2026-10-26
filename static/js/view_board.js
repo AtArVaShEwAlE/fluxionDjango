@@ -76,7 +76,7 @@ async function loadTile(tile, animate) {
     const myToken = ++tile.token;
     let result;
     try {
-        const response = await fetch(`/chart-data/${tile.spec.chart_id}`);
+        const response = await fetch(tile.spec.data_url || `/chart-data/${tile.spec.chart_id}`);
         result = await response.json();
         if (!response.ok || !result.success) {
             throw new Error(result.error || `Server error (${response.status})`);

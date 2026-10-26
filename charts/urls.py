@@ -1,5 +1,5 @@
 from django.urls import path
-from . import dashboards, views
+from . import board_sharing, dashboards, views
 urlpatterns = [
     path('create-chart', views.create_chart, name='create_chart'),
     path('charts', views.charts, name='charts'),
@@ -19,6 +19,11 @@ urlpatterns = [
     path('delete-board/<int:board_id>', dashboards.delete_board, name='delete_board'),
     path('get-board/<int:board_id>', dashboards.get_board, name='get_board'),
     path('view-board/<int:board_id>', dashboards.view_board, name='view_board'),
+    path('share-board/<int:board_id>', board_sharing.share_board, name='share_board'),
+    path('unshare-board/<int:board_id>', board_sharing.unshare_board, name='unshare_board'),
+    path('shared-board/<str:share_token>', board_sharing.view_shared_board, name='shared_board'),
+    path('shared-board-data/<str:share_token>/<int:chart_id>',
+         board_sharing.shared_board_chart_data, name='shared_board_chart_data'),
     path('reports', views.reports, name='reports'),
     path('create-report', views.create_report, name='create_report'),
     path('save-report', views.save_report, name='save_report'),

@@ -1,0 +1,287 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1F9D6E">
+    <link rel="icon" type="image/png" href="{% static 'img/fluxionicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'img/fluxionicon.png' %}">
+    <title>{{ board.title }} - Fluxion</title>
+    <meta name="description" content="{{ board.chart_count }} chart{{ board.chart_count|pluralize }} shared with Fluxion.">
+    <meta property="og:site_name" content="Fluxion">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ board.title }}">
+    <meta property="og:description" content="{{ board.chart_count }} chart{{ board.chart_count|pluralize }} shared with Fluxion.">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/greenlogo.png' %}">
+    <meta name="twitter:card" content="summary">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --sb-bg: #FFFFFF;
+            --sb-bg-soft: #F6F9F7;
+            --sb-ink: #10201A;
+            --sb-ink-soft: #55655F;
+            --sb-accent: #1F9D6E;
+            --sb-accent-dark: #157A56;
+            --sb-accent-soft: #E6F5EF;
+            --sb-border: #E3E9E6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--sb-bg);
+            color: var(--sb-ink);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--sb-border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-link {
+            display: inline-flex;
+            align-items: center;
+            vertical-align: middle;
+            text-decoration: none;
+        }
+
+        .logo-image {
+            height: 36px;
+            width: auto;
+            display: block;
+        }
+
+        .logo {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--sb-ink);
+        }
+
+        .badge {
+            background: var(--sb-accent-soft);
+            color: var(--sb-accent-dark);
+            padding: 0.3rem 0.85rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.75rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .board-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .board-header h1 {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .board-header p {
+            color: var(--sb-ink-soft);
+            font-size: 0.95rem;
+        }
+
+        .board-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        /* 12-column grid: S = 3 per row, M = 2 per row, L = full row */
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(12, minmax(0, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .board-tile {
+            min-width: 0;
+            grid-column: span 6;
+            background: #ffffff;
+            border: 1px solid var(--sb-border);
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(16, 32, 26, 0.06);
+            padding: 1.25rem;
+        }
+
+        .board-tile-s { grid-column: span 4; }
+        .board-tile-m { grid-column: span 6; }
+        .board-tile-l { grid-column: span 12; }
+
+        .board-tile h4 {
+            margin: 0 0 0.75rem;
+            font-size: 1rem;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .board-tile-canvas {
+            position: relative;
+            height: 280px;
+        }
+
+        .board-tile-l .board-tile-canvas { height: 360px; }
+
+        .board-tile-note {
+            margin: 0.75rem 0 0;
+            font-size: 0.85rem;
+            color: #B42318;
+        }
+
+        .board-empty {
+            grid-column: 1 / -1;
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--sb-ink-soft);
+            border: 1px dashed var(--sb-border);
+            border-radius: 14px;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            border: 1.5px solid var(--sb-border);
+            cursor: pointer;
+            background: transparent;
+            color: var(--sb-ink);
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            background: var(--sb-bg-soft);
+        }
+
+        .btn-primary {
+            background: var(--sb-accent);
+            color: #ffffff;
+            border-color: transparent;
+            padding: 0.8rem 2rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--sb-accent-dark);
+        }
+
+        .footer-cta {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .footer {
+            background: var(--sb-bg-soft);
+            border-top: 1px solid var(--sb-border);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .footer p {
+            color: var(--sb-ink-soft);
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .footer a {
+            color: var(--sb-accent-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @media (max-width: 560px) {
+            .board-tile-s { grid-column: span 12; }
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 2rem 1rem; }
+            .board-tile-s { grid-column: span 6; }
+            .board-tile-m, .board-tile-l { grid-column: span 12; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <a href="{% url 'landing' %}" class="logo logo-link"><img src="{% static 'img/greenlogo.png' %}" alt="Fluxion" class="logo-image" width="36" height="36" onerror="this.onerror=null;this.replaceWith('Fluxion')"></a>
+                <span class="badge">Shared Board</span>
+            </div>
+            <a href="{% url 'landing' %}" class="btn">Sign Up Free</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="board-header">
+            <h1>{{ board.title }}</h1>
+            <p id="boardStatus">Loading...</p>
+            <div class="board-actions">
+                <button class="btn" id="refreshBoardBtn">Refresh</button>
+                <button class="btn" id="downloadBoardPngBtn">Download PNG</button>
+                <button class="btn" id="downloadBoardPdfBtn">Download PDF</button>
+            </div>
+        </div>
+
+        <div class="board-grid" id="boardGrid"></div>
+
+        <div class="footer-cta">
+            <a href="{% url 'signup' %}" class="btn btn-primary">Create Your Own Boards</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Powered by <a href="{% url 'landing' %}">Fluxion</a> - Transform your data into beautiful visualizations</p>
+    </div>
+
+    {{ board|json_script:"boardData" }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'js/chart_render.js' %}"></script>
+    <script src="{% static 'js/view_board.js' %}"></script>
+    <script src="{% static 'js/board_export.js' %}"></script>
+</body>
+</html>

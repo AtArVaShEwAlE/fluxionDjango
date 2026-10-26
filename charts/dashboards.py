@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .board_models import BOARD_MAX_ITEMS, BOARD_REFRESH, BOARD_SIZES, Dashboard
@@ -10,7 +11,6 @@ from .models import Chart
 from .views import _json_body
 
 logger = logging.getLogger(__name__)
-
 
 def clean_items(raw, owned_ids):
     """Validate board items. Returns (items, None) or (None, (message, status)).
@@ -86,11 +86,14 @@ def edit_board(request, board_id):
                   {'charts': request.user.charts.all(), 'board_json': board.to_dict()})
 
 
-def board_payload(board):
+def board_payload(board, request):
     """Owner view data: board + one tile per chart that still exists, in saved order."""
     ids = [i.get('chart_id') for i in board.items]
     charts = {c.id: c for c in Chart.objects.filter(owner=board.owner, id__in=ids)}
     tiles = []
+    share_url = ''
+    if board.is_public and board.share_token:
+        share_url = request.build_absolute_uri(reverse('shared_board', args=[board.share_token]))
     for item in board.items:
         chart = charts.get(item.get('chart_id'))
         if chart is None:
@@ -101,15 +104,17 @@ def board_payload(board):
             'title': chart.title,
             'chart_type': chart.chart_type,
             'config': chart.config,
+                'data_url': reverse('chart_data', args=[chart.id]),
         })
     return {'id': board.id, 'title': board.title,
-            'refresh_seconds': board.refresh_seconds, 'tiles': tiles}
+            'refresh_seconds': board.refresh_seconds, 'tiles': tiles,
+            'is_public': board.is_public, 'share_url': share_url}
 
 
 @login_required
 def view_board(request, board_id):
     board = get_object_or_404(Dashboard, pk=board_id, owner=request.user)   # not yours = 404
-    return render(request, 'view_board.html', {'board_json': board_payload(board)})
+    return render(request, 'view_board.html', {'board_json': board_payload(board, request)})
 
 
 # ---------- JSON endpoints ----------

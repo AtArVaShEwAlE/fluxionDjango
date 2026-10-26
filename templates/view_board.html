@@ -12,9 +12,17 @@
         <p id="boardStatus">Loading...</p>
         <div class="board-view-actions">
             <button class="btn btn-primary" id="refreshBoardBtn">Refresh</button>
+            <button class="btn btn-secondary" id="downloadBoardPngBtn">Download PNG</button>
+            <button class="btn btn-secondary" id="downloadBoardPdfBtn">Download PDF</button>
+            <button class="btn btn-secondary" id="shareBoardBtn">Share</button>
+            <button class="btn btn-secondary" id="unshareBoardBtn" style="display: none;">Unshare</button>
             <a href="{% url 'edit_board' board_json.id %}" class="btn btn-secondary">Edit</a>
             <a href="{% url 'boards' %}" class="btn btn-secondary">All Boards</a>
         </div>
+    </div>
+
+    <div class="board-share-row" id="boardShareRow" style="display: none;">
+        <input type="text" id="boardShareLink" class="board-share-input" readonly>
     </div>
 
     <div class="board-grid" id="boardGrid"></div>
@@ -33,4 +41,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/chart_render.js' %}"></script>
 <script src="{% static 'js/view_board.js' %}"></script>
+<script src="{% static 'js/board_export.js' %}"></script>
+<script src="{% static 'js/board_share.js' %}"></script>
 {% endblock %}
