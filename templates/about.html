@@ -2,41 +2,181 @@
 {% load static %}
 
 {% block title %}About Us - Fluxion{% endblock %}
-{% block body_class %}page-info{% endblock %}
+
+{% block head_meta %}
+<script>document.documentElement.classList.add('motion-ready');setTimeout(function(){if(!window.__infoMotion){document.documentElement.classList.remove('motion-ready');}},3000);</script>
+{% endblock %}
+
+{% block body_class %}page-info page-about{% endblock %}
+
 {% block content %}
-<div class="container">
-    <div class="page-header">
-        <h1>About Fluxion</h1>
-        <p>Why we built a data viz tool that gets out of your way</p>
-    </div>
+<!-- Hero -->
+<section class="ab-hero">
+    <span class="ab-blob ab-blob-1"></span>
+    <span class="ab-blob ab-blob-2"></span>
+    <span class="ab-blob ab-blob-3"></span>
 
-    <div class="card">
-        <h3 class="card-title">Our Story</h3>
-        <p>Fluxion started as a simple idea: turning a spreadsheet into a chart shouldn't take twenty clicks and a tutorial video. We wanted something fast enough for a quick look at your data, and polished enough to share with a client.</p>
-    </div>
-
-    <div class="grid grid-3">
-        <div class="card">
-            <h3 class="card-title">Simple</h3>
-            <p>Upload a CSV or Excel file, pick your columns, get a chart. No setup, no config files.</p>
-        </div>
-        <div class="card">
-            <h3 class="card-title">Shareable</h3>
-            <p>Every chart and report gets a public link. Nobody needs an account to view your work.</p>
-        </div>
-        <div class="card">
-            <h3 class="card-title">Yours</h3>
-            <p>Your data stays yours. Datasets and charts are tied to your account only.</p>
+    <div class="ab-hero-inner">
+        <span class="ab-eyebrow"><span class="ab-dot"></span> About Fluxion</span>
+        <h1 class="ab-title"><span data-split>Turn your data into charts</span> <span class="ab-accent">people actually understand</span></h1>
+        <p class="ab-lead" data-reveal>Fluxion is a data visualization tool that gets out of your way. Upload a file, pick your columns, share a link.</p>
+        <div class="ab-cta-row" data-reveal data-reveal-delay="120">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary ab-btn">Go to Dashboard</a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn btn-primary ab-btn">Get started free</a>
+            {% endif %}
+            <a href="#how" class="ab-link">See how it works &darr;</a>
         </div>
     </div>
 
-    <div class="card">
-        <h3 class="card-title">Get In Touch</h3>
-        <p>Got feedback or a feature request? <a href="{% url 'contact' %}" class="auth-link">Reach out here</a>.</p>
+    <svg class="ab-hero-chart" viewBox="0 0 600 200" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="abBarGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#34C08D"/>
+                <stop offset="1" stop-color="#1F9D6E"/>
+            </linearGradient>
+        </defs>
+        <rect class="ab-bar" style="--i:0" x="30" y="130" width="44" height="70" rx="8"/>
+        <rect class="ab-bar" style="--i:1" x="110" y="90" width="44" height="110" rx="8"/>
+        <rect class="ab-bar" style="--i:2" x="190" y="110" width="44" height="90" rx="8"/>
+        <rect class="ab-bar" style="--i:3" x="270" y="60" width="44" height="140" rx="8"/>
+        <rect class="ab-bar" style="--i:4" x="350" y="80" width="44" height="120" rx="8"/>
+        <rect class="ab-bar" style="--i:5" x="430" y="35" width="44" height="165" rx="8"/>
+        <rect class="ab-bar" style="--i:6" x="510" y="50" width="44" height="150" rx="8"/>
+        <path class="ab-line" pathLength="1" d="M52 124 L132 84 L212 104 L292 54 L372 74 L452 29 L532 44"/>
+        <circle class="ab-pt" style="--i:0" cx="52" cy="124" r="5"/>
+        <circle class="ab-pt" style="--i:1" cx="132" cy="84" r="5"/>
+        <circle class="ab-pt" style="--i:2" cx="212" cy="104" r="5"/>
+        <circle class="ab-pt" style="--i:3" cx="292" cy="54" r="5"/>
+        <circle class="ab-pt" style="--i:4" cx="372" cy="74" r="5"/>
+        <circle class="ab-pt" style="--i:5" cx="452" cy="29" r="5"/>
+        <circle class="ab-pt" style="--i:6" cx="532" cy="44" r="5"/>
+    </svg>
+</section>
+
+<!-- Stats (numbers count up when scrolled into view) -->
+<section class="ab-stats" data-reveal>
+    <div class="ab-stat"><span class="ab-stat-num" data-count="11">11</span><span class="ab-stat-label">chart types</span></div>
+    <div class="ab-stat"><span class="ab-stat-num" data-count="16" data-suffix=" MB">16 MB</span><span class="ab-stat-label">max upload size</span></div>
+    <div class="ab-stat"><span class="ab-stat-num" data-count="3">3</span><span class="ab-stat-label">file formats: CSV, XLSX, XLS</span></div>
+    <div class="ab-stat"><span class="ab-stat-num" data-count="1">1</span><span class="ab-stat-label">link to share anything</span></div>
+</section>
+
+<!-- Story -->
+<section class="ab-section">
+    <div class="ab-story">
+        <div data-reveal>
+            <span class="ab-kicker">Our story</span>
+            <h2>Why we built Fluxion</h2>
+            <p>Fluxion started as a simple idea: turning a spreadsheet into a chart shouldn't take twenty clicks and a tutorial video. We wanted something fast enough for a quick look at your data, and polished enough to share with a client.</p>
+            <p>Today you can go from a raw file to a shareable chart, report or live-refreshing board without writing a line of code.</p>
+        </div>
+        <div class="ab-quote" data-reveal data-reveal-delay="150">
+            <p>From spreadsheet to shareable chart, without the twenty clicks.</p>
+        </div>
     </div>
-</div>
+</section>
+
+<!-- Principles -->
+<section class="ab-section">
+    <div class="ab-head" data-reveal>
+        <span class="ab-kicker">What we believe</span>
+        <h2>Built around four ideas</h2>
+    </div>
+    <div class="ab-pillars">
+        <div data-reveal data-reveal-delay="0">
+            <div class="ab-card" data-tilt>
+                <div class="ab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></div>
+                <h3>Simple</h3>
+                <p>Upload a CSV or Excel file, pick your columns, get a chart. No setup, no config files.</p>
+            </div>
+        </div>
+        <div data-reveal data-reveal-delay="100">
+            <div class="ab-card" data-tilt>
+                <div class="ab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/></svg></div>
+                <h3>Flexible</h3>
+                <p>Eleven chart types, plus options for titles, colours, legends and axes, so it looks the way you want.</p>
+            </div>
+        </div>
+        <div data-reveal data-reveal-delay="200">
+            <div class="ab-card" data-tilt>
+                <div class="ab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg></div>
+                <h3>Shareable</h3>
+                <p>Every chart, report and board gets a public link. Nobody needs an account to view your work.</p>
+            </div>
+        </div>
+        <div data-reveal data-reveal-delay="300">
+            <div class="ab-card" data-tilt>
+                <div class="ab-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <h3>Yours</h3>
+                <p>Your data stays yours. Datasets and charts are tied to your account only.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it works -->
+<section class="ab-section" id="how">
+    <div class="ab-head" data-reveal>
+        <span class="ab-kicker">How it works</span>
+        <h2>From file to link in four steps</h2>
+    </div>
+    <div class="ab-steps" data-reveal>
+        <div class="ab-step">
+            <div class="ab-step-num">1</div>
+            <h3>Upload</h3>
+            <p>Drop a CSV or Excel file and preview your rows and columns right away.</p>
+        </div>
+        <div class="ab-step">
+            <div class="ab-step-num">2</div>
+            <h3>Build</h3>
+            <p>Pick a chart type and columns, then customise titles, colours and legends.</p>
+        </div>
+        <div class="ab-step">
+            <div class="ab-step-num">3</div>
+            <h3>Save</h3>
+            <p>Keep charts in My Charts and edit them any time.</p>
+        </div>
+        <div class="ab-step">
+            <div class="ab-step-num">4</div>
+            <h3>Share</h3>
+            <p>One link for a chart, a report or a board. Unshare whenever you like.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Chart types marquee (chips are listed twice for a seamless loop) -->
+<section class="ab-section">
+    <div class="ab-marquee" aria-label="Chart types: bar, line, pie, scatter, horizontal bar, area, doughnut, radar, stacked bar, combo, histogram">
+        <div class="ab-marquee-track" aria-hidden="true">
+            <span class="ab-chip">Bar</span><span class="ab-chip">Line</span><span class="ab-chip">Pie</span><span class="ab-chip">Scatter</span><span class="ab-chip">Horizontal bar</span><span class="ab-chip">Area</span><span class="ab-chip">Doughnut</span><span class="ab-chip">Radar</span><span class="ab-chip">Stacked bar</span><span class="ab-chip">Combo</span><span class="ab-chip">Histogram</span>
+            <span class="ab-chip">Bar</span><span class="ab-chip">Line</span><span class="ab-chip">Pie</span><span class="ab-chip">Scatter</span><span class="ab-chip">Horizontal bar</span><span class="ab-chip">Area</span><span class="ab-chip">Doughnut</span><span class="ab-chip">Radar</span><span class="ab-chip">Stacked bar</span><span class="ab-chip">Combo</span><span class="ab-chip">Histogram</span>
+        </div>
+    </div>
+</section>
+
+<!-- Get in touch -->
+<section class="ab-cta" data-reveal>
+    <div class="ab-cta-card">
+        <h2>Got feedback or a feature request?</h2>
+        <p>Tell us what would make Fluxion better for you. We read every message.</p>
+        <div class="ab-cta-actions">
+            <a href="{% url 'contact' %}" class="ab-btn-light">Reach out here</a>
+            <a href="{% url 'faq' %}" class="ab-btn-ghost">Read the FAQ</a>
+        </div>
+    </div>
+</section>
 {% endblock %}
 
 {% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/info-pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/info-motion.css' %}">
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/info-motion.js' %}"></script>
 {% endblock %}

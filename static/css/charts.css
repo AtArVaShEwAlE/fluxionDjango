@@ -35,7 +35,7 @@ body.page-app .list-search-input {
     flex: 1;
     min-width: 220px;
     padding: 0.7rem 1rem;
-    border: 1.5px solid var(--pa-border);
+    border: 1.5px solid var(--pa-accent);
     border-radius: 9px;
     font-family: inherit;
     font-size: 0.92rem;
@@ -51,7 +51,7 @@ body.page-app .list-search-input:focus {
 
 body.page-app .list-sort-select {
     padding: 0.7rem 1rem;
-    border: 1.5px solid var(--pa-border);
+    border: 1.5px solid var(--pa-ink);
     border-radius: 9px;
     font-family: inherit;
     font-size: 0.92rem;
@@ -63,7 +63,7 @@ body.page-app .list-sort-select {
 body.page-app .chart-card {
     background: #ffffff;
     border-radius: 14px;
-    border: 1px solid var(--pa-border);
+    border: 1.2px solid var(--pa-accent);
     box-shadow: 0 1px 2px rgba(16, 32, 26, 0.03);
     overflow: hidden;
     transition: all 0.2s ease;

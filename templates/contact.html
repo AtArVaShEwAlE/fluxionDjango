@@ -2,65 +2,103 @@
 {% load static %}
 
 {% block title %}Contact Us - Fluxion{% endblock %}
-{% block body_class %}page-info{% endblock %}
+
+{% block head_meta %}
+<script>document.documentElement.classList.add('motion-ready');setTimeout(function(){if(!window.__infoMotion){document.documentElement.classList.remove('motion-ready');}},3000);</script>
+{% endblock %}
+
+{% block body_class %}page-info page-contact{% endblock %}
+
 {% block content %}
-<div class="container-sm">
-    <div class="page-header">
-        <h1>Contact Us</h1>
-        <p>Questions, bugs, feature ideas — send em over</p>
+<!-- Hero -->
+<section class="ct-hero">
+    <span class="ct-blob ct-blob-1"></span>
+    <span class="ct-blob ct-blob-2"></span>
+    <div class="ct-hero-inner">
+        <span class="ct-eyebrow"><span class="ct-dot"></span> Contact us</span>
+        <h1 class="ct-title"><span data-split>Questions, bugs or ideas?</span> <span class="ct-accent">Send them over</span></h1>
+        <p class="ct-lead" data-reveal>Tell us what's on your mind. We read every message.</p>
     </div>
+</section>
 
-    <div class="card">
-        <form method="POST" class="auth-form" id="contactForm">
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label class="form-label" for="contactName">Name</label>
-                <input type="text" id="contactName" name="name" class="form-control" required>
+<div class="ct-wrap">
+    <!-- Left: ways to reach us -->
+    <aside class="ct-side">
+        <div data-reveal data-reveal-delay="0">
+            <div class="ct-card" data-tilt>
+                <div class="ct-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+                <h3>Quick answers</h3>
+                <p>Most how-to questions are covered in the <a href="{% url 'faq' %}" class="auth-link">FAQ</a>.</p>
+            </div>
+        </div>
+        <div data-reveal data-reveal-delay="100">
+            <div class="ct-card" data-tilt>
+                <div class="ct-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg></div>
+                <h3>Found a bug?</h3>
+                <p>Tell us what you clicked and what you expected to happen.</p>
+            </div>
+        </div>
+        <div data-reveal data-reveal-delay="200">
+            <div class="ct-card" data-tilt>
+                <div class="ct-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg></div>
+                <h3>Feature idea?</h3>
+                <p>Describe the chart or workflow you wish existed.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Right: form -->
+    <div class="ct-form-card" id="ctFormCard" data-reveal data-reveal-delay="120">
+        <form method="POST" id="contactForm" class="ct-form">
+            {% csrf_token %}
+            <div class="ct-field">
+                <input type="text" id="contactName" name="name" placeholder=" " autocomplete="name" required>
+                <label for="contactName">Name</label>
+                <p class="ct-error" data-error-for="name" hidden></p>
             </div>
 
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label class="form-label" for="contactEmail">Email</label>
-                <input type="email" id="contactEmail" name="email" class="form-control" required>
+            <div class="ct-field">
+                <input type="email" id="contactEmail" name="email" placeholder=" " autocomplete="email" required>
+                <label for="contactEmail">Email</label>
+                <p class="ct-error" data-error-for="email" hidden></p>
             </div>
 
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label class="form-label" for="contactMessage">Message</label>
-                <textarea id="contactMessage" name="message" class="form-control" rows="6" required></textarea>
+            <div class="ct-field">
+                <textarea id="contactMessage" name="message" rows="6" placeholder=" " required></textarea>
+                <label for="contactMessage">Message</label>
+                <p class="ct-error" data-error-for="message" hidden></p>
+                <span class="ct-count" id="ctCount">0 characters</span>
             </div>
 
-            <div class="form-submit-group">
-                <button type="submit" class="btn btn-primary btn-block">Send Message</button>
-            </div>
+            <button type="submit" class="ct-submit" id="ctSubmit">
+                <span class="ct-submit-label">Send message</span>
+                <span class="ct-spinner" aria-hidden="true"></span>
+            </button>
+            <p id="contactStatus" class="ct-status" role="status" aria-live="polite" hidden></p>
         </form>
-        <p id="contactStatus" style="text-align:center; display:none;"></p>
+
+        <div class="ct-success" id="ctSuccess" tabindex="-1" hidden>
+            <svg class="ct-check" viewBox="0 0 52 52" aria-hidden="true" focusable="false">
+                <circle class="ct-check-circle" pathLength="1" cx="26" cy="26" r="24" fill="none"/>
+                <path class="ct-check-mark" pathLength="1" fill="none" d="M14 27l8 8 16-17"/>
+            </svg>
+            <h3>Message sent</h3>
+            <p>Thanks for getting in touch. We'll read it soon.</p>
+            <button type="button" class="ct-again" id="ctAgain">Send another message</button>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/info-pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/info-motion.css' %}">
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
 {% endblock %}
 
 {% block extra_js %}
-<script>
-document.getElementById('contactForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const status = document.getElementById('contactStatus');
-    const form = this;
-    fetch('/contact', {
-        method: 'POST',
-        body: new FormData(form)
-    })
-    .then(res => res.json())
-    .then(data => {
-        status.style.display = 'block';
-        status.textContent = data.success ? 'Thanks — message sent!' : 'Something went wrong, try again.';
-        if (data.success) form.reset();
-    })
-    .catch(() => {
-        status.style.display = 'block';
-        status.textContent = 'Error sending message.';
-    });
-});
-</script>
+<script src="{% static 'js/info-motion.js' %}"></script>
+<script src="{% static 'js/contact.js' %}"></script>
 {% endblock %}

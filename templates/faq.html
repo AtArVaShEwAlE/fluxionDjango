@@ -2,67 +2,137 @@
 {% load static %}
 
 {% block title %}FAQ - Fluxion{% endblock %}
-{% block body_class %}page-info{% endblock %}
+
+{% block head_meta %}
+<script>document.documentElement.classList.add('motion-ready');setTimeout(function(){if(!window.__infoMotion){document.documentElement.classList.remove('motion-ready');}},3000);</script>
+{% endblock %}
+
+{% block body_class %}page-info page-faq{% endblock %}
+
 {% block content %}
 <div class="container">
-    <div class="page-header">
-        <h1>FAQ & Tutorials</h1>
+    <div class="page-header fq-header">
+        <span class="fq-eyebrow">Help center</span>
+        <h1>FAQ &amp; Tutorials</h1>
         <p>How Fluxion works, step by step</p>
+
+        <div class="fq-search">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" id="faqSearch" placeholder="Search questions (press / to jump here)" autocomplete="off" aria-label="Search questions">
+            <button type="button" id="faqClear" class="fq-clear" aria-label="Clear search" hidden>&times;</button>
+        </div>
     </div>
 
-    <div class="faq-list">
-        <details class="faq-item" open>
+    <div class="fq-toolbar">
+        <div class="fq-chips" role="group" aria-label="Filter by topic">
+            <button type="button" class="fq-chip active" data-cat="all" aria-pressed="true">All</button>
+            <button type="button" class="fq-chip" data-cat="start" aria-pressed="false">Getting started</button>
+            <button type="button" class="fq-chip" data-cat="charts" aria-pressed="false">Charts &amp; boards</button>
+            <button type="button" class="fq-chip" data-cat="sharing" aria-pressed="false">Sharing</button>
+            <button type="button" class="fq-chip" data-cat="data" aria-pressed="false">Data &amp; privacy</button>
+        </div>
+        <div class="fq-actions">
+            <span id="faqCount" aria-live="polite">10 questions</span>
+            <button type="button" class="fq-link" id="faqExpand">Expand all</button>
+            <button type="button" class="fq-link" id="faqCollapse">Collapse all</button>
+        </div>
+    </div>
+
+    <div class="faq-list" id="faqList">
+        <details class="faq-item" data-cat="start" open>
             <summary>How do I upload a dataset?</summary>
             <div class="faq-answer">
-                <p>Go to <a href="{% url 'dashboard' %}" class="auth-link">Dashboard</a>, drag your CSV or Excel file into the upload box (or click browse). Max file size is 16MB. Once uploaded you'll see a preview with row/column counts.</p>
+                <p>Go to <a href="{% url 'dashboard' %}" class="auth-link">Dashboard</a>, drag your CSV or Excel file into the upload box (or click browse). Max file size is 16MB. Once uploaded you'll see a preview with row and column counts.</p>
             </div>
         </details>
 
-        <details class="faq-item">
-            <summary>How do I create a chart?</summary>
-            <div class="faq-answer">
-                <p>After uploading, hit "Create Chart" on the dataset preview. Pick a chart type (bar, line, pie, scatter), choose your X/Y columns (or value/label for pie), give it a title, and hit Update Chart to preview. Save Chart stores it under My Charts.</p>
-            </div>
-        </details>
-
-        <details class="faq-item">
-            <summary>What's the difference between a Chart and a Report?</summary>
-            <div class="faq-answer">
-                <p>A Chart is one visualization. A Report bundles several saved charts behind a single shareable link — good for a weekly summary or client update. Build one from the Reports page.</p>
-            </div>
-        </details>
-
-        <details class="faq-item">
-            <summary>How do I share a chart or report?</summary>
-            <div class="faq-answer">
-                <p>Open the chart/report from My Charts or Reports, hit Share. This generates a public link — anyone with the link can view it, no login needed. Hit Share again anytime to copy the link.</p>
-            </div>
-        </details>
-
-        <details class="faq-item">
-            <summary>Can I embed a chart on my own site?</summary>
-            <div class="faq-answer">
-                <p>Yes. Use the Embed button to copy an <code>&lt;iframe&gt;</code> snippet you can paste into any webpage.</p>
-            </div>
-        </details>
-
-        <details class="faq-item">
-            <summary>Can I edit a chart after saving it?</summary>
-            <div class="faq-answer">
-                <p>Yes, open it from My Charts and hit Edit to change axis columns, chart type, or color scheme.</p>
-            </div>
-        </details>
-
-        <details class="faq-item">
+        <details class="faq-item" data-cat="start">
             <summary>What file types are supported?</summary>
             <div class="faq-answer">
                 <p>CSV and Excel (.xlsx, .xls), up to 16MB.</p>
             </div>
         </details>
+
+        <details class="faq-item" data-cat="charts">
+            <summary>How do I create a chart?</summary>
+            <div class="faq-answer">
+                <p>After uploading, hit "Create Chart" on the dataset preview. Pick one of 11 chart types (bar, line, pie, scatter, horizontal bar, area, doughnut, radar, stacked bar, combo or histogram), choose your columns, give it a title, and hit Update Chart to preview. The Customise panel lets you change the title, legend, axis titles, grid, font size, colours and line smoothing. Save Chart stores it under <a href="{% url 'charts' %}" class="auth-link">My Charts</a>.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="charts">
+            <summary>Can I edit a chart after saving it?</summary>
+            <div class="faq-answer">
+                <p>Yes, open it from My Charts and hit Edit to change the columns, chart type, colour scheme or any Customise option.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="charts">
+            <summary>What's the difference between a Chart, a Report and a Board?</summary>
+            <div class="faq-answer">
+                <p>A Chart is one visualization. A <a href="{% url 'reports' %}" class="auth-link">Report</a> bundles several saved charts behind a single shareable link, good for a weekly summary or client update. A <a href="{% url 'boards' %}" class="auth-link">Board</a> puts saved charts in one grid where you pick each tile's size (small, medium or large) and order, and the board can refresh itself.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="charts">
+            <summary>How do I build a board?</summary>
+            <div class="faq-answer">
+                <p>Open Boards, hit New Board, tick the saved charts you want, set a size for each tile, order them with the arrows and choose how often it refreshes (manual, every 30 seconds, every minute or every 5 minutes). On the board page you can refresh on demand and download the whole board as a PNG or PDF.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="sharing">
+            <summary>How do I share a chart, report or board?</summary>
+            <div class="faq-answer">
+                <p>Open it and hit Share. This generates a public link and anyone with the link can view it, no login needed. Hit the button again to copy the link. Hit Unshare and the link stops working straight away.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="sharing">
+            <summary>Can I embed a chart on my own site?</summary>
+            <div class="faq-answer">
+                <p>Yes. Charts and reports have an Embed button that copies an <code>&lt;iframe&gt;</code> snippet you can paste into any webpage. Boards are shared by link only.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="data">
+            <summary>What do people see when I share something?</summary>
+            <div class="faq-answer">
+                <p>Only the charts themselves, built from the summarised data each chart needs. Viewers never get your raw rows or the uploaded file, and they can't change anything.</p>
+            </div>
+        </details>
+
+        <details class="faq-item" data-cat="data">
+            <summary>What happens if I delete a chart that is in a report or board?</summary>
+            <div class="faq-answer">
+                <p>The report or board keeps working and simply skips the deleted chart. Deleting a report or board never deletes the charts inside it.</p>
+            </div>
+        </details>
+    </div>
+
+    <div class="fq-empty" id="faqEmpty" hidden>
+        <h3>No questions match</h3>
+        <p>Try a different word, or clear the filters.</p>
+        <button type="button" class="fq-reset" id="faqReset">Reset filters</button>
+    </div>
+
+    <div class="fq-help" data-reveal>
+        <h3>Still stuck?</h3>
+        <p>Send us a message and we'll help you out.</p>
+        <a href="{% url 'contact' %}" class="btn btn-primary">Contact us</a>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/info-pages.css' %}">
+<link rel="stylesheet" href="{% static 'css/info-motion.css' %}">
+<link rel="stylesheet" href="{% static 'css/faq.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/info-motion.js' %}"></script>
+<script src="{% static 'js/faq.js' %}"></script>
 {% endblock %}

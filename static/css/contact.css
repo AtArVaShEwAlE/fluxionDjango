@@ -1,0 +1,509 @@
+/* Contact page. Scoped under body.page-contact (tokens --in-* come from info-pages.css). */
+
+body.page-contact .main-content {
+    padding-top: 0;
+}
+
+/* ---------- Hero ---------- */
+body.page-contact .ct-hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 4.5rem 1.5rem 2.5rem;
+    text-align: center;
+    background: linear-gradient(180deg, var(--in-accent-soft) 0%, #FFFFFF 100%);
+}
+
+body.page-contact .ct-blob {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+    animation: im-float 9s ease-in-out infinite;
+}
+
+body.page-contact .ct-blob-1 { width: 320px; height: 320px; background: #9BE3C6; top: -110px; left: -70px; }
+body.page-contact .ct-blob-2 { width: 260px; height: 260px; background: #CFF0E2; top: -20px; right: -50px; animation-delay: -4s; }
+
+body.page-contact .ct-hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+body.page-contact .ct-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    padding: 0.35rem 0.95rem;
+    background: #FFFFFF;
+    border: 1px solid var(--in-border-strong);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--in-accent-dark);
+}
+
+body.page-contact .ct-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--in-accent);
+    animation: ct-ping 1.8s ease-out infinite;
+}
+
+@keyframes ct-ping {
+    0% { box-shadow: 0 0 0 0 rgba(31, 157, 110, 0.5); }
+    80%, 100% { box-shadow: 0 0 0 10px rgba(31, 157, 110, 0); }
+}
+
+body.page-contact .ct-title {
+    margin-bottom: 1rem;
+    font-family: var(--in-font-display);
+    font-size: clamp(2.2rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--in-ink);
+}
+
+body.page-contact .ct-accent {
+    display: inline-block;
+    background: linear-gradient(90deg, #1F9D6E, #34C08D, #157A56, #1F9D6E);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: ct-shine 6s linear infinite;
+}
+
+html.motion-ready body.page-contact .ct-accent {
+    opacity: 0;
+    animation: ct-shine 6s linear infinite, ct-fade 0.7s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ct-shine {
+    to { background-position: 200% center; }
+}
+
+@keyframes ct-fade {
+    from { opacity: 0; transform: translateY(0.4em); }
+    to { opacity: 1; transform: none; }
+}
+
+body.page-contact .ct-lead {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--in-ink-soft);
+}
+
+/* ---------- Layout ---------- */
+body.page-contact .ct-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem 1.5rem 0;
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+body.page-contact .ct-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+body.page-contact .ct-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid var(--in-border);
+    border-radius: 18px;
+    transform: perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.15s ease-out, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+body.page-contact .ct-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(220px circle at var(--mx, 50%) var(--my, 0%), rgba(31, 157, 110, 0.13), transparent 60%);
+    transition: opacity 0.25s ease;
+}
+
+body.page-contact .ct-card:hover {
+    border-color: var(--in-accent);
+    box-shadow: 0 18px 40px rgba(16, 32, 26, 0.1);
+}
+
+body.page-contact .ct-card:hover::after {
+    opacity: 1;
+}
+
+body.page-contact .ct-icon {
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--in-accent-soft);
+    color: var(--in-accent-dark);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, color 0.2s ease;
+}
+
+body.page-contact .ct-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+body.page-contact .ct-card:hover .ct-icon {
+    transform: rotate(-8deg) scale(1.1);
+    background: var(--in-accent);
+    color: #FFFFFF;
+}
+
+body.page-contact .ct-card h3 {
+    margin-bottom: 0.3rem;
+    font-size: 1.1rem;
+    color: var(--in-ink);
+}
+
+body.page-contact .ct-card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--in-ink-soft);
+}
+
+/* ---------- Form card ---------- */
+body.page-contact .ct-form-card {
+    position: relative;
+    padding: 2.25rem 2rem 2rem;
+    background: #FFFFFF;
+    border: 1px solid var(--in-border);
+    border-radius: 24px;
+    box-shadow: 0 18px 50px rgba(16, 32, 26, 0.08);
+}
+
+body.page-contact .ct-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 24px;
+    right: 24px;
+    height: 4px;
+    border-radius: 0 0 4px 4px;
+    background: linear-gradient(90deg, #1F9D6E, #34C08D, #9BE3C6);
+}
+
+body.page-contact .ct-form[hidden],
+body.page-contact .ct-success[hidden],
+body.page-contact .ct-error[hidden],
+body.page-contact .ct-status[hidden] {
+    display: none;
+}
+
+/* floating-label fields: label sits in the input until it has focus or text */
+body.page-contact .ct-field {
+    position: relative;
+    margin-bottom: 1.4rem;
+}
+
+body.page-contact .ct-field input,
+body.page-contact .ct-field textarea {
+    display: block;
+    width: 100%;
+    padding: 1.5rem 1rem 0.55rem;
+    background: #FFFFFF;
+    border: 2px solid var(--in-border);
+    border-radius: 14px;
+    font-family: inherit;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--in-ink);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.page-contact .ct-field textarea {
+    min-height: 150px;
+    max-height: 320px;
+    resize: vertical;
+}
+
+body.page-contact .ct-field label {
+    position: absolute;
+    top: 1.05rem;
+    left: 1.1rem;
+    max-width: calc(100% - 2rem);
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 1rem;
+    color: #7A8B84;
+    pointer-events: none;
+    transform-origin: left top;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+}
+
+body.page-contact .ct-field input:focus,
+body.page-contact .ct-field textarea:focus {
+    outline: none;
+    border-color: var(--in-accent);
+    box-shadow: 0 0 0 4px rgba(31, 157, 110, 0.13);
+}
+
+body.page-contact .ct-field input:focus + label,
+body.page-contact .ct-field textarea:focus + label,
+body.page-contact .ct-field input:not(:placeholder-shown) + label,
+body.page-contact .ct-field textarea:not(:placeholder-shown) + label {
+    transform: translateY(-0.6rem) scale(0.78);
+    color: var(--in-accent-dark);
+}
+
+body.page-contact .ct-field.has-error input,
+body.page-contact .ct-field.has-error textarea {
+    border-color: #B3261E;
+    box-shadow: 0 0 0 4px rgba(179, 38, 30, 0.1);
+}
+
+body.page-contact .ct-field.has-error label {
+    color: #B3261E;
+}
+
+body.page-contact .ct-error {
+    margin: 0.4rem 0 0 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #B3261E;
+    animation: ct-error-in 0.25s ease both;
+}
+
+@keyframes ct-error-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: none; }
+}
+
+body.page-contact .ct-count {
+    display: block;
+    margin: 0.35rem 0.25rem 0 0;
+    text-align: right;
+    font-size: 0.78rem;
+    color: #7A8B84;
+}
+
+/* send button: sheen sweep on hover, spinner while sending */
+body.page-contact .ct-submit {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #157A56, #1F9D6E 55%, #34C08D);
+    font-family: inherit;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+}
+
+body.page-contact .ct-submit::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -60%;
+    width: 40%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+}
+
+body.page-contact .ct-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(31, 157, 110, 0.32);
+}
+
+body.page-contact .ct-submit:hover:not(:disabled)::after {
+    left: 130%;
+    transition: left 0.7s ease;
+}
+
+body.page-contact .ct-submit:focus-visible {
+    outline: 3px solid rgba(31, 157, 110, 0.4);
+    outline-offset: 3px;
+}
+
+body.page-contact .ct-submit:disabled {
+    opacity: 0.85;
+    cursor: progress;
+}
+
+body.page-contact .ct-spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #FFFFFF;
+    border-radius: 50%;
+    animation: ct-spin 0.8s linear infinite;
+}
+
+body.page-contact .ct-submit.is-sending .ct-spinner {
+    display: inline-block;
+}
+
+@keyframes ct-spin {
+    to { transform: rotate(360deg); }
+}
+
+body.page-contact .ct-status {
+    margin: 1rem 0 0;
+    text-align: center;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--in-accent-dark);
+}
+
+body.page-contact .ct-status.is-error {
+    color: #B3261E;
+}
+
+/* shake the card when sending fails */
+body.page-contact .ct-form-card.ct-shake {
+    animation: ct-shake 0.45s ease;
+}
+
+@keyframes ct-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(3px); }
+}
+
+/* ---------- Success panel ---------- */
+body.page-contact .ct-success {
+    padding: 2rem 1rem;
+    text-align: center;
+    outline: none;
+}
+
+body.page-contact .ct-success h3 {
+    margin: 1rem 0 0.4rem;
+    font-family: var(--in-font-display);
+    font-size: 1.6rem;
+    color: var(--in-ink);
+}
+
+body.page-contact .ct-success p {
+    margin-bottom: 1.5rem;
+    color: var(--in-ink-soft);
+}
+
+body.page-contact .ct-check {
+    width: 84px;
+    height: 84px;
+}
+
+body.page-contact .ct-check-circle,
+body.page-contact .ct-check-mark {
+    stroke: var(--in-accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+}
+
+body.page-contact .ct-success:not([hidden]) .ct-check-circle {
+    animation: ct-draw 0.6s ease forwards;
+}
+
+body.page-contact .ct-success:not([hidden]) .ct-check-mark {
+    animation: ct-draw 0.4s ease forwards 0.5s;
+}
+
+@keyframes ct-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+body.page-contact .ct-again {
+    padding: 0.7rem 1.6rem;
+    background: #FFFFFF;
+    border: 1.5px solid var(--in-border-strong);
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 600;
+    color: var(--in-ink);
+    cursor: pointer;
+    transition: border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+}
+
+body.page-contact .ct-again:hover {
+    border-color: var(--in-accent);
+    color: var(--in-accent-dark);
+    transform: translateY(-1px);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+    body.page-contact .ct-wrap {
+        grid-template-columns: 1fr;
+    }
+
+    body.page-contact .ct-form-card {
+        order: -1;
+    }
+}
+
+@media (max-width: 520px) {
+    body.page-contact .ct-hero {
+        padding-top: 3.25rem;
+    }
+
+    body.page-contact .ct-form-card {
+        padding: 1.75rem 1.25rem 1.5rem;
+    }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    body.page-contact .ct-blob,
+    body.page-contact .ct-dot,
+    body.page-contact .ct-accent,
+    body.page-contact .ct-spinner,
+    body.page-contact .ct-error,
+    body.page-contact .ct-form-card.ct-shake {
+        animation: none !important;
+    }
+
+    html.motion-ready body.page-contact .ct-accent {
+        opacity: 1;
+    }
+
+    body.page-contact .ct-field label,
+    body.page-contact .ct-submit,
+    body.page-contact .ct-submit::after {
+        transition: none !important;
+    }
+
+    body.page-contact .ct-success:not([hidden]) .ct-check-circle,
+    body.page-contact .ct-success:not([hidden]) .ct-check-mark {
+        animation: none !important;
+        stroke-dashoffset: 0;
+    }
+
+    body.page-contact .ct-card {
+        transform: none;
+    }
+}

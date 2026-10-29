@@ -1,0 +1,257 @@
+/* FAQ page. Scoped under body.page-faq (tokens --in-* and .faq-item base styles come from info-pages.css). */
+
+body.page-faq .fq-header {
+    position: relative;
+    padding: 3rem 1rem 1rem;
+    text-align: center;
+}
+
+body.page-faq .fq-eyebrow {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.3rem 0.85rem;
+    background: var(--in-accent-soft);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--in-accent-dark);
+}
+
+body.page-faq .fq-header h1 {
+    margin-bottom: 0.5rem;
+}
+
+body.page-faq .fq-header p {
+    margin: 0;
+    color: var(--in-ink-soft);
+}
+
+/* ---------- Search ---------- */
+body.page-faq .fq-search {
+    position: relative;
+    max-width: 560px;
+    margin: 1.75rem auto 0;
+}
+
+body.page-faq .fq-search svg {
+    position: absolute;
+    top: 50%;
+    left: 1.1rem;
+    width: 20px;
+    height: 20px;
+    transform: translateY(-50%);
+    color: var(--in-ink-soft);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+body.page-faq .fq-search:focus-within svg {
+    color: var(--in-accent);
+}
+
+body.page-faq .fq-search input {
+    width: 100%;
+    padding: 0.95rem 3rem;
+    background: #FFFFFF;
+    border: 2px solid var(--in-border);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--in-ink);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+body.page-faq .fq-search input::placeholder {
+    color: #8A9A93;
+}
+
+body.page-faq .fq-search input::-webkit-search-cancel-button {
+    display: none;
+}
+
+body.page-faq .fq-search input:focus {
+    outline: none;
+    border-color: var(--in-accent);
+    box-shadow: 0 0 0 4px rgba(31, 157, 110, 0.14);
+    transform: scale(1.01);
+}
+
+body.page-faq .fq-clear {
+    position: absolute;
+    top: 50%;
+    right: 0.8rem;
+    width: 28px;
+    height: 28px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 50%;
+    background: var(--in-bg-soft);
+    color: var(--in-ink-soft);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+body.page-faq .fq-clear:hover {
+    background: var(--in-accent-soft);
+    color: var(--in-accent-dark);
+}
+
+body.page-faq .fq-clear[hidden] {
+    display: none;
+}
+
+/* ---------- Toolbar ---------- */
+body.page-faq .fq-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem 0 1.25rem;
+}
+
+body.page-faq .fq-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+body.page-faq .fq-chip {
+    padding: 0.45rem 1rem;
+    background: #FFFFFF;
+    border: 1.5px solid var(--in-border);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--in-ink-soft);
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+body.page-faq .fq-chip:hover {
+    border-color: var(--in-accent);
+    color: var(--in-accent-dark);
+    transform: translateY(-1px);
+}
+
+body.page-faq .fq-chip.active {
+    background: var(--in-accent);
+    border-color: var(--in-accent);
+    color: #FFFFFF;
+    box-shadow: 0 6px 16px rgba(31, 157, 110, 0.25);
+}
+
+body.page-faq .fq-chip:focus-visible {
+    outline: 2px solid var(--in-accent);
+    outline-offset: 2px;
+}
+
+body.page-faq .fq-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.88rem;
+    color: var(--in-ink-soft);
+}
+
+body.page-faq .fq-link {
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    color: var(--in-accent-dark);
+    cursor: pointer;
+}
+
+body.page-faq .fq-link:hover {
+    text-decoration: underline;
+}
+
+/* ---------- List tweaks (base .faq-item styles live in info-pages.css) ---------- */
+body.page-faq .faq-item[open] {
+    border-color: var(--in-accent);
+    box-shadow: 0 12px 30px rgba(31, 157, 110, 0.1);
+}
+
+/* padding (not margin) so the open/close height animation includes the gap */
+body.page-faq .faq-answer {
+    margin-top: 0;
+    padding-top: 0.75rem;
+    animation: none;
+}
+
+/* ---------- Empty state + help ---------- */
+body.page-faq .fq-empty {
+    padding: 3rem 1rem;
+    text-align: center;
+    border: 1px dashed var(--in-border-strong);
+    border-radius: 16px;
+    color: var(--in-ink-soft);
+}
+
+body.page-faq .fq-empty[hidden] {
+    display: none;
+}
+
+body.page-faq .fq-empty h3 {
+    margin-bottom: 0.4rem;
+    color: var(--in-ink);
+}
+
+body.page-faq .fq-empty p {
+    margin-bottom: 1rem;
+    color: var(--in-ink-soft);
+}
+
+body.page-faq .fq-reset {
+    padding: 0.55rem 1.25rem;
+    background: var(--in-accent);
+    border: none;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 600;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease;
+}
+
+body.page-faq .fq-reset:hover {
+    background: var(--in-accent-dark);
+    transform: translateY(-1px);
+}
+
+body.page-faq .fq-help {
+    margin-top: 2.5rem;
+    padding: 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, var(--in-accent-soft), #FFFFFF);
+    border: 1px solid var(--in-border);
+    border-radius: 20px;
+}
+
+body.page-faq .fq-help h3 {
+    margin-bottom: 0.4rem;
+    color: var(--in-ink);
+}
+
+body.page-faq .fq-help p {
+    margin-bottom: 1.25rem;
+    color: var(--in-ink-soft);
+}
+
+@media (max-width: 640px) {
+    body.page-faq .fq-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

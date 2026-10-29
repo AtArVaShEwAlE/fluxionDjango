@@ -100,6 +100,17 @@ try:
     check('navbar new user menu', 'id="nvTrigger"' in nav, True)
     check('navbar old user menu gone', 'id="userDropdown"' in nav, False)
     check('anon navbar has no user menu', 'nvTrigger' in anon.get('/').content.decode(), False)
+    ab_html = anon.get('/about').content.decode()
+    check('about page redesigned', 'class="ab-hero"' in ab_html, True)
+    check('about page motion assets', 'info-motion.js' in ab_html and 'css/about.css' in ab_html, True)
+    fq_html = anon.get('/faq').content.decode()
+    check('faq page search box', 'id="faqSearch"' in fq_html, True)
+    check('faq page 10 questions', fq_html.count('class="faq-item"'), 10)
+    check('faq page script', 'js/faq.js' in fq_html, True)
+    ct_html = anon.get('/contact').content.decode()
+    check('contact page redesigned', 'id="contactForm"' in ct_html and 'class="ct-' in ct_html, True)
+    check('contact page assets', 'js/contact.js' in ct_html and 'css/contact.css' in ct_html, True)
+    check('contact page fields', all(f'name="{n}"' in ct_html for n in ('name', 'email', 'message')), True)
 
     # ---- upload ----
     csv = SimpleUploadedFile('zz_test.csv', b'name,sales,cost\na,10,1\nb,20,2\nc,30,3\n', content_type='text/csv')
