@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="theme-color" content="#1F9D6E">
     {% block head_meta %}{% endblock %}
@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/navbar.css' %}">
     {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'css/mobile-nav.css' %}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
     <!-- Navigation Container -->
@@ -68,6 +69,11 @@
                                 {% if user.email %}<span class="nv-menu-email">{{ user.email }}</span>{% endif %}
                             </div>
                         </div>
+                        <a href="{% url 'landing' %}" class="nv-item nv-mobile-only" role="menuitem">Home</a>
+                        <a href="{% url 'about' %}" class="nv-item nv-mobile-only" role="menuitem">About Us</a>
+                        <a href="{% url 'contact' %}" class="nv-item nv-mobile-only" role="menuitem">Contact Us</a>
+                        <a href="{% url 'faq' %}" class="nv-item nv-mobile-only" role="menuitem">FAQ</a>
+                        <div class="nv-sep nv-mobile-only" role="separator"></div>
                         <a href="{% url 'profile' %}" class="nv-item" role="menuitem">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             Profile
@@ -87,6 +93,7 @@
             {% endif %}
         </div>
     </div>
+{% include 'partials/tabbar.html' %}
 {% include 'partials/messages.html' %}
     <!-- Main Content -->
     <main class="main-content">
@@ -103,6 +110,7 @@
     <!-- Scripts -->
     <script src="{% static 'js/base.js' %}?v=2"></script>
     <script src="{% static 'js/navbar.js' %}"></script>
+    <script src="{% static 'js/mobile-nav.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html> 

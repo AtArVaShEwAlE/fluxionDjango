@@ -1,0 +1,46 @@
+{% comment %}Mobile bottom tab bar. Visible only at <=900px (css/mobile-nav.css).{% endcomment %}
+<nav class="tabbar" aria-label="Primary">
+{% if user.is_authenticated %}
+    <a href="{% url 'dashboard' %}" class="tab{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+        <span>Dashboard</span>
+    </a>
+    <a href="{% url 'create_chart' %}" class="tab{% if request.resolver_match.url_name == 'create_chart' %} active{% endif %}"{% if request.resolver_match.url_name == 'create_chart' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+        <span>Create</span>
+    </a>
+    <a href="{% url 'charts' %}" class="tab{% if request.resolver_match.url_name == 'charts' %} active{% endif %}"{% if request.resolver_match.url_name == 'charts' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        <span>Charts</span>
+    </a>
+    <a href="{% url 'reports' %}" class="tab{% if request.resolver_match.url_name == 'reports' %} active{% endif %}"{% if request.resolver_match.url_name == 'reports' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+        <span>Reports</span>
+    </a>
+    <a href="{% url 'boards' %}" class="tab{% if request.resolver_match.url_name == 'boards' %} active{% endif %}"{% if request.resolver_match.url_name == 'boards' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+        <span>Boards</span>
+    </a>
+    <a href="{% url 'live_data' %}" class="tab{% if request.resolver_match.url_name == 'live_data' %} active{% endif %}"{% if request.resolver_match.url_name == 'live_data' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+        <span>Live</span>
+    </a>
+{% else %}
+    <a href="{% url 'landing' %}" class="tab{% if request.resolver_match.url_name == 'landing' %} active{% endif %}"{% if request.resolver_match.url_name == 'landing' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <span>Home</span>
+    </a>
+    <a href="{% url 'about' %}" class="tab{% if request.resolver_match.url_name == 'about' %} active{% endif %}"{% if request.resolver_match.url_name == 'about' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>About</span>
+    </a>
+    <a href="{% url 'contact' %}" class="tab{% if request.resolver_match.url_name == 'contact' %} active{% endif %}"{% if request.resolver_match.url_name == 'contact' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <span>Contact</span>
+    </a>
+    <a href="{% url 'faq' %}" class="tab{% if request.resolver_match.url_name == 'faq' %} active{% endif %}"{% if request.resolver_match.url_name == 'faq' %} aria-current="page"{% endif %}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span>FAQ</span>
+    </a>
+{% endif %}
+</nav>

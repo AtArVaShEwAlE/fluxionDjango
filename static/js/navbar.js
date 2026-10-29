@@ -6,7 +6,10 @@
     if (!root || !trigger || !menu) return;
 
     function items() {
-        return Array.from(menu.querySelectorAll('.nv-item'));
+        var phone = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+        return Array.from(menu.querySelectorAll('.nv-item')).filter(function (el) {
+            return phone || !el.classList.contains('nv-mobile-only');
+        });
     }
 
     function isOpen() {
