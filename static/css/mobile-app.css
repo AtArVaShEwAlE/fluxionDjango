@@ -5,6 +5,12 @@
    rules here win. Every selector is scoped to body.page-app.
    ========================================================================== */
 
+/* Builder + board view headers were left-aligned (no centring rule loaded) */
+body.page-app.page-create-board .page-header,
+body.page-app.page-view-board .page-header {
+    text-align: center;
+}
+
 /* Profile quick actions: h4 inherited the default blue link colour */
 body.page-app .action-content h4 {
     color: var(--pa-ink);
@@ -293,5 +299,109 @@ body.page-app .action-content h4 {
     body.page-app .page-header h1,
     body.page-app .profile-header h1 {
         font-size: 1.75rem;
+    }
+}
+
+/* ==========================================================================
+   Phase 16B2: reports, boards, create report / board, view board
+   ========================================================================== */
+
+@media (max-width: 900px) {
+    body.page-app .page-header h1 {
+        overflow-wrap: anywhere;
+    }
+
+    /* Builders: Save button floats above the tab bar */
+    body.page-app.page-create-report #saveReportBtn,
+    body.page-app.page-create-board #saveBoardBtn {
+        position: fixed;
+        left: calc(1rem + env(safe-area-inset-left, 0px));
+        right: calc(1rem + env(safe-area-inset-right, 0px));
+        bottom: calc(var(--tb-h, 60px) + env(safe-area-inset-bottom, 0px) + 0.6rem);
+        z-index: 1040;
+        width: auto;
+        box-shadow: 0 8px 24px rgba(16, 32, 26, 0.28);
+    }
+
+    html.kb-open body.page-app.page-create-report #saveReportBtn,
+    html.kb-open body.page-app.page-create-board #saveBoardBtn {
+        bottom: 0.6rem;
+    }
+
+    body.page-app.page-create-report .container,
+    body.page-app.page-create-board .container {
+        padding-bottom: 5rem;
+    }
+
+    body.page-app .report-builder-grid,
+    body.page-app .board-builder-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.page-app .report-builder-grid > .card,
+    body.page-app .board-builder-grid > .card {
+        min-width: 0;
+    }
+
+    body.page-app .chart-picker-item,
+    body.page-app .board-picker-item {
+        min-height: 56px;
+    }
+
+    body.page-app .board-row-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    body.page-app.page-create-report .btn-block,
+    body.page-app.page-create-board .btn-block {
+        display: flex;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Report modal panels */
+    body.page-app .report-chart-panel {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    body.page-app .report-chart-panel-canvas-wrap {
+        height: min(320px, 50dvh);
+    }
+
+    /* View board */
+    body.page-app.page-view-board .board-view-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+    }
+
+    body.page-app.page-view-board .board-view-actions .btn {
+        width: 100%;
+    }
+
+    body.page-app.page-view-board .board-share-input {
+        max-width: none;
+    }
+
+    body.page-app.page-view-board .board-tile {
+        padding: 1rem;
+    }
+
+    body.page-app.page-view-board .board-tile-canvas {
+        height: 240px;
+    }
+
+    body.page-app.page-view-board .board-tile-l .board-tile-canvas {
+        height: 280px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    body.page-app .reports-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 }

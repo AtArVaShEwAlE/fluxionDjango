@@ -92,6 +92,8 @@ check('app css modal full height dvh', '100dvh' in app, True)
 check('app css action bar fixed', 'position: fixed' in app, True)
 check('app css kb-open action bar', 'html.kb-open body.page-app .axis-config-panel .chart-actions' in app, True)
 check('app css inputs 16px (no iOS zoom)', 'font-size: 16px' in app, True)
+check('app css builder grids use minmax(0, 1fr)', 'grid-template-columns: minmax(0, 1fr)' in app, True)
+check('app css floating save buttons', '#saveReportBtn' in app and '#saveBoardBtn' in app, True)
 _plain = re.sub(r'/\*.*?\*/', '', app, flags=re.S)
 _unscoped = []
 for chunk in re.findall(r'([^{}]+)\{', _plain):
