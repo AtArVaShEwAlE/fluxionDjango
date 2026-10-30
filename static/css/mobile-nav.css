@@ -60,6 +60,10 @@
         justify-content: flex-start;
     }
 
+    html body[class] .navbar-container .logo-link {
+        min-height: 44px;
+    }
+
     html body[class] .navbar-container .navbar-profile {
         width: auto;
         margin-left: auto;
@@ -229,5 +233,47 @@
 @media (prefers-reduced-motion: reduce) {
     .tabbar .tab {
         transition: none;
+    }
+}
+
+/* ---- Desktop navbar fit (901-1535px) ----
+   Both link groups overflowed the bar below ~1400px. Tighter spacing from
+   901 up; below 1320px logged-in users get the 4 public links inside the
+   avatar menu (same .nv-mobile-only items the phone menu uses). */
+@media (min-width: 901px) and (max-width: 1535px) {
+    html body[class] .navbar-container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+
+    html body[class] .navbar-container .navbar-center {
+        gap: 1rem;
+    }
+
+    html body[class] .navbar-container .navbar-links {
+        gap: 0.15rem;
+    }
+
+    html body[class] .navbar-container .navbar-links li a {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.86rem;
+    }
+}
+
+@media (min-width: 901px) and (max-width: 1319px) {
+    html body[class] .navbar-container .navbar-center:has(.navbar-links-right) {
+        justify-content: center;
+    }
+
+    html body[class] .navbar-container .navbar-center:has(.navbar-links-right) .navbar-links-left {
+        display: none;
+    }
+
+    .navbar-container .nv-item.nv-mobile-only {
+        display: flex;
+    }
+
+    .navbar-container .nv-sep.nv-mobile-only {
+        display: block;
     }
 }

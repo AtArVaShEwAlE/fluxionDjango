@@ -6,7 +6,7 @@
     if (!root || !trigger || !menu) return;
 
     function items() {
-        var phone = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+        var phone = window.matchMedia && window.matchMedia('(max-width: 1319px)').matches;
         return Array.from(menu.querySelectorAll('.nv-item')).filter(function (el) {
             return phone || !el.classList.contains('nv-mobile-only');
         });

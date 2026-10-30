@@ -25,13 +25,14 @@ def urls(text):
 base = read('templates', 'base.html')
 tab = read('templates', 'partials', 'tabbar.html')
 css = read('static', 'css', 'mobile-nav.css')
+app = read('static', 'css', 'mobile-app.css')
 js = read('static', 'js', 'mobile-nav.js')
 navjs = read('static', 'js', 'navbar.js')
 
-for label, text in [('base.html', base), ('tabbar.html', tab), ('mobile-nav.css', css), ('mobile-nav.js', js), ('navbar.js', navjs)]:
+for label, text in [('base.html', base), ('tabbar.html', tab), ('mobile-nav.css', css), ('mobile-app.css', app), ('mobile-nav.js', js), ('navbar.js', navjs)]:
     check(f'{label} exists', text is not None, True)
 
-if None in (base, tab, css, js, navjs):
+if None in (base, tab, css, app, js, navjs):
     print('missing file(s), stopping')
     sys.exit(1)
 
@@ -76,6 +77,32 @@ check('css 44px targets >= 4', css.count('min-height: 44px') >= 4, True)
 check('js kb-open', 'kb-open' in js, True)
 check('js matchMedia', 'matchMedia' in js, True)
 check('navbar.js filters mobile-only items', 'nv-mobile-only' in navjs, True)
+check('navbar.js matchMedia matches css 1319 bound', '(max-width: 1319px)' in navjs, True)
+check('css desktop fit bound 1319', 'max-width: 1319px' in css, True)
+check('css desktop fit bound 1535', 'max-width: 1535px' in css, True)
+check('css hides left links via :has', ':has(.navbar-links-right) .navbar-links-left' in css, True)
+
+
+# mobile-app.css (Phase 16B): page-app only, no 100vh, linked last
+check('mobile-app.css linked once', base.count('css/mobile-app.css'), 1)
+check('mobile-app.css after mobile-nav.css', base.index('css/mobile-app.css') > base.index('css/mobile-nav.css'), True)
+check('app css braces balanced', app.count('{') == app.count('}'), True)
+check('app css no 100vh (use dvh)', '100vh' in app, False)
+check('app css modal full height dvh', '100dvh' in app, True)
+check('app css action bar fixed', 'position: fixed' in app, True)
+check('app css kb-open action bar', 'html.kb-open body.page-app .axis-config-panel .chart-actions' in app, True)
+check('app css inputs 16px (no iOS zoom)', 'font-size: 16px' in app, True)
+_plain = re.sub(r'/\*.*?\*/', '', app, flags=re.S)
+_unscoped = []
+for chunk in re.findall(r'([^{}]+)\{', _plain):
+    chunk = chunk.strip()
+    if chunk.startswith('@'):
+        continue
+    for sel in chunk.split(','):
+        sel = sel.strip()
+        if sel and not (sel.startswith('body.page-app') or sel.startswith('html.kb-open body.page-app')):
+            _unscoped.append(sel)
+check('app css every selector scoped to body.page-app', _unscoped, [])
 
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:

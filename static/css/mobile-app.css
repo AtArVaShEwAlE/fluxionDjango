@@ -1,0 +1,297 @@
+/* ==========================================================================
+   Fluxion - Mobile layout for logged-in app pages (Phase 16B1)
+   Dashboard, Create Chart, My Charts, Profile.
+   Loaded AFTER page CSS + mobile-nav.css (base.html), so equal-specificity
+   rules here win. Every selector is scoped to body.page-app.
+   ========================================================================== */
+
+/* Profile quick actions: h4 inherited the default blue link colour */
+body.page-app .action-content h4 {
+    color: var(--pa-ink);
+}
+
+@media (max-width: 900px) {
+    /* ---- Touch targets + no iOS focus zoom ---- */
+    body.page-app .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    body.page-app.page-app select,
+    body.page-app.page-app textarea,
+    body.page-app.page-app input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]):not([type="file"]):not([type="hidden"]):not([type="submit"]) {
+        font-size: 16px;
+        min-height: 44px;
+    }
+
+    body.page-app .btn-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    body.page-app .upload-trigger {
+        min-height: 44px;
+        padding: 0 0.35rem;
+    }
+
+    body.page-app .modal-close {
+        width: 44px;
+        height: 44px;
+    }
+
+    body.page-app .y-row-remove {
+        width: 44px;
+        min-height: 44px;
+    }
+
+    body.page-app .customise-panel summary {
+        min-height: 44px;
+    }
+
+    body.page-app .btn-add-y {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin-top: 0;
+    }
+
+    body.page-app .opt-group > label.opt-check,
+    body.page-app .clean-data-drop-label {
+        min-height: 44px;
+    }
+
+    /* ---- Page headers ---- */
+    body.page-app .page-header,
+    body.page-app .profile-header {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+
+    body.page-app .page-header h1,
+    body.page-app .profile-header h1 {
+        margin-top: 0;
+        font-size: 2rem;
+    }
+
+    body.page-app .page-header p,
+    body.page-app .profile-header p {
+        font-size: 1rem;
+    }
+
+    /* ---- Create chart: Update/Save bar pinned above the tab bar ---- */
+    body.page-app .chart-builder {
+        padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
+
+    body.page-app .axis-config-panel .chart-actions {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: calc(var(--tb-h, 60px) + env(safe-area-inset-bottom, 0px));
+        z-index: 1040;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: stretch;
+        gap: 0.6rem;
+        margin: 0;
+        padding: 0.6rem calc(1rem + env(safe-area-inset-right, 0px)) 0.6rem calc(1rem + env(safe-area-inset-left, 0px));
+        background: rgba(255, 255, 255, 0.97);
+        border-top: 1px solid var(--pa-border);
+        box-shadow: 0 -4px 14px rgba(16, 32, 26, 0.06);
+    }
+
+    body.page-app .axis-config-panel .chart-actions .btn-block {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 0 0.75rem;
+    }
+
+    html.kb-open body.page-app .axis-config-panel .chart-actions {
+        bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    /* ---- Create chart ---- */
+    body.page-app .chart-type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+        gap: 0.6rem;
+    }
+
+    body.page-app .chart-type-btn {
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        padding: 0.7rem 0.4rem;
+        min-width: 0;
+    }
+
+    body.page-app .chart-type-btn span {
+        margin-top: 0.3rem;
+        font-size: 0.8rem;
+        text-align: center;
+    }
+
+    body.page-app .chart-container {
+        min-height: 320px;
+        padding: 0.75rem;
+    }
+
+    body.page-app #chartCanvas {
+        max-height: 420px;
+    }
+
+    body.page-app .chart-preview-card .card-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    body.page-app .recent-item {
+        flex-wrap: wrap;
+    }
+
+    /* ---- Dashboard ---- */
+    body.page-app .upload-area-compact {
+        padding: 1.25rem 1rem;
+    }
+
+    body.page-app .upload-content-compact h4 {
+        font-size: 1.2rem;
+    }
+
+    body.page-app .dataset-actions {
+        flex-wrap: wrap;
+    }
+
+    body.page-app .dataset-actions .btn {
+        flex: 1 1 150px;
+    }
+
+    body.page-app .data-table {
+        table-layout: auto;
+        width: max-content;
+        min-width: 100%;
+    }
+
+    body.page-app .data-table th {
+        white-space: nowrap;
+    }
+
+    body.page-app .data-table td {
+        max-width: 220px;
+    }
+
+    body.page-app .datasets-table td.dataset-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body.page-app .clean-data-actions {
+        flex-wrap: wrap;
+    }
+
+    body.page-app .clean-data-actions .btn {
+        flex: 1 1 140px;
+    }
+
+    /* ---- My Charts ---- */
+    body.page-app .list-search-input {
+        min-width: 0;
+        flex: 1 1 100%;
+    }
+
+    body.page-app .list-sort-select {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    body.page-app .modal-content {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    body.page-app .modal-header {
+        padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1rem 0.75rem;
+    }
+
+    body.page-app .modal-header h2 {
+        font-size: 1.15rem;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    body.page-app .modal-body {
+        padding: 1rem;
+    }
+
+    body.page-app .modal-chart-container {
+        height: 55dvh;
+        min-height: 260px;
+    }
+
+    body.page-app .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* ---- Profile ---- */
+    body.page-app .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+    }
+
+    body.page-app .stats-card .stat-item {
+        padding: 0.75rem 0.25rem;
+    }
+
+    body.page-app .stats-card .stat-number {
+        font-size: 1.6rem;
+    }
+
+    body.page-app .stats-card .stat-label {
+        font-size: 0.7rem;
+        letter-spacing: 0.02em;
+    }
+
+    body.page-app .action-button {
+        flex-direction: row;
+        text-align: left;
+        gap: 1rem;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    body.page-app .charts-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body.page-app .card {
+        padding: 1.1rem;
+    }
+
+    body.page-app .column-stats-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    body.page-app .page-header h1,
+    body.page-app .profile-header h1 {
+        font-size: 1.75rem;
+    }
+}
