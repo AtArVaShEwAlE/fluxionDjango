@@ -95,7 +95,7 @@ async function renderModalChart(chartData) {
             result,
             chartData.chart_type,
             chartData.config.color_scheme,
-            { maintainAspectRatio: true, options: chartData.config.chart_options, chartTitle: chartData.title }
+            { maintainAspectRatio: false, options: chartData.config.chart_options, chartTitle: chartData.title }
         )
     );
 }

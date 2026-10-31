@@ -405,3 +405,37 @@ body.page-app .action-content h4 {
         gap: 1rem;
     }
 }
+
+/* ==========================================================================
+   Phase 16B3: Live Charts
+   ========================================================================== */
+
+@media (max-width: 900px) {
+    body.page-app .notification button {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    /* toasts above the tab bar, like the flash messages */
+    body.page-app .notification-container {
+        top: auto;
+        left: 0.75rem;
+        right: 0.75rem;
+        bottom: calc(var(--tb-h, 60px) + env(safe-area-inset-bottom, 0px) + 0.75rem);
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    body.page-app .flow-container {
+        gap: 0;
+        min-height: 0;
+        padding: 1rem 0;
+    }
+
+    body.page-app .flow-path {
+        width: 90px;
+        height: 90px;
+        margin: 0;
+    }
+}

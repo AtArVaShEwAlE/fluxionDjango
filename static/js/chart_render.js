@@ -154,7 +154,8 @@ window.FluxionChart = (function () {
         const isHistogram = chartType === 'histogram';
         const scatterCategorical = chartType === 'scatter' && isCategorical(result.labels);
         const grid = { color: '#E3E9E6' };
-        const ticks = { color: '#55655F' };
+        const narrow = typeof window !== 'undefined' && window.innerWidth < 600;
+        const ticks = narrow ? { color: '#55655F', font: { size: 10 }, maxRotation: 50 } : { color: '#55655F' };
 
         return {
             type: JS_TYPE[chartType] || chartType,
@@ -167,7 +168,7 @@ window.FluxionChart = (function () {
                     title: opts.title
                         ? { display: true, text: opts.title, font: { size: 16, weight: 'bold' }, color: '#10201A' }
                         : { display: false },
-                    legend: { display: isRound || result.series.length > 1, position: 'bottom', labels: { color: '#55655F' } }
+                    legend: { display: isRound || result.series.length > 1, position: 'bottom', labels: narrow ? { color: '#55655F', boxWidth: 12, padding: 10, font: { size: 11 } } : { color: '#55655F' } }
                 },
                 scales: isRound ? {} : isRadar ? {
                     r: { beginAtZero: true, grid: grid, angleLines: grid, pointLabels: { color: '#55655F' }, ticks: { color: '#55655F', backdropColor: 'transparent' } }

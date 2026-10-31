@@ -94,6 +94,7 @@ check('app css kb-open action bar', 'html.kb-open body.page-app .axis-config-pan
 check('app css inputs 16px (no iOS zoom)', 'font-size: 16px' in app, True)
 check('app css builder grids use minmax(0, 1fr)', 'grid-template-columns: minmax(0, 1fr)' in app, True)
 check('app css floating save buttons', '#saveReportBtn' in app and '#saveBoardBtn' in app, True)
+check('app css live toasts above tab bar', 'body.page-app .notification-container' in app, True)
 _plain = re.sub(r'/\*.*?\*/', '', app, flags=re.S)
 _unscoped = []
 for chunk in re.findall(r'([^{}]+)\{', _plain):
