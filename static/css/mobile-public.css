@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Fluxion - Mobile fixes for landing, auth and info pages (Phase 16C1)
+   Loaded last (base.html). Every selector is scoped to a page body class.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+    /* ---- Auth: no iOS focus zoom, 44px targets, dynamic viewport ---- */
+    body.page-auth .form-control {
+        font-size: 16px;
+        min-height: 44px;
+    }
+
+    body.page-auth .checkbox-group {
+        min-height: 44px;
+    }
+
+    @supports (height: 100dvh) {
+        body.page-auth .au-shell {
+            min-height: calc(100dvh - 65px);
+        }
+
+        body.page-auth .main-content > .auth-container {
+            min-height: calc(100dvh - 140px);
+        }
+    }
+
+    /* ---- Contact ---- */
+    body.page-info.page-contact .ct-field input,
+    body.page-info.page-contact .ct-field textarea {
+        font-size: 16px;
+    }
+
+    body.page-info.page-contact .ct-again {
+        min-height: 44px;
+    }
+
+    /* ---- About ---- */
+    body.page-info.page-about .ab-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    /* ---- FAQ ---- */
+    body.page-info.page-faq .fq-search input {
+        font-size: 16px;
+    }
+
+    body.page-info.page-faq .fq-clear {
+        width: 44px;
+        height: 44px;
+        right: 0.35rem;
+    }
+
+    body.page-info.page-faq .fq-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    body.page-info.page-faq .fq-actions {
+        flex-wrap: wrap;
+        gap: 0.25rem 1rem;
+    }
+
+    body.page-info.page-faq .fq-link {
+        min-height: 44px;
+        padding: 0 0.35rem;
+    }
+
+    body.page-info.page-faq .faq-item summary {
+        min-height: 44px;
+    }
+
+    body.page-info.page-faq .fq-reset {
+        min-height: 44px;
+    }
+}

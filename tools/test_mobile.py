@@ -107,6 +107,25 @@ for chunk in re.findall(r'([^{}]+)\{', _plain):
             _unscoped.append(sel)
 check('app css every selector scoped to body.page-app', _unscoped, [])
 
+pub = read('static', 'css', 'mobile-public.css')
+check('mobile-public.css exists', pub is not None, True)
+if pub is not None:
+    check('mobile-public.css linked once', base.count('css/mobile-public.css'), 1)
+    check('mobile-public.css after mobile-app.css', base.index('css/mobile-public.css') > base.index('css/mobile-app.css'), True)
+    check('public css braces balanced', pub.count('{') == pub.count('}'), True)
+    check('public css no 100vh (use dvh)', '100vh' in pub, False)
+    _pp = re.sub(r'/\*.*?\*/', '', pub, flags=re.S)
+    _bad = []
+    for chunk in re.findall(r'([^{}]+)\{', _pp):
+        chunk = chunk.strip()
+        if chunk.startswith('@'):
+            continue
+        for sel in chunk.split(','):
+            sel = sel.strip()
+            if sel and not sel.startswith(('body.page-auth', 'body.page-info', 'body.page-landing')):
+                _bad.append(sel)
+    check('public css every selector scoped to a page body', _bad, [])
+
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':
