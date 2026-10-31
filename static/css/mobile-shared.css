@@ -1,0 +1,107 @@
+/* ==========================================================================
+   Fluxion - Mobile fixes for the public shared pages (Phase 16C2)
+   Linked ONLY by shared_chart.html, shared_report.html, shared_board.html,
+   after their inline <style>, so equal-specificity rules here win.
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    @supports (height: 100dvh) {
+        body {
+            min-height: 100dvh;
+        }
+    }
+
+    .header {
+        padding: 0.6rem 1rem;
+        padding-top: calc(0.6rem + env(safe-area-inset-top, 0px));
+    }
+
+    .header-content {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .logo-link {
+        min-height: 44px;
+    }
+
+    .badge {
+        margin-left: 0.4rem;
+    }
+
+    .header-content > .btn {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+        font-size: 0.82rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
+    .actions,
+    .board-actions {
+        gap: 0.6rem;
+    }
+
+    .actions .btn,
+    .board-actions .btn {
+        flex: 1 1 140px;
+    }
+
+    .container {
+        padding: 1.5rem 1rem;
+    }
+
+    .chart-header h1,
+    .report-header h1,
+    .board-header h1 {
+        font-size: 1.6rem;
+        overflow-wrap: anywhere;
+    }
+
+    .chart-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-card,
+    .chart-panel {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .chart-card .chart-container {
+        height: min(420px, 60dvh);
+    }
+
+    .board-tile {
+        padding: 1rem;
+    }
+
+    .board-tile-canvas {
+        height: 240px;
+    }
+
+    .board-tile-l .board-tile-canvas {
+        height: 280px;
+    }
+
+    .footer {
+        padding: 1.5rem 1rem;
+    }
+
+    .footer-cta {
+        padding: 1.5rem 0;
+    }
+}
+
+/* the page's own 560px rule sits before its 768px rule and loses: restore 1 column */
+@media (max-width: 560px) {
+    .board-tile-s {
+        grid-column: span 12;
+    }
+}

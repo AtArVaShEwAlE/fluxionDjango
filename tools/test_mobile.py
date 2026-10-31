@@ -126,6 +126,21 @@ if pub is not None:
                 _bad.append(sel)
     check('public css every selector scoped to a page body', _bad, [])
 
+sh = read('static', 'css', 'mobile-shared.css')
+check('mobile-shared.css exists', sh is not None, True)
+if sh is not None:
+    check('shared css braces balanced', sh.count('{') == sh.count('}'), True)
+    check('shared css no 100vh (use dvh)', '100vh' in sh, False)
+    for _n in ('shared_chart', 'shared_report', 'shared_board'):
+        _t = read('templates', _n + '.html') or ''
+        check(_n + ' links mobile-shared.css once, after </style>', _t.count('css/mobile-shared.css') == 1 and _t.index('css/mobile-shared.css') > _t.index('</style>'), True)
+    check('base.html does not load mobile-shared.css', 'mobile-shared.css' in base, False)
+    check('shared_chart chart fills its box (maintainAspectRatio false)', 'maintainAspectRatio: false' in (read('templates', 'shared_chart.html') or ''), True)
+for _n in ('shared_chart', 'shared_report', 'shared_board', 'error'):
+    _t = read('templates', _n + '.html') or ''
+    for _p in re.findall(r"\{% static '([^']+)' %\}", _t):
+        check(_n + ' static exists: ' + _p, os.path.exists(os.path.join(ROOT, 'static', _p)), True)
+
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':
