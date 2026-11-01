@@ -1,8 +1,3 @@
-/* ==========================================================================
-   Fluxion — Landing Page (commercial white theme)
-   Scoped under body.page-landing so no other page is affected.
-   ========================================================================== */
-
 body.page-landing {
     --ln-bg: #FFFFFF;
     --ln-bg-soft: #F6F9F7;
@@ -17,16 +12,32 @@ body.page-landing {
     --ln-font-body: 'Inter', sans-serif;
 
     background: var(--ln-bg);
+    color: var(--ln-ink);
     font-family: var(--ln-font-body);
+    line-height: 1.6;
+}
+
+/* base.css sets h1/h2/h3 to #E2E2E2 and p to #b0b0b0 for the dark theme.
+   On this white page that made every heading that does not restate a colour
+   (.lx-card h3, .lx-step h3, .lx-use h3) near-invisible. Re-point them at the
+   light-theme ink, exactly as app-theme.css does for body.page-app. */
+
+body.page-landing h1,
+body.page-landing h2,
+body.page-landing h3 {
+    font-family: var(--ln-font-display);
     color: var(--ln-ink);
 }
 
-body.page-landing .main-content {
-    min-height: auto;
-    padding: 0;
+body.page-landing p {
+    color: var(--ln-ink-soft);
 }
 
-/* ---- Navbar override (light, sticky, full-width) ---- */
+/* ---------- navbar: base.css ships a dark floating pill, app-theme.css
+   restyles it to a light sticky bar for body.page-app. The landing page had
+   no such override, so it rendered a dark glass pill over a white page. Same
+   treatment as app-theme.css, scoped here. ---------- */
+
 body.page-landing .navbar-container {
     position: sticky;
     top: 0;
@@ -34,30 +45,26 @@ body.page-landing .navbar-container {
     transform: none;
     width: 100%;
     max-width: none;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: none;
     border-bottom: 1px solid var(--ln-border);
     border-radius: 0;
     box-shadow: none;
-    padding: 0.9rem 3rem;
+    padding: 0.85rem 3rem;
 }
 
 body.page-landing .navbar-container.scrolled {
     box-shadow: 0 2px 16px rgba(16, 32, 26, 0.06);
 }
 
-body.page-landing .navbar-logo h3 {
-    color: var(--ln-ink);
-    font-family: var(--ln-font-display);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+body.page-landing .logo-link.logo-fallback {
+    color: var(--ln-accent-dark);
 }
 
 body.page-landing .navbar-links li a {
     color: var(--ln-ink-soft);
-    font-family: var(--ln-font-body);
 }
 
 body.page-landing .navbar-links li a:hover {
@@ -72,11 +79,13 @@ body.page-landing .navbar-links li a.active {
 
 body.page-landing .login-btn {
     color: var(--ln-ink);
-    border: 1.5px solid var(--ln-border-strong);
+    border-color: var(--ln-border-strong);
 }
 
 body.page-landing .login-btn:hover {
     background: var(--ln-bg-soft);
+    border-color: var(--ln-ink-soft);
+    color: var(--ln-ink);
 }
 
 body.page-landing .signup-btn {
@@ -86,9 +95,68 @@ body.page-landing .signup-btn {
 
 body.page-landing .signup-btn:hover {
     background: var(--ln-accent-dark);
+    color: #ffffff;
 }
 
-/* ---- Footer override ---- */
+body.page-landing .user-btn {
+    background: var(--ln-accent-soft);
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .user-btn:hover {
+    background: var(--ln-accent);
+    color: #ffffff;
+}
+
+body.page-landing .user-dropdown {
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.1);
+}
+
+body.page-landing .dropdown-item {
+    color: var(--ln-ink);
+    border-bottom: 1px solid var(--ln-border);
+}
+
+body.page-landing .dropdown-item:hover {
+    background: var(--ln-bg-soft);
+    color: var(--ln-ink);
+}
+
+/* ---------- buttons + footer: base.css paints them for the dark theme
+   (#E2E2E2 fill on white = invisible edge, #2a2a2a card). app-theme.css only
+   recolours them under body.page-app. ---------- */
+
+body.page-landing .btn {
+    font-family: var(--ln-font-body);
+}
+
+body.page-landing .btn-primary {
+    background: var(--ln-accent);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(31, 157, 110, 0.22);
+}
+
+body.page-landing .btn-primary:hover {
+    background: var(--ln-accent-dark);
+    color: #ffffff;
+    box-shadow: 0 10px 24px rgba(31, 157, 110, 0.28);
+    transform: translateY(-1px);
+}
+
+body.page-landing .btn-secondary {
+    background: #ffffff;
+    color: var(--ln-ink);
+    border: 1.5px solid var(--ln-border-strong);
+}
+
+body.page-landing .btn-secondary:hover {
+    background: var(--ln-bg-soft);
+    border-color: var(--ln-ink-soft);
+    color: var(--ln-ink);
+}
+
 body.page-landing .footer {
     background: var(--ln-bg);
     border-top: 1px solid var(--ln-border);
@@ -98,149 +166,207 @@ body.page-landing .footer p {
     color: var(--ln-ink-soft);
 }
 
-/* ---- Shared primitives ---- */
-body.page-landing .ln-eyebrow {
-    display: inline-block;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ln-accent-dark);
-    background: var(--ln-accent-soft);
-    padding: 0.35rem 0.85rem;
-    border-radius: 100px;
-    margin-bottom: 1.25rem;
+body.page-landing .lx-ico {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-body.page-landing .ln-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.85rem 1.75rem;
-    border-radius: 10px;
-    font-family: var(--ln-font-body);
-    font-weight: 600;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: all 0.18s ease;
-    border: 1.5px solid transparent;
-    cursor: pointer;
+body.page-landing .lx-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-body.page-landing .ln-btn-primary {
-    background: var(--ln-accent);
-    color: #ffffff;
+body.page-landing .lx-narrow {
+    max-width: 760px;
 }
 
-body.page-landing .ln-btn-primary:hover {
-    background: var(--ln-accent-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.25);
+body.page-landing .lx-section {
+    padding: 5.5rem 3rem;
 }
 
-body.page-landing .ln-btn-ghost {
-    background: transparent;
-    color: var(--ln-ink);
-    border-color: var(--ln-border-strong);
-}
-
-body.page-landing .ln-btn-ghost:hover {
+body.page-landing .lx-soft {
     background: var(--ln-bg-soft);
-    border-color: var(--ln-ink-soft);
+    border-top: 1px solid var(--ln-border);
+    border-bottom: 1px solid var(--ln-border);
 }
 
-body.page-landing .ln-btn-lg {
-    padding: 1.05rem 2.25rem;
-    font-size: 1.05rem;
-}
-
-body.page-landing .ln-section-head {
-    max-width: 640px;
-    margin: 0 auto 3.5rem;
-    text-align: center;
-}
-
-body.page-landing .ln-section-head h2 {
+body.page-landing .lx-section h2 {
     font-family: var(--ln-font-display);
-    font-size: 2.25rem;
+    font-size: clamp(1.8rem, 3.4vw, 2.5rem);
     font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
     color: var(--ln-ink);
-    letter-spacing: -0.01em;
+    margin: 0 0 1rem;
+}
+
+body.page-landing .lx-section h3 {
+    font-family: var(--ln-font-display);
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-section p {
+    font-size: 1rem;
+    color: var(--ln-ink-soft);
+}
+
+body.page-landing .lx-section .ln-section-head h2 {
     margin: 0;
 }
 
-body.page-landing .ln-section-sub {
-    font-size: 1.05rem;
-    color: var(--ln-ink-soft);
-    margin: 1rem 0 0;
-    line-height: 1.6;
+/* ---------- reveal ---------- */
+/* The reveal animates the individual `translate` property, not `transform`.
+   `transform: none` on .lx-in out-specified (0,3,2 vs 0,3,1) every component
+   that sets its own transform, so it killed the .lx-window 3D tilt and made
+   the .lx-card / .lx-use / .lx-card-ico hover lifts dead. */
+
+html.lx-motion body.page-landing [data-lx] {
+    opacity: 0;
+    translate: 0 26px;
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), translate 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--lx-d, 0) * 1ms);
 }
 
-/* ---- Hero ---- */
-body.page-landing .ln-hero {
-    padding: 5rem 3rem 6rem;
-    background: linear-gradient(180deg, var(--ln-bg-soft) 0%, var(--ln-bg) 65%);
+html.lx-motion body.page-landing [data-lx].lx-in {
+    opacity: 1;
+    translate: none;
 }
 
-body.page-landing .ln-hero-inner {
+html.lx-motion body.page-landing [data-split] .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.55em) rotate(2deg);
+    animation: lx-word-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--i, 0) * 70ms + 100ms);
+}
+
+@keyframes lx-word-in {
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes lx-float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, -18px, 0); }
+}
+
+@keyframes lx-shine {
+    to { background-position: 200% center; }
+}
+
+/* ---------- hero ---------- */
+body.page-landing .lx-hero {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 4.5rem 3rem 5.5rem;
+    background: linear-gradient(180deg, var(--ln-bg-soft) 0%, var(--ln-bg) 70%);
+}
+
+body.page-landing .lx-blob {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.45;
+    animation: lx-float 10s ease-in-out infinite;
+}
+
+body.page-landing .lx-blob-1 { width: 380px; height: 380px; background: #9BE3C6; top: -130px; left: -90px; }
+body.page-landing .lx-blob-2 { width: 300px; height: 300px; background: #CFF0E2; top: 50px; right: -80px; animation-delay: -4s; }
+body.page-landing .lx-blob-3 { width: 240px; height: 240px; background: #BDEBD6; bottom: -100px; left: 38%; animation-delay: -7s; }
+
+body.page-landing .lx-hero-inner {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 4rem;
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr);
+    gap: 3.5rem;
     align-items: center;
 }
 
-body.page-landing .ln-hero-copy h1 {
+body.page-landing .lx-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+body.page-landing .lx-ping {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ln-accent);
+    animation: lx-ping 1.8s ease-out infinite;
+}
+
+@keyframes lx-ping {
+    0% { box-shadow: 0 0 0 0 rgba(31, 157, 110, 0.5); }
+    80%, 100% { box-shadow: 0 0 0 10px rgba(31, 157, 110, 0); }
+}
+
+body.page-landing .lx-title {
     font-family: var(--ln-font-display);
-    font-size: 3.4rem;
+    font-size: clamp(2.4rem, 5.4vw, 3.9rem);
     font-weight: 700;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
     color: var(--ln-ink);
     margin: 0 0 1.25rem;
 }
 
-body.page-landing .ln-hero-sub {
-    font-family: var(--ln-font-body);
+body.page-landing .lx-grad {
+    display: inline-block;
+    background: linear-gradient(90deg, #1F9D6E, #34C08D, #157A56, #1F9D6E);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: lx-shine 6s linear infinite;
+}
+
+html.lx-motion body.page-landing .lx-grad {
+    opacity: 0;
+    animation: lx-shine 6s linear infinite, lx-grad-in 0.8s 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes lx-grad-in {
+    from { opacity: 0; transform: translateY(0.4em); }
+    to { opacity: 1; transform: none; }
+}
+
+body.page-landing .lx-sub {
     font-size: 1.15rem;
     line-height: 1.6;
     color: var(--ln-ink-soft);
-    max-width: 480px;
+    max-width: 520px;
     margin: 0 0 2rem;
 }
 
-body.page-landing .ln-hero-actions {
+body.page-landing .lx-actions {
     display: flex;
-    gap: 1rem;
     flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
 }
 
-body.page-landing .ln-hero-proof {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    font-size: 0.9rem;
-    color: var(--ln-ink-soft);
-}
-
-body.page-landing .ln-dot {
-    color: var(--ln-border-strong);
-}
-
-body.page-landing .ln-hero-highlights {
+body.page-landing .lx-checks {
     list-style: none;
     margin: 0;
-    padding: 1.5rem 0 0;
-    border-top: 1px solid var(--ln-border);
+    padding: 1.4rem 0 0;
+    max-width: 520px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.85rem 1.5rem;
-    max-width: 480px;
+    gap: 0.8rem 1.5rem;
+    border-top: 1px solid var(--ln-border);
 }
 
-body.page-landing .ln-hero-highlights li {
+body.page-landing .lx-checks li {
     display: flex;
     align-items: center;
     gap: 0.55rem;
@@ -248,312 +374,1716 @@ body.page-landing .ln-hero-highlights li {
     color: var(--ln-ink-soft);
 }
 
-body.page-landing .ln-hero-highlights li svg {
-    flex-shrink: 0;
+body.page-landing .lx-checks .lx-ico,
+body.page-landing .lx-list .lx-ico {
     color: var(--ln-accent);
+    stroke-width: 2.5;
+    width: 16px;
+    height: 16px;
 }
 
-/* ---- Hero visual: animated chart mockup ---- */
-body.page-landing .ln-hero-visual {
+/* hero visual */
+body.page-landing .lx-hero-visual {
     position: relative;
+    min-width: 0;
+    padding-bottom: 1.5rem;
 }
 
-body.page-landing .ln-chart-card {
+body.page-landing .lx-window {
     background: #ffffff;
     border: 1px solid var(--ln-border);
-    border-radius: 16px;
-    box-shadow: 0 20px 50px rgba(16, 32, 26, 0.08);
-    padding: 1.75rem;
+    border-radius: 18px;
+    box-shadow: 0 30px 70px rgba(16, 32, 26, 0.12);
+    overflow: hidden;
+    transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.2s ease-out;
 }
 
-body.page-landing .ln-chart-card-header {
+body.page-landing .lx-win-bar {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-}
-
-body.page-landing .ln-chart-card-title {
-    display: block;
-    font-weight: 700;
-    color: var(--ln-ink);
-    font-size: 1rem;
-}
-
-body.page-landing .ln-chart-card-sub {
-    display: block;
-    font-size: 0.8rem;
-    color: var(--ln-ink-soft);
-    margin-top: 0.2rem;
-}
-
-body.page-landing .ln-chart-badge {
-    background: var(--ln-accent-soft);
-    color: var(--ln-accent-dark);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 0.25rem 0.65rem;
-    border-radius: 100px;
-}
-
-body.page-landing .ln-chart-bars {
-    display: flex;
-    align-items: stretch;
-    gap: 1rem;
-    height: 200px;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.75rem 1rem;
+    background: #FAFCFB;
     border-bottom: 1px solid var(--ln-border);
-    padding-bottom: 0.75rem;
 }
 
-body.page-landing .ln-bar {
-    flex: 1;
+body.page-landing .lx-win-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+body.page-landing .lx-d1 { background: #F7A8A2; }
+body.page-landing .lx-d2 { background: #F6D58A; }
+body.page-landing .lx-d3 { background: #9BE3C6; }
+
+body.page-landing .lx-win-title {
+    margin-left: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ln-ink-soft);
+}
+
+body.page-landing .lx-win-body {
+    padding: 1.1rem 1.25rem 1rem;
+}
+
+body.page-landing .lx-win-top {
     display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    position: relative;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
 }
 
-body.page-landing .ln-bar::before {
-    content: '';
+body.page-landing .lx-tabs {
+    display: inline-flex;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    background: var(--ln-bg-soft);
+    border: 1px solid var(--ln-border);
+    border-radius: 999px;
+}
+
+body.page-landing .lx-tab {
+    min-height: 32px;
+    padding: 0.3rem 0.85rem;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ln-ink-soft);
+    cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.page-landing .lx-tab[aria-selected="true"] {
+    background: #ffffff;
+    color: var(--ln-accent-dark);
+    box-shadow: 0 2px 8px rgba(16, 32, 26, 0.1);
+}
+
+body.page-landing .lx-file {
+    font-size: 0.78rem;
+    color: var(--ln-ink-soft);
+}
+
+/* floating badges */
+body.page-landing .lx-float {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.12);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ln-accent-dark);
+    animation: lx-float 6s ease-in-out infinite;
+}
+
+body.page-landing .lx-float-a { left: -1.4rem; bottom: 0; }
+body.page-landing .lx-float-b { right: 1.2rem; top: -1.1rem; animation-delay: -2s; }
+body.page-landing .lx-float-c { right: 2rem; bottom: -0.4rem; animation-delay: -4s; }
+
+body.page-landing .lx-live-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #F59E0B;
+    animation: lx-ping-amber 1.6s ease-out infinite;
+}
+
+@keyframes lx-ping-amber {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.55); }
+    80%, 100% { box-shadow: 0 0 0 9px rgba(245, 158, 11, 0); }
+}
+
+/* ---------- svg charts (drawn by landing.js) ---------- */
+body.page-landing .lx-chart svg {
     display: block;
     width: 100%;
-    height: var(--h);
-    background: linear-gradient(180deg, #34C08D 0%, var(--ln-accent) 100%);
-    border-radius: 6px 6px 2px 2px;
-    animation: ln-grow-bar 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-    animation-delay: var(--d);
-    transform-origin: bottom;
+    height: auto;
+    overflow: visible;
 }
 
-body.page-landing .ln-bar span {
-    position: absolute;
-    bottom: -1.5rem;
-    font-size: 0.75rem;
-    color: var(--ln-ink-soft);
-    font-weight: 500;
+body.page-landing .lx-grid-line { stroke: #E3E9E6; stroke-width: 1; }
+body.page-landing .lx-tick { fill: #8B968F; font-size: 10px; font-family: var(--ln-font-body); }
+body.page-landing .lx-xlab { fill: #55655F; font-size: 11px; font-weight: 500; font-family: var(--ln-font-body); }
+body.page-landing .lx-vlab { fill: #10201A; font-size: 11px; font-weight: 700; font-family: var(--ln-font-body); }
+
+body.page-landing .lx-bar {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: lx-bar-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+    transition: opacity 0.15s ease, filter 0.15s ease;
 }
 
-@keyframes ln-grow-bar {
+body.page-landing .lx-chart svg:hover .lx-bar { opacity: 0.55; }
+body.page-landing .lx-chart svg .lx-bar:hover { opacity: 1; filter: brightness(1.08); }
+
+@keyframes lx-bar-in {
     from { transform: scaleY(0); opacity: 0; }
     to { transform: scaleY(1); opacity: 1; }
 }
 
-body.page-landing .ln-float-badge {
-    position: absolute;
-    bottom: -1.25rem;
-    left: -1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+body.page-landing .lx-line {
+    fill: none;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: lx-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes lx-draw {
+    to { stroke-dashoffset: 0; }
+}
+
+body.page-landing .lx-area {
+    opacity: 0;
+    animation: lx-fade-in 0.8s 0.4s ease forwards;
+}
+
+@keyframes lx-fade-in {
+    to { opacity: 1; }
+}
+
+body.page-landing .lx-dotpt {
+    stroke: #ffffff;
+    stroke-width: 2;
+    opacity: 0;
+    animation: lx-fade-in 0.4s ease forwards;
+    animation-delay: calc(var(--i, 0) * 90ms + 500ms);
+}
+
+body.page-landing .lx-seg-arc {
+    animation: lx-arc-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--i, 0) * 90ms);
+}
+
+@keyframes lx-arc-in {
+    from { stroke-width: 0; opacity: 0; }
+    to { stroke-width: 30; opacity: 1; }
+}
+
+body.page-landing .lx-donut-total { fill: #10201A; font-size: 22px; font-weight: 800; font-family: var(--ln-font-display); }
+body.page-landing .lx-donut-sub { fill: #55655F; font-size: 10px; font-family: var(--ln-font-body); }
+
+/* ---------- facts strip ---------- */
+body.page-landing .lx-strip {
+    padding: 0 3rem;
+    margin-top: -2.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+body.page-landing .lx-strip-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--ln-border);
+    border: 1px solid var(--ln-border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 18px 45px rgba(16, 32, 26, 0.08);
+}
+
+body.page-landing .lx-fact {
+    background: #ffffff;
+    padding: 1.4rem 1rem;
+    text-align: center;
+}
+
+body.page-landing .lx-fact-num {
+    display: block;
+    font-family: var(--ln-font-display);
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-fact-label {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--ln-ink-soft);
+}
+
+/* ---------- demo ---------- */
+body.page-landing .lx-demo {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+body.page-landing .lx-demo-controls,
+body.page-landing .lx-demo-stage {
     background: #ffffff;
     border: 1px solid var(--ln-border);
-    color: var(--ln-accent-dark);
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.7rem 1.1rem;
-    border-radius: 10px;
-    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.1);
-    animation: ln-float-in 0.6s ease 0.9s both;
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: 0 12px 34px rgba(16, 32, 26, 0.06);
 }
 
-@keyframes ln-float-in {
-    from { transform: translateY(12px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+body.page-landing .lx-ctl {
+    margin-bottom: 1.4rem;
 }
 
-/* ---- Features ---- */
-body.page-landing .ln-features {
-    padding: 6rem 3rem;
-    max-width: 1200px;
-    margin: 0 auto;
+body.page-landing .lx-ctl-label {
+    display: block;
+    margin-bottom: 0.55rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ln-ink-soft);
 }
 
-body.page-landing .ln-feature-grid {
+body.page-landing .lx-seg {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
 }
 
-body.page-landing .ln-feature-card {
+body.page-landing .lx-seg-btn {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
     background: #ffffff;
-    border: 1px solid var(--ln-ink);
-    border-radius: 14px;
-    padding: 1.75rem;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.5s ease, transform 0.5s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    border: 1.5px solid var(--ln-border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ln-ink-soft);
+    cursor: pointer;
+    transition: all 0.18s ease;
 }
 
-body.page-landing .ln-feature-card.ln-visible {
-    opacity: 1;
-    transform: translateY(0);
+body.page-landing .lx-seg-btn:hover {
+    border-color: var(--ln-accent);
+    color: var(--ln-accent-dark);
 }
 
-body.page-landing .ln-feature-card:hover {
-    border-color: var(--ln-border-strong);
-    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.06);
+body.page-landing .lx-seg-btn.active {
+    background: var(--ln-accent-soft);
+    border-color: var(--ln-accent);
+    color: var(--ln-accent-dark);
 }
 
-body.page-landing .ln-feature-icon {
+body.page-landing .lx-swatches {
+    display: flex;
+    gap: 0.6rem;
+}
+
+body.page-landing .lx-sw {
     width: 44px;
     height: 44px;
+    padding: 0;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c1, #1F9D6E), var(--c2, #34C08D));
+    box-shadow: 0 0 0 1.5px var(--ln-border);
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.page-landing .lx-sw:hover {
+    transform: scale(1.08);
+}
+
+body.page-landing .lx-sw.active {
+    box-shadow: 0 0 0 2.5px var(--ln-accent);
+}
+
+body.page-landing .lx-shuffle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    background: var(--ln-accent);
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.page-landing .lx-shuffle:hover {
+    background: var(--ln-accent-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.25);
+}
+
+body.page-landing .lx-shuffle:active .lx-ico {
+    transform: rotate(180deg);
+}
+
+body.page-landing .lx-shuffle .lx-ico {
+    transition: transform 0.3s ease;
+}
+
+body.page-landing .lx-demo-note {
+    margin: 1.1rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--ln-ink-soft);
+}
+
+body.page-landing .lx-demo-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-badge {
+    flex-shrink: 0;
+    padding: 0.25rem 0.7rem;
+    background: var(--ln-accent-soft);
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+body.page-landing .lx-val {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    background: var(--ln-bg-soft);
+    border: 1px solid var(--ln-border);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--ln-ink-soft);
+}
+
+body.page-landing .lx-val b {
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-val i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+/* ---------- feature cards ---------- */
+body.page-landing .lx-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.4rem;
+}
+
+body.page-landing .lx-card {
+    position: relative;
+    overflow: hidden;
+    padding: 1.75rem;
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    border-radius: 16px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* accent rule that draws in from the left on hover */
+body.page-landing .lx-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--ln-accent), #34C08D);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.page-landing .lx-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 0%), rgba(31, 157, 110, 0.12), transparent 60%);
+    transition: opacity 0.25s ease;
+}
+
+body.page-landing .lx-card:hover {
+    border-color: var(--ln-accent);
+    box-shadow: 0 18px 40px rgba(16, 32, 26, 0.1);
+    transform: translateY(-3px);
+}
+
+body.page-landing .lx-card:hover::after {
+    opacity: 1;
+}
+
+body.page-landing .lx-card:hover::before {
+    transform: scaleX(1);
+}
+
+body.page-landing .lx-card-ico {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 1.1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--ln-accent-soft);
     color: var(--ln-accent-dark);
-    border-radius: 10px;
-    margin-bottom: 1.1rem;
+    border-radius: 12px;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, color 0.2s ease;
 }
 
-body.page-landing .ln-feature-card h3 {
-    font-family: var(--ln-font-display);
+body.page-landing .lx-card-ico .lx-ico {
+    width: 22px;
+    height: 22px;
+}
+
+body.page-landing .lx-card:hover .lx-card-ico {
+    transform: rotate(-8deg) scale(1.1);
+    background: var(--ln-accent);
+    color: #ffffff;
+}
+
+/* the icon springs up as its card reveals, staggered by the card's own delay.
+   Animates `scale` (not `transform`) so the hover above still works. */
+html.lx-motion body.page-landing .lx-card.lx-in .lx-card-ico {
+    animation: lx-ico-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--lx-d, 0) * 1ms + 180ms);
+}
+
+@keyframes lx-ico-pop {
+    from { scale: 0.55; opacity: 0; }
+    to { scale: 1; opacity: 1; }
+}
+
+body.page-landing .lx-card h3 {
+    margin: 0 0 0.5rem;
     font-size: 1.15rem;
     font-weight: 700;
-    color: var(--ln-ink);
-    margin: 0 0 0.5rem;
 }
 
-body.page-landing .ln-feature-card p {
-    font-family: var(--ln-font-body);
+body.page-landing .lx-card p {
+    margin: 0;
     font-size: 0.95rem;
     line-height: 1.55;
-    color: var(--ln-ink-soft);
+}
+
+/* ---------- steps ---------- */
+body.page-landing .lx-steps {
+    position: relative;
+    list-style: none;
     margin: 0;
-}
-
-/* ---- Process ---- */
-body.page-landing .ln-process {
-    background: var(--ln-bg-soft);
-    padding: 6rem 3rem;
-    border-top: 1px solid var(--ln-border);
-    border-bottom: 1px solid var(--ln-border);
-}
-
-body.page-landing .ln-process-grid {
-    max-width: 1100px;
-    margin: 0 auto;
+    padding: 0;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 3rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.5rem;
 }
 
-body.page-landing .ln-process-step {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
+body.page-landing .lx-steps::before,
+body.page-landing .lx-steps::after {
+    content: '';
+    position: absolute;
+    top: 28px;
+    left: 12.5%;
+    right: 12.5%;
+    height: 3px;
+    border-radius: 3px;
 }
 
-body.page-landing .ln-process-step.ln-visible {
-    opacity: 1;
-    transform: translateY(0);
+body.page-landing .lx-steps::before {
+    background: var(--ln-border);
 }
 
-body.page-landing .ln-step-num {
-    display: block;
+body.page-landing .lx-steps::after {
+    background: linear-gradient(90deg, #1F9D6E, #34C08D);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 1.6s cubic-bezier(0.22, 1, 0.36, 1) 0.3s;
+}
+
+body.page-landing .lx-steps.lx-in::after,
+html:not(.lx-motion) body.page-landing .lx-steps::after {
+    transform: scaleX(1);
+}
+
+/* a highlight that keeps travelling along the connector once it has drawn.
+   Desktop only: at <=960px the track becomes a 3px column and a horizontal
+   sweep would read as a glitch. */
+@media (min-width: 961px) {
+    html.lx-motion body.page-landing .lx-steps.lx-in::before {
+        background: linear-gradient(90deg,
+            var(--ln-border) 0%,
+            var(--ln-border) 38%,
+            rgba(31, 157, 110, 0.55) 50%,
+            var(--ln-border) 62%,
+            var(--ln-border) 100%);
+        background-size: 260% 100%;
+        animation: lx-track-sweep 4.5s ease-in-out 1.4s infinite;
+    }
+
+    @keyframes lx-track-sweep {
+        0% { background-position: 160% 0; }
+        100% { background-position: -60% 0; }
+    }
+}
+
+body.page-landing .lx-step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+body.page-landing .lx-step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 1.1rem;
+    background: #ffffff;
+    border: 3px solid var(--ln-accent);
+    border-radius: 50%;
     font-family: var(--ln-font-display);
-    font-size: 1.75rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--ln-accent-dark);
+    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.18);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+
+html.lx-motion body.page-landing .lx-steps.lx-in .lx-step-num {
+    animation: lx-step-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+html.lx-motion body.page-landing .lx-steps.lx-in .lx-step:nth-child(2) .lx-step-num { animation-delay: 0.18s; }
+html.lx-motion body.page-landing .lx-steps.lx-in .lx-step:nth-child(3) .lx-step-num { animation-delay: 0.36s; }
+html.lx-motion body.page-landing .lx-steps.lx-in .lx-step:nth-child(4) .lx-step-num { animation-delay: 0.54s; }
+
+@keyframes lx-step-pop {
+    from { scale: 0.4; opacity: 0; }
+    to { scale: 1; opacity: 1; }
+}
+
+body.page-landing .lx-steps .lx-step:hover .lx-step-num {
+    border-color: var(--ln-accent-dark);
+    box-shadow: 0 12px 26px rgba(31, 157, 110, 0.3);
+    transform: translateY(-3px);
+}
+
+body.page-landing .lx-step h3 {
+    margin: 0 0 0.4rem;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: var(--ln-border-strong);
-    margin-bottom: 0.75rem;
 }
 
-body.page-landing .ln-process-step h3 {
-    font-family: var(--ln-font-display);
-    font-size: 1.2rem;
+body.page-landing .lx-step p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ---------- split sections ---------- */
+body.page-landing .lx-split {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 3.5rem;
+    align-items: center;
+}
+
+body.page-landing .lx-split-rev {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+body.page-landing .lx-split-copy p {
+    margin: 0 0 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.65;
+}
+
+body.page-landing .lx-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.7rem;
+}
+
+body.page-landing .lx-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.97rem;
+    color: var(--ln-ink);
+}
+
+/* board mock */
+body.page-landing .lx-board {
+    min-width: 0;
+    padding: 1.1rem;
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(16, 32, 26, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.page-landing .lx-board-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+}
+
+body.page-landing .lx-board-title {
     font-weight: 700;
     color: var(--ln-ink);
-    margin: 0 0 0.5rem;
 }
 
-body.page-landing .ln-process-step p {
-    font-size: 0.95rem;
+body.page-landing .lx-board-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.28rem 0.75rem;
+    background: var(--ln-accent-soft);
+    border-radius: 999px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-spin {
+    width: 11px;
+    height: 11px;
+    border: 2px solid rgba(21, 122, 86, 0.25);
+    border-top-color: var(--ln-accent-dark);
+    border-radius: 50%;
+}
+
+body.page-landing .lx-board.lx-refreshing .lx-spin {
+    animation: lx-spin 0.7s linear infinite;
+}
+
+@keyframes lx-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* .lx-refreshing lives for 1100 ms (see landing.js), so one pulse fits */
+body.page-landing .lx-board.lx-refreshing {
+    border-color: var(--ln-accent);
+    box-shadow: 0 24px 60px rgba(16, 32, 26, 0.1), 0 0 0 4px rgba(31, 157, 110, 0.08);
+}
+
+body.page-landing .lx-board.lx-refreshing .lx-board-status {
+    animation: lx-status-pulse 1.1s ease-in-out;
+}
+
+@keyframes lx-status-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(31, 157, 110, 0.35); }
+    50% { box-shadow: 0 0 0 7px rgba(31, 157, 110, 0); }
+}
+
+body.page-landing .lx-board-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+/* scan sweep across the tiles while the mock is refreshing. The pseudo is
+   absolutely positioned so it does not become an extra grid cell. */
+body.page-landing .lx-board-grid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(100deg,
+        transparent 35%,
+        rgba(31, 157, 110, 0.14) 50%,
+        transparent 65%);
+    background-size: 250% 100%;
+}
+
+body.page-landing .lx-board.lx-refreshing .lx-board-grid::after {
+    opacity: 1;
+    animation: lx-board-scan 1.1s ease-in-out;
+}
+
+@keyframes lx-board-scan {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
+}
+
+body.page-landing .lx-tile {
+    min-width: 0;
+    padding: 0.7rem 0.8rem 0.6rem;
+    background: var(--ln-bg-soft);
+    border: 1px solid var(--ln-border);
+    border-radius: 12px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+body.page-landing .lx-tile-s { grid-column: span 4; }
+body.page-landing .lx-tile-m { grid-column: span 6; }
+body.page-landing .lx-tile-l { grid-column: span 12; }
+
+body.page-landing .lx-tile-t {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ln-ink-soft);
+}
+
+/* tiles stagger in on reveal (animates `translate`, so the hover lift below
+   is left free) */
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile {
+    animation: lx-tile-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile:nth-child(2) { animation-delay: 0.06s; }
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile:nth-child(3) { animation-delay: 0.12s; }
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile:nth-child(4) { animation-delay: 0.18s; }
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile:nth-child(5) { animation-delay: 0.24s; }
+html.lx-motion body.page-landing .lx-board.lx-in .lx-tile:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes lx-tile-in {
+    from { translate: 0 14px; opacity: 0; }
+    to { translate: none; opacity: 1; }
+}
+
+body.page-landing .lx-tile:hover {
+    border-color: var(--ln-accent);
+    box-shadow: 0 8px 20px rgba(16, 32, 26, 0.08);
+    transform: translateY(-2px);
+}
+
+body.page-landing .lx-mini {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 54px;
+}
+
+body.page-landing .lx-mini-wide {
+    height: 62px;
+}
+
+body.page-landing .lx-mini i {
+    flex: 1;
+    height: var(--h, 50%);
+    background: linear-gradient(180deg, #34C08D, #1F9D6E);
+    border-radius: 4px 4px 1px 1px;
+    transition: height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* delaying the bars one by one turns the 4.2 s refresh into a left-to-right
+   ripple instead of every bar jumping at once */
+body.page-landing .lx-board .lx-mini i:nth-child(2)  { transition-delay: 0.045s; }
+body.page-landing .lx-board .lx-mini i:nth-child(3)  { transition-delay: 0.09s; }
+body.page-landing .lx-board .lx-mini i:nth-child(4)  { transition-delay: 0.135s; }
+body.page-landing .lx-board .lx-mini i:nth-child(5)  { transition-delay: 0.18s; }
+body.page-landing .lx-board .lx-mini i:nth-child(6)  { transition-delay: 0.225s; }
+body.page-landing .lx-board .lx-mini i:nth-child(7)  { transition-delay: 0.27s; }
+body.page-landing .lx-board .lx-mini i:nth-child(8)  { transition-delay: 0.315s; }
+body.page-landing .lx-board .lx-mini i:nth-child(9)  { transition-delay: 0.36s; }
+body.page-landing .lx-board .lx-mini i:nth-child(10) { transition-delay: 0.405s; }
+body.page-landing .lx-board .lx-mini i:nth-child(11) { transition-delay: 0.45s; }
+body.page-landing .lx-board .lx-mini i:nth-child(12) { transition-delay: 0.495s; }
+
+/* ---------- live ---------- */
+body.page-landing .lx-live-sec {
+    background: linear-gradient(135deg, #10201A 0%, #1A362C 100%);
+}
+
+body.page-landing .lx-live-sec h2 {
+    color: #ffffff;
+}
+
+body.page-landing .lx-live-sec .lx-split-copy p {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+body.page-landing .lx-live-sec .lx-list li {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+body.page-landing .lx-live-sec .lx-list .lx-ico {
+    color: #6EE7B7;
+}
+
+body.page-landing .lx-live-sec .ln-eyebrow {
+    background: rgba(255, 255, 255, 0.1);
+    color: #6EE7B7;
+}
+
+body.page-landing .lx-live {
+    min-width: 0;
+    padding: 1.1rem 1.2rem 0.9rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.page-landing .lx-live:hover {
+    border-color: rgba(110, 231, 183, 0.4);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(52, 192, 141, 0.07);
+}
+
+body.page-landing .lx-live-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+body.page-landing .lx-live-val {
+    margin-left: auto;
+    font-family: var(--ln-font-display);
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 0 0 18px rgba(52, 192, 141, 0.45);
+}
+
+body.page-landing .lx-live-svg {
+    display: block;
+    width: 100%;
+    height: 190px;
+    margin: 0.6rem 0;
+}
+
+body.page-landing .lx-live-grid line {
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 1;
+}
+
+body.page-landing .lx-live-line {
+    fill: none;
+    stroke: #34C08D;
+    stroke-width: 3;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 6px rgba(52, 192, 141, 0.5));
+}
+
+body.page-landing .lx-live-area {
+    fill: url(#lxLiveGrad);
+    animation: lx-area-breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes lx-area-breathe {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+body.page-landing .lx-live-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+body.page-landing .lx-live-foot strong {
+    color: #ffffff;
+}
+
+/* ---------- sharing flow ---------- */
+body.page-landing .lx-flow {
+    max-width: 900px;
+    margin: 0 auto 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+body.page-landing .lx-node {
+    flex: 0 0 auto;
+    width: 190px;
+    padding: 1.3rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+    background: #ffffff;
+    border: 1.5px solid var(--ln-border);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.06);
+    transition: transform 0.25s ease;
+}
+
+/* the three nodes light up in the order the packets reach them */
+html.lx-motion body.page-landing .lx-flow .lx-node {
+    animation: lx-node-pulse 2.4s ease-in-out infinite;
+}
+
+html.lx-motion body.page-landing .lx-flow .lx-node:nth-child(3) { animation-delay: 0.8s; }
+html.lx-motion body.page-landing .lx-flow .lx-node:nth-child(5) { animation-delay: 1.6s; }
+
+@keyframes lx-node-pulse {
+    0%, 100% {
+        border-color: var(--ln-border);
+        box-shadow: 0 12px 30px rgba(16, 32, 26, 0.06);
+    }
+    22% {
+        border-color: var(--ln-accent);
+        box-shadow: 0 14px 34px rgba(31, 157, 110, 0.22);
+    }
+}
+
+body.page-landing .lx-flow .lx-node:hover {
+    transform: translateY(-3px);
+}
+
+body.page-landing .lx-node .lx-ico {
+    width: 26px;
+    height: 26px;
+    margin-bottom: 0.3rem;
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-node strong {
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-node span {
+    font-size: 0.82rem;
+    color: var(--ln-ink-soft);
+}
+
+body.page-landing .lx-pipe {
+    position: relative;
+    flex: 1;
+    height: 3px;
+    margin: 0 0.5rem;
+    background: repeating-linear-gradient(90deg, var(--ln-border-strong) 0 8px, transparent 8px 14px);
+    border-radius: 3px;
+}
+
+/* one pattern period is 8px dash + 6px gap, so shifting by 14px loops
+   seamlessly. Direction follows the axis the pipe runs on. */
+@media (min-width: 961px) {
+    html.lx-motion body.page-landing .lx-pipe {
+        animation: lx-pipe-flow 1.2s linear infinite;
+    }
+
+    @keyframes lx-pipe-flow {
+        from { background-position: 0 0; }
+        to { background-position: 14px 0; }
+    }
+}
+
+@media (max-width: 960px) {
+    html.lx-motion body.page-landing .lx-pipe {
+        animation: lx-pipe-flow-v 1.2s linear infinite;
+    }
+
+    @keyframes lx-pipe-flow-v {
+        from { background-position: 0 0; }
+        to { background-position: 0 14px; }
+    }
+}
+
+body.page-landing .lx-packet {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    background: var(--ln-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(31, 157, 110, 0.7);
+    animation: lx-travel 2.4s ease-in-out infinite;
+}
+
+body.page-landing .lx-packet-2 {
+    animation-delay: -1.2s;
+}
+
+@keyframes lx-travel {
+    0% { left: 0; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: calc(100% - 12px); opacity: 0; }
+}
+
+body.page-landing .lx-trio {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.2rem;
+}
+
+body.page-landing .lx-trio-item {
+    padding: 1.3rem 1.4rem;
+    background: var(--ln-bg-soft);
+    border: 1px solid var(--ln-border);
+    border-radius: 14px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+body.page-landing .lx-trio-item:hover {
+    transform: translateY(-3px);
+    border-color: var(--ln-accent);
+    background: #ffffff;
+    box-shadow: 0 14px 30px rgba(16, 32, 26, 0.08);
+}
+
+body.page-landing .lx-trio-item strong {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-trio-item span {
+    font-size: 0.93rem;
     line-height: 1.55;
     color: var(--ln-ink-soft);
-    margin: 0;
 }
 
-/* ---- Final CTA ---- */
-body.page-landing .ln-cta {
-    padding: 6rem 3rem;
+/* ---------- use cases ---------- */
+body.page-landing .lx-uses {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.2rem;
 }
 
-body.page-landing .ln-cta-card {
-    max-width: 720px;
-    margin: 0 auto;
-    text-align: center;
-    background: linear-gradient(135deg, var(--ln-ink) 0%, #1A362C 100%);
-    border-radius: 20px;
-    padding: 4rem 3rem;
+body.page-landing .lx-use {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 1.5rem;
+    /* the 4px accent is 3px wider than the 1px border on the other three
+       sides, so the copy was inset 28px on the left against 25px on the
+       right and read as pushed off-centre. Trimming the left padding by the
+       difference makes the text block sit symmetrically in the card. */
+    padding-left: calc(1.5rem - 3px);
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    border-left: 4px solid var(--ln-accent);
+    border-radius: 14px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-left-color 0.25s ease;
 }
 
-body.page-landing .ln-cta-card h2 {
-    font-family: var(--ln-font-display);
-    font-size: 2rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0 0 0.75rem;
+/* the hover wash lives on its own layer: a gradient cannot be interpolated,
+   so transitioning `background` snapped at the midpoint instead of fading.
+   z-index -1 keeps it above the white card but under the copy. */
+body.page-landing .lx-use::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(180deg, #ffffff 0%, var(--ln-accent-soft) 100%);
+    transition: opacity 0.25s ease;
 }
 
-body.page-landing .ln-cta-card p {
+body.page-landing .lx-use:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(16, 32, 26, 0.08);
+    border-left-color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-use:hover::after {
+    opacity: 1;
+}
+
+/* line-height was inherited at 1.6, which adds roughly 4px of leading above
+   the cap and below the baseline. Against a 1.5rem padding that made the top
+   look looser than the bottom and opened too wide a gap under the heading. */
+body.page-landing .lx-use h3 {
+    margin: 0 0 0.45rem;
     font-size: 1.05rem;
-    color: rgba(255, 255, 255, 0.75);
-    margin: 0 0 2rem;
+    line-height: 1.3;
+    font-weight: 700;
+    text-wrap: balance;
+    transition: color 0.25s ease;
 }
 
-/* ---- Responsive ---- */
+body.page-landing .lx-use:hover h3 {
+    color: var(--ln-accent-dark);
+}
+
+body.page-landing .lx-use p {
+    margin: 0;
+    font-size: 0.93rem;
+    line-height: 1.55;
+}
+/* ---------- marquee ---------- */
+body.page-landing .lx-marquee-sec {
+    padding: 2.5rem 0;
+    overflow: hidden;
+}
+
+body.page-landing .lx-marquee {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+body.page-landing .lx-marquee-track {
+    display: flex;
+    width: max-content;
+    gap: 0.75rem;
+    animation: lx-marquee 32s linear infinite;
+}
+
+body.page-landing .lx-marquee:hover .lx-marquee-track {
+    animation-play-state: paused;
+}
+
+body.page-landing .lx-chip {
+    flex-shrink: 0;
+    padding: 0.55rem 1.2rem;
+    background: #ffffff;
+    border: 1.5px solid var(--ln-border);
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--ln-ink);
+    white-space: nowrap;
+    transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+/* reachable because .lx-marquee:hover already pauses the track */
+body.page-landing .lx-chip:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: var(--ln-accent);
+    color: var(--ln-accent-dark);
+    background: var(--ln-accent-soft);
+}
+
+@keyframes lx-marquee {
+    to { transform: translateX(calc(-50% - 0.375rem)); }
+}
+
+/* ---------- faq teaser ---------- */
+body.page-landing .lx-faq {
+    display: grid;
+    gap: 0.8rem;
+}
+
+body.page-landing .lx-q {
+    background: #ffffff;
+    border: 1px solid var(--ln-border);
+    border-radius: 14px;
+    padding: 0 1.3rem;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+body.page-landing .lx-q[open] {
+    border-color: var(--ln-accent);
+    box-shadow: 0 10px 26px rgba(31, 157, 110, 0.1);
+}
+
+body.page-landing .lx-q summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 56px;
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--ln-font-display);
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--ln-ink);
+}
+
+body.page-landing .lx-q summary::-webkit-details-marker {
+    display: none;
+}
+
+body.page-landing .lx-q summary::after {
+    content: '+';
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ln-accent-soft);
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: var(--ln-accent-dark);
+    transition: transform 0.25s ease;
+}
+
+body.page-landing .lx-q[open] summary::after {
+    transform: rotate(135deg);
+}
+
+body.page-landing .lx-q p {
+    margin: 0 0 1.2rem;
+    padding-right: 2.5rem;
+    line-height: 1.6;
+}
+
+body.page-landing .lx-q:hover {
+    border-color: var(--ln-border-strong);
+}
+
+/* questions stagger in on reveal */
+html.lx-motion body.page-landing .lx-faq.lx-in .lx-q {
+    animation: lx-q-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html.lx-motion body.page-landing .lx-faq.lx-in .lx-q:nth-child(2) { animation-delay: 0.08s; }
+html.lx-motion body.page-landing .lx-faq.lx-in .lx-q:nth-child(3) { animation-delay: 0.16s; }
+html.lx-motion body.page-landing .lx-faq.lx-in .lx-q:nth-child(4) { animation-delay: 0.24s; }
+
+@keyframes lx-q-in {
+    from { translate: 0 14px; opacity: 0; }
+    to { translate: none; opacity: 1; }
+}
+
+/* <details> has no exit transition without JS, but opening can be animated */
+body.page-landing .lx-q[open] p {
+    animation: lx-faq-open 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes lx-faq-open {
+    from { translate: 0 -6px; opacity: 0; }
+    to { translate: none; opacity: 1; }
+}
+
+body.page-landing .lx-more {
+    margin: 1.5rem 0 0;
+    text-align: center;
+}
+
+/* ---------- final cta ---------- */
+body.page-landing .lx-cta {
+    padding: 4rem 3rem 6rem;
+}
+
+/* The card carried white copy (h2 / p below) but no surface of its own, so
+   on the white page the CTA text was invisible and the two blobs floated
+   over the page instead of glowing inside a panel. Skin matches .lx-live-sec. */
+
+body.page-landing .lx-cta-card {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    padding: 3.5rem 2.5rem;
+    background: linear-gradient(135deg, #10201A 0%, #1A362C 100%);
+    border-radius: 24px;
+    text-align: center;
+}
+
+body.page-landing .lx-cta-blob {
+    position: absolute;
+    z-index: -1;
+    border-radius: 50%;
+    filter: blur(50px);
+    opacity: 0.35;
+    animation: lx-float 9s ease-in-out infinite;
+}
+
+body.page-landing .lx-cta-blob-1 { width: 240px; height: 240px; background: #34C08D; top: -90px; left: -60px; }
+body.page-landing .lx-cta-blob-2 { width: 200px; height: 200px; background: #6EE7B7; bottom: -80px; right: -40px; animation-delay: -4s; }
+
+body.page-landing .lx-cta-card h2 {
+    color: #ffffff;
+}
+
+body.page-landing .lx-cta-card p {
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 1.5rem;
+}
+
+/* the markup uses .ln-btn / .ln-btn-primary, so only additive properties are
+   set here; the theme's own button rules are untouched */
+html.lx-motion body.page-landing .lx-cta-card.lx-in .lx-cta-btn {
+    animation: lx-cta-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s both;
+}
+
+@keyframes lx-cta-pop {
+    from { scale: 0.82; opacity: 0; }
+    to { scale: 1; opacity: 1; }
+}
+
+body.page-landing .lx-cta-btn {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+body.page-landing .lx-cta-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(105deg,
+        transparent 40%,
+        rgba(255, 255, 255, 0.5) 50%,
+        transparent 60%);
+    background-size: 250% 100%;
+    background-position: 150% 0;
+    transition: background-position 0.7s ease;
+}
+
+body.page-landing .lx-cta-btn:hover::after {
+    background-position: -50% 0;
+}
+
+/* ---------- keyboard focus (base.css ships none) ---------- */
+
+body.page-landing .btn:focus-visible,
+body.page-landing .auth-btn:focus-visible,
+body.page-landing .user-btn:focus-visible,
+body.page-landing .navbar-links li a:focus-visible,
+body.page-landing .lx-tab:focus-visible,
+body.page-landing .lx-seg-btn:focus-visible,
+body.page-landing .lx-sw:focus-visible,
+body.page-landing .lx-shuffle:focus-visible,
+body.page-landing .lx-q summary:focus-visible {
+    outline: 2px solid var(--ln-accent);
+    outline-offset: 2px;
+}
+
+/* If text-clipping is unavailable the gradient word would render fully
+   transparent; fall back to solid accent. */
+
+@supports not (background-clip: text) {
+    body.page-landing .lx-grad {
+        background: none;
+        -webkit-text-fill-color: var(--ln-accent-dark);
+        color: var(--ln-accent-dark);
+    }
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1100px) {
+    body.page-landing .lx-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.page-landing .lx-uses {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 960px) {
-    body.page-landing .ln-hero-inner {
-        grid-template-columns: 1fr;
+    body.page-landing .lx-hero {
+        padding: 3rem 1.5rem 4.5rem;
     }
 
-    body.page-landing .ln-hero-copy h1 {
-        font-size: 2.5rem;
+    body.page-landing .lx-hero-inner,
+    body.page-landing .lx-split,
+    body.page-landing .lx-split-rev {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2.5rem;
     }
 
-    body.page-landing .ln-feature-grid,
-    body.page-landing .ln-process-grid {
-        grid-template-columns: 1fr;
+    body.page-landing .lx-split-rev .lx-live {
+        order: 2;
     }
 
-    body.page-landing .navbar-container {
-        padding: 0.9rem 1.25rem;
+    body.page-landing .lx-section {
+        padding: 4rem 1.5rem;
+    }
+
+    body.page-landing .lx-strip {
+        padding: 0 1.5rem;
+    }
+
+    body.page-landing .lx-strip-inner {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.page-landing .lx-demo {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.page-landing .lx-demo-stage {
+        order: -1;
+    }
+
+    body.page-landing .lx-demo-controls {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 1.5rem;
+    }
+
+    body.page-landing .lx-demo-controls .lx-shuffle,
+    body.page-landing .lx-demo-controls .lx-demo-note {
+        grid-column: 1 / -1;
+    }
+
+    body.page-landing .lx-steps {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1.6rem;
+        max-width: 420px;
+        margin: 0 auto;
+    }
+
+    body.page-landing .lx-steps::before,
+    body.page-landing .lx-steps::after {
+        top: 28px;
+        bottom: 28px;
+        left: 28px;
+        right: auto;
+        width: 3px;
+        height: auto;
+    }
+
+    body.page-landing .lx-steps::after {
+        transform: scaleY(0);
+        transform-origin: top;
+    }
+
+    body.page-landing .lx-steps.lx-in::after,
+    html:not(.lx-motion) body.page-landing .lx-steps::after {
+        transform: scaleY(1);
+    }
+
+    body.page-landing .lx-step {
+        display: grid;
+        grid-template-columns: 58px minmax(0, 1fr);
+        column-gap: 1rem;
+        text-align: left;
+        align-items: center;
+    }
+
+    body.page-landing .lx-step-num {
+        grid-row: 1 / span 2;
+        margin: 0;
+    }
+
+    body.page-landing .lx-step h3,
+    body.page-landing .lx-step p {
+        grid-column: 2;
+    }
+
+    body.page-landing .lx-flow {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    body.page-landing .lx-node {
+        width: min(280px, 100%);
+    }
+
+    body.page-landing .lx-pipe {
+        flex: 0 0 56px;
+        width: 3px;
+        height: 56px;
+        margin: 0.5rem 0;
+        background: repeating-linear-gradient(180deg, var(--ln-border-strong) 0 8px, transparent 8px 14px);
+    }
+
+    body.page-landing .lx-packet {
+        left: 50%;
+        margin-left: -6px;
+        margin-top: 0;
+        top: 0;
+        animation-name: lx-travel-v;
+    }
+
+    body.page-landing .lx-trio {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@keyframes lx-travel-v {
+    0% { top: 0; opacity: 0; }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { top: calc(100% - 12px); opacity: 0; }
+}
+
+@media (max-width: 900px) {
+    body.page-landing .lx-tab {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
     }
 }
 
 @media (max-width: 640px) {
-    body.page-landing .ln-hero,
-    body.page-landing .ln-features,
-    body.page-landing .ln-process,
-    body.page-landing .ln-cta {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+    body.page-landing .lx-checks {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    body.page-landing .ln-hero-actions {
+    body.page-landing .lx-actions {
         flex-direction: column;
         align-items: stretch;
     }
 
-    body.page-landing .ln-hero-highlights {
-        grid-template-columns: 1fr;
-        max-width: none;
+    body.page-landing .lx-grid,
+    body.page-landing .lx-uses {
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    body.page-landing .ln-cta-card {
-        padding: 3rem 1.75rem;
+    body.page-landing .lx-demo-controls {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    body.page-landing .lx-demo-controls,
+    body.page-landing .lx-demo-stage {
+        padding: 1.1rem;
+    }
+
+    body.page-landing .lx-float-a { left: 0.2rem; }
+    body.page-landing .lx-float-b { right: 0.6rem; top: -1.1rem; }
+    body.page-landing .lx-float-c { display: none; }
+
+    body.page-landing .lx-cta {
+        padding: 3rem 1.5rem 4rem;
+    }
+
+    body.page-landing .lx-cta-card {
+        padding: 2.5rem 1.5rem;
+    }
+
+    body.page-landing .lx-fact-num {
+        font-size: 1.8rem;
+    }
+
+    body.page-landing .lx-q p {
+        padding-right: 0;
     }
 }
 
-/* ---- Reduced motion ---- */
+/* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-    body.page-landing .ln-bar::before,
-    body.page-landing .ln-float-badge,
-    body.page-landing .ln-feature-card,
-    body.page-landing .ln-process-step {
+    body.page-landing .lx-blob,
+    body.page-landing .lx-cta-blob,
+    body.page-landing .lx-float,
+    body.page-landing .lx-ping,
+    body.page-landing .lx-live-dot,
+    body.page-landing .lx-grad,
+    body.page-landing .lx-marquee-track,
+    body.page-landing .lx-packet,
+    body.page-landing .lx-bar,
+    body.page-landing .lx-line,
+    body.page-landing .lx-area,
+    body.page-landing .lx-dotpt,
+    body.page-landing .lx-seg-arc {
         animation: none !important;
-        transition: none !important;
+    }
+
+    body.page-landing .lx-line {
+        stroke-dashoffset: 0;
+    }
+
+    body.page-landing .lx-area,
+    body.page-landing .lx-dotpt {
+        opacity: 1;
+    }
+
+    body.page-landing [data-lx],
+    body.page-landing [data-split] .word {
         opacity: 1 !important;
         transform: none !important;
+        translate: none !important;
+        transition: none !important;
+    }
+
+    /* .lx-grad is hidden by html.lx-motion until its own animation runs;
+       with animations off it would stay at opacity 0 and drop the words out
+       of the headline. */
+
+    body.page-landing .lx-grad {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    body.page-landing .lx-steps::after {
+        transform: none !important;
+        transition: none !important;
+    }
+
+    body.page-landing .lx-mini i,
+    body.page-landing .lx-window,
+    body.page-landing .lx-card {
+        transition: none !important;
+    }
+
+    /* everything added above. Nothing here starts hidden without its
+       animation, so switching these off leaves every element in its
+       resting state rather than blank. */
+
+    body.page-landing .lx-card::before,
+    body.page-landing .lx-card-ico,
+    body.page-landing .lx-step-num,
+    body.page-landing .lx-steps::before,
+    body.page-landing .lx-tile,
+    body.page-landing .lx-board-status,
+    body.page-landing .lx-board-grid::after,
+    body.page-landing .lx-live,
+    body.page-landing .lx-live-area,
+    body.page-landing .lx-pipe,
+    body.page-landing .lx-node,
+    body.page-landing .lx-trio-item,
+    body.page-landing .lx-use,
+    body.page-landing .lx-use h3,
+    body.page-landing .lx-chip,
+    body.page-landing .lx-q,
+    body.page-landing .lx-q p,
+    body.page-landing .lx-cta-btn,
+    body.page-landing .lx-cta-btn::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    /* the .lx-refreshing variants are more specific than the entries above,
+       so they need naming outright or their animation still runs */
+    body.page-landing .lx-board.lx-refreshing .lx-board-status,
+    body.page-landing .lx-board.lx-refreshing .lx-board-grid::after,
+    body.page-landing .lx-board.lx-refreshing .lx-spin,
+    body.page-landing .lx-q[open] p {
+        animation: none !important;
+    }
+
+    body.page-landing .lx-card::before {
+        transform: scaleX(0) !important;
+    }
+
+    body.page-landing .lx-board.lx-refreshing .lx-board-grid::after {
+        opacity: 0 !important;
     }
 }

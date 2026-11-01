@@ -6,11 +6,12 @@
 {% block body_class %}page-landing{% endblock %}
 
 {% block head_meta %}
-<meta name="description" content="Upload a CSV or Excel file and turn it into a clean, shareable chart in under a minute. No formulas, no setup.">
+<script>document.documentElement.classList.add('lx-motion');setTimeout(function(){if(!window.__lxMotion){document.documentElement.classList.remove('lx-motion');}},3000);</script>
+<meta name="description" content="Upload a CSV or Excel file and turn it into charts, reports and self-refreshing boards. 11 chart types, live data, public share links. No formulas, no setup.">
 <meta property="og:site_name" content="Fluxion">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Fluxion - Turn Spreadsheets Into Answers">
-<meta property="og:description" content="Upload a CSV or Excel file and turn it into a clean, shareable chart in under a minute.">
+<meta property="og:description" content="Upload a CSV or Excel file and turn it into charts, reports and self-refreshing boards in minutes.">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/greenlogo.png' %}">
 <meta name="twitter:card" content="summary">
@@ -20,166 +21,330 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/landing.css' %}">
+<link rel="stylesheet" href="{% static 'css/landing-v2.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<!-- Hero -->
-<section class="ln-hero">
-    <div class="ln-hero-inner">
-        <div class="ln-hero-copy">
-            <span class="ln-eyebrow">Data visualization, simplified</span>
-            <h1>See your data.<br>Instantly clear.</h1>
-            <p class="ln-hero-sub">Fluxion turns a raw spreadsheet into a clean, shareable chart in under a minute. Upload a CSV or Excel file, choose a chart type, map your columns to axes, and adjust the color scheme — all from one screen, with a live preview that updates as you go. No formulas, no dashboard software to learn, and nothing to configure before you start.</p>
-            <div class="ln-hero-actions">
-                <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary">Start free</a>
-                <a href="#how-it-works" class="ln-btn ln-btn-ghost">See how it works</a>
+<!-- ============ Hero ============ -->
+<section class="lx-hero">
+    <span class="lx-blob lx-blob-1" aria-hidden="true"></span>
+    <span class="lx-blob lx-blob-2" aria-hidden="true"></span>
+    <span class="lx-blob lx-blob-3" aria-hidden="true"></span>
+
+    <div class="lx-hero-inner">
+        <div class="lx-hero-copy">
+            <span class="ln-eyebrow lx-pill"><span class="lx-ping" aria-hidden="true"></span> Data visualization, simplified</span>
+            <h1 class="lx-title"><span data-split>See your data.</span> <span class="lx-grad">Instantly clear.</span></h1>
+            <p class="lx-sub" data-lx>Upload a CSV or Excel file, pick a chart type, map your columns and share a link. Fluxion turns raw spreadsheets into clean charts, reports and self-refreshing boards, with no formulas and nothing to set up.</p>
+            <div class="lx-actions" data-lx data-lx-delay="120">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="ln-btn ln-btn-primary">Go to Dashboard</a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary">Start free</a>
+                {% endif %}
+                <a href="#demo" class="ln-btn ln-btn-ghost">Try the live demo</a>
             </div>
-            <ul class="ln-hero-highlights">
-                <li>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    No credit card required
-                </li>
-                <li>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    CSV &amp; Excel files up to 16MB
-                </li>
-                <li>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    Bar, line, pie &amp; scatter charts
-                </li>
-                <li>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                    Public share links, no login needed to view
-                </li>
+            <ul class="lx-checks" data-lx data-lx-delay="220">
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>No credit card required</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>CSV and Excel files up to 16 MB</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>11 chart types, fully customisable</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Public links, viewers need no account</li>
             </ul>
         </div>
 
-        <div class="ln-hero-visual" aria-hidden="true">
-            <div class="ln-chart-card">
-                <div class="ln-chart-card-header">
-                    <div>
-                        <span class="ln-chart-card-title">Revenue by Quarter</span>
-                        <span class="ln-chart-card-sub">Uploaded from Q_sales.csv</span>
+        <div class="lx-hero-visual" id="lxTilt">
+            <div class="lx-window">
+                <div class="lx-win-bar">
+                    <span class="lx-win-dot lx-d1"></span><span class="lx-win-dot lx-d2"></span><span class="lx-win-dot lx-d3"></span>
+                    <span class="lx-win-title">Revenue by Quarter</span>
+                </div>
+                <div class="lx-win-body">
+                    <div class="lx-win-top">
+                        <div class="lx-tabs" role="tablist" aria-label="Chart type" id="lxHeroTabs">
+                            <button type="button" class="lx-tab" role="tab" data-type="bar" aria-selected="true">Bar</button>
+                            <button type="button" class="lx-tab" role="tab" data-type="line" aria-selected="false">Line</button>
+                            <button type="button" class="lx-tab" role="tab" data-type="donut" aria-selected="false">Donut</button>
+                        </div>
+                        <span class="lx-file">sales_q.csv &middot; 5 rows</span>
                     </div>
-                    <span class="ln-chart-badge">Bar</span>
-                </div>
-                <div class="ln-chart-bars">
-                    <div class="ln-bar" style="--h: 38%; --d: 0s;"><span>Q1</span></div>
-                    <div class="ln-bar" style="--h: 55%; --d: 0.08s;"><span>Q2</span></div>
-                    <div class="ln-bar" style="--h: 47%; --d: 0.16s;"><span>Q3</span></div>
-                    <div class="ln-bar" style="--h: 78%; --d: 0.24s;"><span>Q4</span></div>
-                    <div class="ln-bar" style="--h: 92%; --d: 0.32s;"><span>Q5</span></div>
+                    <div class="lx-chart" id="lxHeroChart" role="img" aria-label="Sample revenue chart that switches between bar, line and donut views"></div>
                 </div>
             </div>
-            <div class="ln-float-badge">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-                Chart saved
+            <div class="lx-float lx-float-a"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Chart saved</div>
+            <div class="lx-float lx-float-b"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg>Link copied</div>
+            <div class="lx-float lx-float-c"><span class="lx-live-dot"></span>Live</div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ Facts strip ============ -->
+<section class="lx-strip" data-lx>
+    <div class="lx-strip-inner">
+        <div class="lx-fact"><span class="lx-fact-num" data-count="11">11</span><span class="lx-fact-label">chart types</span></div>
+        <div class="lx-fact"><span class="lx-fact-num" data-count="16" data-suffix=" MB">16 MB</span><span class="lx-fact-label">per uploaded file</span></div>
+        <div class="lx-fact"><span class="lx-fact-num" data-count="3">3</span><span class="lx-fact-label">file formats: CSV, XLSX, XLS</span></div>
+        <div class="lx-fact"><span class="lx-fact-num" data-count="1">1</span><span class="lx-fact-label">link to share a chart, report or board</span></div>
+    </div>
+</section>
+
+<!-- ============ Live demo ============ -->
+<section class="lx-section" id="demo">
+    <div class="lx-wrap">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">Try it right here</span>
+            <h2>Change a chart in one click</h2>
+            <p class="ln-section-sub">A small demo with sample data. Inside Fluxion the same switches work on your own spreadsheet.</p>
+        </div>
+        <div class="lx-demo" data-lx data-lx-delay="100">
+            <div class="lx-demo-controls">
+                <div class="lx-ctl">
+                    <span class="lx-ctl-label">Chart type</span>
+                    <div class="lx-seg" id="lxDemoTypes" role="group" aria-label="Chart type">
+                        <button type="button" class="lx-seg-btn active" data-type="bar" aria-pressed="true">Bar</button>
+                        <button type="button" class="lx-seg-btn" data-type="line" aria-pressed="false">Line</button>
+                        <button type="button" class="lx-seg-btn" data-type="area" aria-pressed="false">Area</button>
+                        <button type="button" class="lx-seg-btn" data-type="donut" aria-pressed="false">Doughnut</button>
+                    </div>
+                </div>
+                <div class="lx-ctl">
+                    <span class="lx-ctl-label">Colour scheme</span>
+                    <div class="lx-swatches" id="lxDemoSchemes" role="group" aria-label="Colour scheme">
+                        <button type="button" class="lx-sw active" data-scheme="default" aria-pressed="true" aria-label="Green" style="--c1:#1F9D6E;--c2:#34C08D"></button>
+                        <button type="button" class="lx-sw" data-scheme="blue" aria-pressed="false" aria-label="Blue" style="--c1:#3B82F6;--c2:#1D4ED8"></button>
+                        <button type="button" class="lx-sw" data-scheme="purple" aria-pressed="false" aria-label="Purple" style="--c1:#8B5CF6;--c2:#5B21B6"></button>
+                        <button type="button" class="lx-sw" data-scheme="rainbow" aria-pressed="false" aria-label="Rainbow" style="--c1:#EF4444;--c2:#22C55E"></button>
+                    </div>
+                </div>
+                <button type="button" class="lx-shuffle" id="lxShuffle">
+                    <svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+                    Shuffle the data
+                </button>
+                <p class="lx-demo-note">Hover or tap a bar to see its value. Everything here is drawn in your browser, nothing is uploaded.</p>
+            </div>
+            <div class="lx-demo-stage">
+                <div class="lx-demo-head"><span id="lxDemoCaption">Bar chart &middot; Green</span><span class="lx-badge">Sample data</span></div>
+                <div class="lx-chart lx-chart-lg" id="lxDemoChart" role="img" aria-label="Interactive sample chart"></div>
+                <div class="lx-values" id="lxDemoValues"></div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Feature Grid -->
-<section class="ln-features" id="features">
-    <div class="ln-section-head">
-        <span class="ln-eyebrow">Why Fluxion</span>
-        <h2>Everything you need, nothing you don't</h2>
-        <p class="ln-section-sub">Every feature below ships in the free plan — there's no upgrade wall between you and a finished chart.</p>
-    </div>
-    <div class="ln-feature-grid">
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
-            </div>
-            <h3>Drag-and-drop upload</h3>
-            <p>Drop a CSV or Excel file (up to 16MB) and Fluxion reads the columns, detects data types, and shows you the first rows immediately. No manual formatting, no cleaning spreadsheets before you can see your own data.</p>
+<!-- ============ Features ============ -->
+<section class="lx-section lx-soft" id="features">
+    <div class="lx-wrap">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">Why Fluxion</span>
+            <h2>From a raw file to a finished dashboard</h2>
+            <p class="ln-section-sub">Everything below is in the app today, and every feature ships in the free plan.</p>
         </div>
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
-            </div>
-            <h3>Four chart types</h3>
-            <p>Bar, line, pie, and scatter plots cover most everyday reporting needs. Map any column to an axis, switch chart types without re-uploading, and watch the preview update instantly as you adjust it.</p>
-        </div>
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4a2 2 0 0 1 2-2h10l4 4v10.2a2 2 0 0 1-2 1.8H8a2 2 0 0 1-2-2Z"/><path d="M10 2v4h6"/><path d="M18 18v-7h-8v7"/><path d="M18 22H4a2 2 0 0 1-2-2V6"/></svg>
-            </div>
-            <h3>Save your work</h3>
-            <p>Every chart is saved to your account alongside its source dataset, so you can revisit, tweak the axes, or export it again later without hunting for the original file or rebuilding from scratch.</p>
-        </div>
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-            </div>
-            <h3>Share with a link</h3>
-            <p>Generate a public link to any saved chart in one click. Viewers get a clean, standalone page with the live chart and download options — no Fluxion account or login required on their end.</p>
-        </div>
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
-            </div>
-            <h3>Export anywhere</h3>
-            <p>Download any chart as a PNG for quick sharing or a PDF for print-ready reports. Exports render at full resolution, so they hold up fine dropped straight into a slide deck or document.</p>
-        </div>
-        <div class="ln-feature-card">
-            <div class="ln-feature-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
-            </div>
-            <h3>No setup time</h3>
-            <p>There's no workspace to configure, no integration to connect, and no tutorial to sit through. Sign up, upload a file, and your first chart is ready in under a minute — genuinely.</p>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section class="ln-process" id="how-it-works">
-    <div class="ln-section-head">
-        <span class="ln-eyebrow">The process</span>
-        <h2>Three steps from spreadsheet to shareable chart</h2>
-        <p class="ln-section-sub">No account setup, no data modeling, no waiting on IT. Most people finish all three steps on their first visit.</p>
-    </div>
-    <div class="ln-process-grid">
-        <div class="ln-process-step">
-            <span class="ln-step-num">01</span>
-            <h3>Upload your file</h3>
-            <p>Drop in a CSV or Excel file up to 16MB. Fluxion parses the columns, infers data types, and shows a live preview of your rows within seconds — before you commit to any chart settings.</p>
-        </div>
-        <div class="ln-process-step">
-            <span class="ln-step-num">02</span>
-            <h3>Choose your chart</h3>
-            <p>Pick bar, line, pie, or scatter, then map your columns to the axes (or values and labels, for pie charts). Adjust the color scheme and title, and the preview updates instantly on the right.</p>
-        </div>
-        <div class="ln-process-step">
-            <span class="ln-step-num">03</span>
-            <h3>Save and share</h3>
-            <p>Save the chart to your account so it's there whenever you come back, then generate a public link anyone can open and view — no Fluxion account required on their end, ever.</p>
+        <div class="lx-grid">
+            <article class="lx-card" data-lx data-lx-delay="0">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg></div>
+                <h3>Drag-and-drop upload</h3>
+                <p>Drop a CSV, XLSX or XLS file up to 16 MB. Columns, data types and a row preview appear straight away, with a per-column overview so you can spot gaps before you chart.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="80">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 12h8"/><path d="M10 18h4"/></svg></div>
+                <h3>Clean columns first</h3>
+                <p>Rename messy headers or drop columns you don't need. Dropped columns stay out of every future chart built from that dataset.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="160">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div>
+                <h3>11 chart types</h3>
+                <p>Bar, line, pie, scatter, horizontal bar, area, doughnut, radar, stacked bar, combo and histogram. Switch type without re-uploading.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="0">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/></svg></div>
+                <h3>Make it look right</h3>
+                <p>The Customise panel covers titles, legend position, axis titles, gridlines, font size, your own series colours and smooth or straight lines.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="80">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>
+                <h3>Save, search, edit</h3>
+                <p>Every chart lives in My Charts. Search by title, sort by date, and reopen any chart later to change columns, type or colours.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="160">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg></div>
+                <h3>Reports</h3>
+                <p>Bundle several saved charts into one report behind a single shareable link. Good for a weekly summary or a client update.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="0">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></div>
+                <h3>Boards</h3>
+                <p>Arrange charts in one grid with small, medium or large tiles. Refresh on demand or on a timer, then download the board as PNG or PDF.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="80">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg></div>
+                <h3>Live Charts</h3>
+                <p>Stream data into a line, bar, scatter or gauge view from simulated data, one of your datasets or an API endpoint that returns JSON.</p>
+            </article>
+            <article class="lx-card" data-lx data-lx-delay="160">
+                <div class="lx-card-ico"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg></div>
+                <h3>Share and embed</h3>
+                <p>One public link per chart, report or board. Unshare any time, embed charts and reports with an iframe, and export charts as PNG or PDF.</p>
+            </article>
         </div>
     </div>
 </section>
 
-<!-- Final CTA -->
-<section class="ln-cta">
-    <div class="ln-cta-card">
+<!-- ============ How it works ============ -->
+<section class="lx-section" id="how-it-works">
+    <div class="lx-wrap">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">The process</span>
+            <h2>From file to link in four steps</h2>
+            <p class="ln-section-sub">No account setup, no data modelling, no waiting on anyone. Most people finish all four on their first visit.</p>
+        </div>
+        <ol class="lx-steps" id="lxSteps" data-lx>
+            <li class="lx-step"><span class="lx-step-num">1</span><h3>Upload</h3><p>Drop a CSV or Excel file and preview the rows and columns right away.</p></li>
+            <li class="lx-step"><span class="lx-step-num">2</span><h3>Build</h3><p>Pick a chart type and columns, then adjust titles, colours and legends.</p></li>
+            <li class="lx-step"><span class="lx-step-num">3</span><h3>Save</h3><p>Keep the chart in My Charts and edit it whenever the data changes.</p></li>
+            <li class="lx-step"><span class="lx-step-num">4</span><h3>Share</h3><p>Send one link for a chart, a report or a board. Unshare whenever you like.</p></li>
+        </ol>
+    </div>
+</section>
+
+<!-- ============ Boards ============ -->
+<section class="lx-section lx-soft">
+    <div class="lx-wrap lx-split">
+        <div class="lx-split-copy" data-lx>
+            <span class="ln-eyebrow">Boards</span>
+            <h2>Dashboards that keep themselves fresh</h2>
+            <p>Pick saved charts, give each tile a size, put them in order and choose how often the board refreshes: manual, every 30 seconds, every minute or every 5 minutes.</p>
+            <ul class="lx-list">
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Small, medium and large tiles in a 12-column grid</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Refresh on demand or on a timer</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Download the whole board as PNG or PDF</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Share it with one public link</li>
+            </ul>
+        </div>
+        <div class="lx-board" id="lxBoard" data-lx data-lx-delay="120" aria-hidden="true">
+            <div class="lx-board-bar">
+                <span class="lx-board-title">Sales overview</span>
+                <span class="lx-board-status" id="lxBoardStatus"><span class="lx-spin"></span><span class="lx-board-status-text">Auto-refresh &middot; 30 s</span></span>
+            </div>
+            <div class="lx-board-grid">
+                <div class="lx-tile lx-tile-s"><span class="lx-tile-t">Revenue</span><div class="lx-mini"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="lx-tile lx-tile-s"><span class="lx-tile-t">Orders</span><div class="lx-mini"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="lx-tile lx-tile-s"><span class="lx-tile-t">Returns</span><div class="lx-mini"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="lx-tile lx-tile-m"><span class="lx-tile-t">By region</span><div class="lx-mini"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="lx-tile lx-tile-m"><span class="lx-tile-t">Top products</span><div class="lx-mini"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+                <div class="lx-tile lx-tile-l"><span class="lx-tile-t">Monthly trend</span><div class="lx-mini lx-mini-wide"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ Live ============ -->
+<section class="lx-section lx-live-sec">
+    <div class="lx-wrap lx-split lx-split-rev">
+        <div class="lx-live" data-lx aria-hidden="true">
+            <div class="lx-live-bar"><span class="lx-live-dot"></span><span>Streaming</span><span class="lx-live-val" id="lxLiveVal">--</span></div>
+            <svg class="lx-live-svg" viewBox="0 0 600 200" preserveAspectRatio="none" id="lxLiveSvg">
+                <defs><linearGradient id="lxLiveGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34C08D" stop-opacity=".45"/><stop offset="1" stop-color="#34C08D" stop-opacity="0"/></linearGradient></defs>
+                <g class="lx-live-grid"><line x1="0" x2="600" y1="50" y2="50"/><line x1="0" x2="600" y1="100" y2="100"/><line x1="0" x2="600" y1="150" y2="150"/></g>
+                <path id="lxLiveArea" class="lx-live-area" d=""/>
+                <path id="lxLiveLine" class="lx-live-line" d=""/>
+            </svg>
+            <div class="lx-live-foot"><span>Points: <strong id="lxLiveN">0</strong></span><span>Average: <strong id="lxLiveAvg">--</strong></span></div>
+        </div>
+        <div class="lx-split-copy" data-lx data-lx-delay="120">
+            <span class="ln-eyebrow">Live Charts</span>
+            <h2>Watch your data move in real time</h2>
+            <p>Start with built-in simulated data, stream a column from one of your own datasets, or poll an API endpoint that returns JSON. Choose a line, bar, scatter or gauge view, then set the update interval, the number of points and the colour scheme.</p>
+            <ul class="lx-list">
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Update interval from 100 ms to 5 seconds</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Pause, resume, clear and export an image</li>
+                <li><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Point it at your own API with a JSON value path</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- ============ Share + privacy ============ -->
+<section class="lx-section">
+    <div class="lx-wrap">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">Sharing</span>
+            <h2>Share the chart, not your spreadsheet</h2>
+            <p class="ln-section-sub">People you share with see the finished chart. Your uploaded file and raw rows stay with you.</p>
+        </div>
+        <div class="lx-flow" data-lx data-lx-delay="100" aria-hidden="true">
+            <div class="lx-node"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></svg><strong>Your dataset</strong><span>Private to your account</span></div>
+            <div class="lx-pipe"><span class="lx-packet"></span></div>
+            <div class="lx-node"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg><strong>Your chart</strong><span>Summarised data only</span></div>
+            <div class="lx-pipe"><span class="lx-packet lx-packet-2"></span></div>
+            <div class="lx-node"><svg class="lx-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98"/><path d="m15.41 6.51-6.82 3.98"/></svg><strong>Public link</strong><span>View only, no login</span></div>
+        </div>
+        <ul class="lx-trio">
+            <li class="lx-trio-item" data-lx data-lx-delay="0"><strong>No raw rows leave</strong><span>Viewers get only what each chart needs. They can't download the uploaded file or change anything.</span></li>
+            <li class="lx-trio-item" data-lx data-lx-delay="80"><strong>Unshare in one click</strong><span>Switch a link off and it stops working straight away, along with any embeds.</span></li>
+            <li class="lx-trio-item" data-lx data-lx-delay="160"><strong>Embed anywhere</strong><span>Charts and reports come with an iframe snippet you can paste into any web page.</span></li>
+        </ul>
+    </div>
+</section>
+
+<!-- ============ Use cases ============ -->
+<section class="lx-section lx-soft">
+    <div class="lx-wrap">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">Good for</span>
+            <h2>Whatever your spreadsheet is hiding</h2>
+        </div>
+        <div class="lx-uses">
+            <div class="lx-use" data-lx data-lx-delay="0"><h3>Weekly summaries</h3><p>Bundle the week's charts into one report and send a single link.</p></div>
+            <div class="lx-use" data-lx data-lx-delay="80"><h3>Client updates</h3><p>Share a clean public page instead of attaching a spreadsheet.</p></div>
+            <div class="lx-use" data-lx data-lx-delay="160"><h3>Team boards</h3><p>Put the numbers everyone checks on one board that refreshes itself.</p></div>
+            <div class="lx-use" data-lx data-lx-delay="240"><h3>Quick data checks</h3><p>Drop in a file, scan the column overview and chart whatever looks odd.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ Chart types marquee ============ -->
+<section class="lx-marquee-sec" aria-label="Chart types: bar, line, pie, scatter, horizontal bar, area, doughnut, radar, stacked bar, combo, histogram">
+    <div class="lx-marquee" aria-hidden="true">
+        <div class="lx-marquee-track">
+            <span class="lx-chip">Bar</span><span class="lx-chip">Line</span><span class="lx-chip">Pie</span><span class="lx-chip">Scatter</span><span class="lx-chip">Horizontal bar</span><span class="lx-chip">Area</span><span class="lx-chip">Doughnut</span><span class="lx-chip">Radar</span><span class="lx-chip">Stacked bar</span><span class="lx-chip">Combo</span><span class="lx-chip">Histogram</span>
+            <span class="lx-chip">Bar</span><span class="lx-chip">Line</span><span class="lx-chip">Pie</span><span class="lx-chip">Scatter</span><span class="lx-chip">Horizontal bar</span><span class="lx-chip">Area</span><span class="lx-chip">Doughnut</span><span class="lx-chip">Radar</span><span class="lx-chip">Stacked bar</span><span class="lx-chip">Combo</span><span class="lx-chip">Histogram</span>
+        </div>
+    </div>
+</section>
+
+<!-- ============ FAQ teaser ============ -->
+<section class="lx-section">
+    <div class="lx-wrap lx-narrow">
+        <div class="ln-section-head" data-lx>
+            <span class="ln-eyebrow">Quick answers</span>
+            <h2>Before you start</h2>
+        </div>
+        <div class="lx-faq" data-lx data-lx-delay="80">
+            <details class="lx-q"><summary>What file types can I upload?</summary><p>CSV and Excel (.xlsx, .xls), up to 16 MB.</p></details>
+            <details class="lx-q"><summary>Can I edit a chart after saving it?</summary><p>Yes. Open it from My Charts and hit Edit to change the columns, chart type, colour scheme or any Customise option.</p></details>
+            <details class="lx-q"><summary>What do people see when I share something?</summary><p>Only the charts themselves, built from the summarised data each chart needs. Viewers never get your raw rows or the uploaded file, and they can't change anything.</p></details>
+            <details class="lx-q"><summary>What's the difference between a chart, a report and a board?</summary><p>A chart is one visualisation. A report bundles several saved charts behind one link. A board puts saved charts in one grid with tile sizes you choose, and it can refresh itself.</p></details>
+        </div>
+        <p class="lx-more" data-lx><a href="{% url 'faq' %}" class="auth-link">Read the full FAQ &rarr;</a></p>
+    </div>
+</section>
+
+<!-- ============ Final CTA ============ -->
+<section class="ln-cta lx-cta">
+    <div class="ln-cta-card lx-cta-card" data-lx>
+        <span class="lx-cta-blob lx-cta-blob-1" aria-hidden="true"></span>
+        <span class="lx-cta-blob lx-cta-blob-2" aria-hidden="true"></span>
         <h2>Ready to see your data clearly?</h2>
         <p>Create a free account and turn your first spreadsheet into a chart today.</p>
-        <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary ln-btn-lg">Start creating — it's free</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="ln-btn ln-btn-primary ln-btn-lg lx-cta-btn">Go to Dashboard</a>
+        {% else %}
+            <a href="{% url 'signup' %}" class="ln-btn ln-btn-primary ln-btn-lg lx-cta-btn">Start creating, it's free</a>
+        {% endif %}
     </div>
 </section>
+{% endblock %}
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const cards = document.querySelectorAll('.ln-feature-card, .ln-process-step');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('ln-visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
-    cards.forEach(card => observer.observe(card));
-});
-</script>
+{% block extra_js %}
+<script src="{% static 'js/landing.js' %}"></script>
 {% endblock %}
