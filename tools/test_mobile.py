@@ -146,7 +146,7 @@ _ex = read('static', 'js', 'chart_extras.js')
 check('chart_extras.js exists', _ex is not None, True)
 if _ex is not None:
     check('chart_extras.js defines FluxionExtras', 'window.FluxionExtras' in _ex, True)
-for _n in ('create_chart', 'shared_chart', 'shared_report', 'shared_board'):
+for _n in ('create_chart', 'shared_chart', 'shared_report', 'shared_board', 'charts', 'reports', 'view_board'):
     _t = read('templates', _n + '.html') or ''
     check(_n + ' loads chart_extras.js once, after chart_render.js', _t.count('js/chart_extras.js') == 1 and _t.index('js/chart_extras.js') > _t.index('js/chart_render.js'), True)
 for res, label, got, exp in rows:
