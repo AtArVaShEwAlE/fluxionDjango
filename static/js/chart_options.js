@@ -4,6 +4,14 @@
 window.FluxionOptionsPanel = (function () {
     const ROUND = ['pie', 'doughnut'];
     const SMOOTH = ['line', 'area', 'combo'];
+    const LABEL_NO = ['radar'];
+    const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
+    const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
+    const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
+    const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
+    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut'];
+    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut'];
+    const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area'];
     const MAX_COLORS = 10;
 
     let state = {};
@@ -87,6 +95,14 @@ window.FluxionOptionsPanel = (function () {
         show('grid', !round);
         show('smooth', SMOOTH.indexOf(type) !== -1);
         show('colors', !round);
+        show('vlabels', LABEL_NO.indexOf(type) === -1);
+        show('highlight', HI_OK.indexOf(type) !== -1);
+        show('trend', TREND_OK.indexOf(type) !== -1);
+        show('reflines', REF_OK.indexOf(type) !== -1);
+        show('sort', SORT_OK.indexOf(type) !== -1);
+        show('topn', TOPN_OK.indexOf(type) !== -1);
+        show('log', LOG_NO.indexOf(type) === -1);
+        show('gradient', GRAD_OK.indexOf(type) !== -1);
     }
 
     function syncControls() {
@@ -100,6 +116,19 @@ window.FluxionOptionsPanel = (function () {
         $('optGrid').checked = state.grid !== false;
         $('optSmooth').checked = state.smooth !== false;
         $('optFontSize').value = state.font_size || '';
+        const refs = state.ref_lines || [];
+        $('optValueLabels').checked = state.value_labels === true;
+        $('optHighlight').checked = state.highlight === true;
+        $('optTrend').checked = state.trendline === true;
+        $('optLog').checked = state.log_scale === true;
+        $('optRefAvg').checked = refs.indexOf('avg') !== -1;
+        $('optRefMin').checked = refs.indexOf('min') !== -1;
+        $('optRefMax').checked = refs.indexOf('max') !== -1;
+        $('optSort').value = state.sort || '';
+        $('optTopN').value = state.top_n || '';
+        $('optNumFormat').value = state.number_format || 'auto';
+        $('optGradient').checked = state.gradient !== false;
+        $('optAnimate').checked = state.animate !== false;
         applyVisibility();
         colorSig = sig();
         renderColors();
@@ -142,6 +171,34 @@ window.FluxionOptionsPanel = (function () {
         listen('optYTitle', 'input', e => setOrDelete('y_title', e.target.value.trim()));
         listen('optGrid', 'change', e => { if (e.target.checked) delete state.grid; else state.grid = false; });
         listen('optSmooth', 'change', e => { if (e.target.checked) delete state.smooth; else state.smooth = false; });
+        const flag = (id, key) => listen(id, 'change', e => { if (e.target.checked) state[key] = true; else delete state[key]; });
+        flag('optValueLabels', 'value_labels');
+        flag('optHighlight', 'highlight');
+        flag('optTrend', 'trendline');
+        flag('optLog', 'log_scale');
+        const unflag = (id, key) => listen(id, 'change', e => { if (e.target.checked) delete state[key]; else state[key] = false; });
+        unflag('optGradient', 'gradient');
+        unflag('optAnimate', 'animate');
+        const readRefs = () => {
+            const r = [];
+            if ($('optRefAvg').checked) r.push('avg');
+            if ($('optRefMin').checked) r.push('min');
+            if ($('optRefMax').checked) r.push('max');
+            if (r.length) state.ref_lines = r; else delete state.ref_lines;
+        };
+        ['optRefAvg', 'optRefMin', 'optRefMax'].forEach(id => listen(id, 'change', readRefs));
+        listen('optSort', 'change', e => setOrDelete('sort', e.target.value));
+        listen('optNumFormat', 'change', e => setOrDelete('number_format', e.target.value === 'auto' ? '' : e.target.value));
+        const readTop = clamp => {
+            const el = $('optTopN');
+            if (el.value === '') { delete state.top_n; return; }
+            const n = parseInt(el.value, 10);
+            if (!Number.isFinite(n)) return;
+            if (n >= 3 && n <= 20) state.top_n = n;
+            else if (clamp) { const c = Math.min(20, Math.max(3, n)); el.value = c; state.top_n = c; }
+        };
+        listen('optTopN', 'input', () => readTop(false));
+        listen('optTopN', 'change', () => readTop(true));
         listen('optFontSize', 'input', () => readFont(false));
         listen('optFontSize', 'change', () => readFont(true));
         listen('optColorsReset', 'click', () => {

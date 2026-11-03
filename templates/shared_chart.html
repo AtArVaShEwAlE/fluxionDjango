@@ -297,6 +297,7 @@
     {{ chart|json_script:"chart-data" }}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="{% static 'js/chart_render.js' %}"></script>
+    <script src="{% static 'js/chart_extras.js' %}"></script>
     <script>
         // Chart data from server
         const chartData = JSON.parse(document.getElementById('chart-data').textContent);

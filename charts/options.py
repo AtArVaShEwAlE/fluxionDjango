@@ -12,6 +12,11 @@ MAX_AXIS_TITLE = 60
 MIN_FONT = 10
 MAX_FONT = 24
 MAX_COLORS = 10
+REF_LINES = ('avg', 'min', 'max')
+SORTS = ('asc', 'desc')
+NUMBER_FORMATS = ('plain', 'percent', 'usd', 'eur', 'inr', 'gbp')
+MIN_TOP_N = 3
+MAX_TOP_N = 20
 
 
 def _text(value, limit):
@@ -60,7 +65,8 @@ def clean_options(raw):
     if not isinstance(raw, dict):
         return {}
     out = {}
-    for key in ('show_title', 'grid', 'smooth'):
+    for key in ('show_title', 'grid', 'smooth', 'value_labels', 'highlight', 'trendline',
+                'log_scale', 'gradient', 'animate'):
         if isinstance(raw.get(key), bool):
             out[key] = raw[key]
     for key, limit in (('title_text', MAX_TITLE), ('x_title', MAX_AXIS_TITLE),
@@ -74,6 +80,19 @@ def clean_options(raw):
     size = _font_size(raw.get('font_size'))
     if size is not None:
         out['font_size'] = size
+    refs = raw.get('ref_lines')
+    if (isinstance(refs, list) and 0 < len(refs) <= 3
+            and all(isinstance(r, str) and r in REF_LINES for r in refs)):
+        out['ref_lines'] = [r for r in REF_LINES if r in refs]
+    for key, allowed in (('sort', SORTS), ('number_format', NUMBER_FORMATS)):
+        value = raw.get(key)
+        if isinstance(value, str) and value in allowed:
+            out[key] = value
+    top = raw.get('top_n')
+    if isinstance(top, float) and top.is_integer():
+        top = int(top)
+    if isinstance(top, int) and not isinstance(top, bool) and MIN_TOP_N <= top <= MAX_TOP_N:
+        out['top_n'] = top
     colors = _colors(raw.get('series_colors'))
     if colors:
         out['series_colors'] = colors

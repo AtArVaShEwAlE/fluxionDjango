@@ -170,6 +170,7 @@
                             <option value="blue">Blue Tones</option>
                             <option value="purple">Purple Tones</option>
                             <option value="rainbow">Rainbow</option>
+                            <option value="cbsafe">Colour-blind safe</option>
                         </select>
                     </div>
                 </div>
@@ -220,6 +221,47 @@
                             <button type="button" class="btn-add-y" id="optColorsReset">Reset colors</button>
                         </div>
                         <button type="button" class="btn btn-secondary btn-block btn-sm" id="optReset">Reset customisation</button>
+
+                        <div class="opt-group">
+                            <label class="opt-check" data-opt="vlabels"><input type="checkbox" id="optValueLabels"> Value labels</label>
+                            <label class="opt-check" data-opt="highlight"><input type="checkbox" id="optHighlight"> Highlight max / min</label>
+                            <label class="opt-check" data-opt="trend"><input type="checkbox" id="optTrend"> Trendline</label>
+                            <label class="opt-check" data-opt="log"><input type="checkbox" id="optLog"> Log scale</label>
+                        </div>
+                        <div class="opt-group" data-opt="reflines">
+                            <label>Reference lines</label>
+                            <label class="opt-check"><input type="checkbox" id="optRefAvg"> Average</label>
+                            <label class="opt-check"><input type="checkbox" id="optRefMin"> Minimum</label>
+                            <label class="opt-check"><input type="checkbox" id="optRefMax"> Maximum</label>
+                        </div>
+                        <div class="opt-group" data-opt="sort">
+                            <label for="optSort">Sort</label>
+                            <select id="optSort" class="form-select">
+                                <option value="">As in data</option>
+                                <option value="desc">High to low</option>
+                                <option value="asc">Low to high</option>
+                            </select>
+                        </div>
+                        <div class="opt-group" data-opt="topn">
+                            <label for="optTopN">Show top (3-20)</label>
+                            <input type="number" id="optTopN" class="form-input" min="3" max="20" placeholder="All">
+                        </div>
+                        <div class="opt-group">
+                            <label for="optNumFormat">Number format</label>
+                            <select id="optNumFormat" class="form-select">
+                                <option value="auto">Auto</option>
+                                <option value="plain">Plain (1,234)</option>
+                                <option value="percent">Percent (value is %)</option>
+                                <option value="usd">Dollar ($)</option>
+                                <option value="eur">Euro</option>
+                                <option value="inr">Rupee</option>
+                                <option value="gbp">Pound</option>
+                            </select>
+                        </div>
+                        <div class="opt-group">
+                            <label class="opt-check" data-opt="gradient"><input type="checkbox" id="optGradient" checked> Gradient fill</label>
+                            <label class="opt-check"><input type="checkbox" id="optAnimate" checked> Animation</label>
+                        </div>
                     </div>
                 </details>
 
@@ -274,6 +316,7 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/chart_render.js' %}"></script>
+<script src="{% static 'js/chart_extras.js' %}"></script>
 <script src="{% static 'js/chart_options.js' %}"></script>
 <script src="{% static 'js/create_chart.js' %}"></script>
 {% endblock %}

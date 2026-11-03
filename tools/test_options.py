@@ -68,6 +68,37 @@ check('colors 11 -> 10', len(clean_options({'series_colors': ['#112233'] * 11})[
 check('colors empty list omitted', clean_options({'series_colors': []}), {})
 check('colors non-list dropped', clean_options({'series_colors': '#112233'}), {})
 
+FULL2 = {
+    'value_labels': True, 'highlight': False, 'trendline': True, 'log_scale': False,
+    'gradient': False, 'animate': False, 'ref_lines': ['avg', 'min', 'max'],
+    'sort': 'desc', 'top_n': 5, 'number_format': 'inr',
+}
+check('18B full roundtrip', clean_options(dict(FULL2)), FULL2)
+check('18B idempotent', clean_options(clean_options(dict(FULL2))), FULL2)
+for k in ('value_labels', 'highlight', 'trendline', 'log_scale', 'gradient', 'animate'):
+    check(f'{k} "yes" dropped', clean_options({k: 'yes'}), {})
+    check(f'{k} False kept', clean_options({k: False}), {k: False})
+check('ref_lines reordered', clean_options({'ref_lines': ['max', 'avg']}), {'ref_lines': ['avg', 'max']})
+check('ref_lines one bad drops all', clean_options({'ref_lines': ['avg', 'median']}), {})
+check('ref_lines unhashable entry no crash', clean_options({'ref_lines': ['avg', ['x']]}), {})
+check('ref_lines empty omitted', clean_options({'ref_lines': []}), {})
+check('ref_lines 4 dropped', clean_options({'ref_lines': ['avg', 'min', 'max', 'avg']}), {})
+check('ref_lines str dropped', clean_options({'ref_lines': 'avg'}), {})
+check('sort asc kept', clean_options({'sort': 'asc'}), {'sort': 'asc'})
+check('sort bad dropped', clean_options({'sort': 'up'}), {})
+check('sort list no crash', clean_options({'sort': ['asc']}), {})
+check('number_format usd kept', clean_options({'number_format': 'usd'}), {'number_format': 'usd'})
+check('number_format auto dropped', clean_options({'number_format': 'auto'}), {})
+check('number_format bad dropped', clean_options({'number_format': 'yen'}), {})
+check('top_n 3 kept', clean_options({'top_n': 3}), {'top_n': 3})
+check('top_n 20 kept', clean_options({'top_n': 20}), {'top_n': 20})
+check('top_n 2 dropped', clean_options({'top_n': 2}), {})
+check('top_n 21 dropped', clean_options({'top_n': 21}), {})
+check('top_n str dropped', clean_options({'top_n': '5'}), {})
+check('top_n True dropped', clean_options({'top_n': True}), {})
+check('top_n 5.0 -> 5', clean_options({'top_n': 5.0}), {'top_n': 5})
+check('top_n 5.5 dropped', clean_options({'top_n': 5.5}), {})
+
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':

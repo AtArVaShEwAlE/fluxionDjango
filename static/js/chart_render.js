@@ -8,7 +8,8 @@ window.FluxionChart = (function () {
         default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
         blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
         purple: ['#8B5CF6', '#7C3AED', '#6D28D9', '#5B21B6', '#4C1D95'],
-        rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6']
+        rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6'],
+        cbsafe: ['#0072B2', '#E69F00', '#009E73', '#D55E00', '#CC79A7', '#56B4E9']
     };
     // Chart.js has no 'hbar' / 'area' type: they are bar / line plus options.
     const JS_TYPE = { hbar: 'bar', area: 'line', stacked: 'bar', combo: 'bar', histogram: 'bar' };
@@ -464,9 +465,12 @@ window.FluxionChart = (function () {
     // opts also takes: options (chart_options dict), chartTitle (fallback title text)
     function buildConfig(result, chartType, name, opts) {
         opts = opts || {};
-        const config = buildBaseConfig(result, chartType, name, opts);
+        const X = window.FluxionExtras;
+         if (X) result = X.prepare(result, chartType, opts.options || {});
+         const config = buildBaseConfig(result, chartType, name, opts);
         const o = opts.options;
         if (o && Object.keys(o).length) applyOptions(config, o, opts);
+        if (X) X.apply(config, result, chartType, o || {}, opts);
         return config;
     }
 

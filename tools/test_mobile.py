@@ -141,7 +141,14 @@ for _n in ('shared_chart', 'shared_report', 'shared_board', 'error'):
     for _p in re.findall(r"\{% static '([^']+)' %\}", _t):
         check(_n + ' static exists: ' + _p, os.path.exists(os.path.join(ROOT, 'static', _p)), True)
 
-w = max(len(r[1]) for r in rows)
+# chart_extras.js (Phase 18B): own file, loaded right after chart_render.js
+_ex = read('static', 'js', 'chart_extras.js')
+check('chart_extras.js exists', _ex is not None, True)
+if _ex is not None:
+    check('chart_extras.js defines FluxionExtras', 'window.FluxionExtras' in _ex, True)
+for _n in ('create_chart', 'shared_chart', 'shared_report', 'shared_board'):
+    _t = read('templates', _n + '.html') or ''
+    check(_n + ' loads chart_extras.js once, after chart_render.js', _t.count('js/chart_extras.js') == 1 and _t.index('js/chart_extras.js') > _t.index('js/chart_render.js'), True)
 for res, label, got, exp in rows:
     if res == 'FAIL':
         print(f'{res:<5} {label:<{w}} {got}  {exp}')
