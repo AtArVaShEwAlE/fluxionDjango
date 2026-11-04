@@ -797,6 +797,34 @@ window.FluxionExtras = (function () {
         try { return hiResCanvas(chart, scale || 2); } catch (e) { return canvas; }
     }
 
+    // soft glow behind scatter points (the scatter version of the bar gradient)
+    function scatterGlowPlugin() {
+        return {
+            id: 'fxGlow',
+            beforeDatasetsDraw: function (chart) {
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach(function (ds, di) {
+                    if (!chart.isDatasetVisible(di)) return;
+                    const meta = chart.getDatasetMeta(di);
+                    if (meta.data.length > 250) return;
+                    const color = typeof ds.pointHoverBackgroundColor === 'string' ? ds.pointHoverBackgroundColor : '#1F9D6E';
+                    const r = (ds.pointRadius || 6) * 2.6;
+                    meta.data.forEach(function (el) {
+                        const p = el.getProps(['x', 'y'], true);
+                        if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) return;
+                        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+                        g.addColorStop(0, alpha(color, 0.38));
+                        g.addColorStop(1, alpha(color, 0));
+                        ctx.fillStyle = g;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                });
+            }
+        };
+    }
+
     // ---------- config patch ----------
     function solidify(datasets) {
         datasets.forEach(function (ds) {
@@ -886,6 +914,17 @@ window.FluxionExtras = (function () {
                 };
             }
         }
+        if (type === 'scatter') {
+            config.data.datasets.forEach(function (ds) {
+                const color = typeof ds.pointHoverBackgroundColor === 'string' ? ds.pointHoverBackgroundColor : '#1F9D6E';
+                const many = ds.data.length > 150;
+                ds.pointRadius = many ? 4 : 6.5;
+                ds.pointHoverRadius = many ? 7 : 9;
+                ds.backgroundColor = alpha(color, 0.88);
+                ds.borderColor = '#FFFFFF';
+                ds.borderWidth = 2;
+            });
+        }
         if (o.insight) {
             opt.layout = opt.layout || {};
             opt.layout.padding = Object.assign({}, opt.layout.padding, { bottom: 38 });
@@ -898,6 +937,7 @@ window.FluxionExtras = (function () {
         if (o.highlight && HI_OK.indexOf(type) !== -1) list.push(highlightPlugin(o, F));
         if (o.center_total && type === 'doughnut') list.push(centerTotalPlugin(o, F));
         if (o.insight) list.push(insightPlugin(o, F, type));
+        if (type === 'scatter' && o.gradient !== false) list.push(scatterGlowPlugin());
         if (o.zoom && ZOOM_OK.indexOf(type) !== -1) list.push(zoomPlugin());
         list.push(hiResPlugin());
         config.plugins = (config.plugins || []).concat([resetPlugin], list);
