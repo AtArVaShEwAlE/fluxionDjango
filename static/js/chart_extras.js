@@ -5,7 +5,8 @@
 // Option keys match charts/options.py.
 window.FluxionExtras = (function () {
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut'];
+    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
+    const LAST_OK = ['line', 'area', 'scatter'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
@@ -26,6 +27,13 @@ window.FluxionExtras = (function () {
     // ---------- data: sort, top N ----------
     function prepare(result, type, o) {
         o = o || {};
+        if (o.last_n && LAST_OK.indexOf(type) !== -1 && result && result.labels && result.labels.length > o.last_n && result.series) {
+            const from = result.labels.length - o.last_n;
+            return Object.assign({}, result, {
+                labels: result.labels.slice(from),
+                series: result.series.map(s => ({ column: s.column, values: s.values.slice(from) }))
+            });
+        }
         const doSort = o.sort && SORT_OK.indexOf(type) !== -1;
         const doTop = o.top_n && TOPN_OK.indexOf(type) !== -1;
         if (!doSort && !doTop) return result;

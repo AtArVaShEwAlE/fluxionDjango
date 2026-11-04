@@ -17,6 +17,8 @@ SORTS = ('asc', 'desc')
 NUMBER_FORMATS = ('plain', 'percent', 'usd', 'eur', 'inr', 'gbp')
 MIN_TOP_N = 3
 MAX_TOP_N = 20
+MIN_LAST_N = 3
+MAX_LAST_N = 200
 
 
 def _text(value, limit):
@@ -93,6 +95,11 @@ def clean_options(raw):
         top = int(top)
     if isinstance(top, int) and not isinstance(top, bool) and MIN_TOP_N <= top <= MAX_TOP_N:
         out['top_n'] = top
+    last = raw.get('last_n')
+    if isinstance(last, float) and last.is_integer():
+        last = int(last)
+    if isinstance(last, int) and not isinstance(last, bool) and MIN_LAST_N <= last <= MAX_LAST_N:
+        out['last_n'] = last
     colors = _colors(raw.get('series_colors'))
     if colors:
         out['series_colors'] = colors

@@ -9,7 +9,8 @@ window.FluxionOptionsPanel = (function () {
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut'];
+    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
+    const LAST_OK = ['line', 'area', 'scatter'];
     const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut'];
     const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area'];
     const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
@@ -102,6 +103,7 @@ window.FluxionOptionsPanel = (function () {
         show('reflines', REF_OK.indexOf(type) !== -1);
         show('sort', SORT_OK.indexOf(type) !== -1);
         show('topn', TOPN_OK.indexOf(type) !== -1);
+        show('lastn', LAST_OK.indexOf(type) !== -1);
         show('log', LOG_NO.indexOf(type) === -1);
         show('gradient', GRAD_OK.indexOf(type) !== -1);
         show('axis2', type === 'combo');
@@ -130,6 +132,7 @@ window.FluxionOptionsPanel = (function () {
         $('optRefMax').checked = refs.indexOf('max') !== -1;
         $('optSort').value = state.sort || '';
         $('optTopN').value = state.top_n || '';
+        $('optLastN').value = state.last_n || '';
         $('optNumFormat').value = state.number_format || 'auto';
         $('optGradient').checked = state.gradient !== false;
         $('optAnimate').checked = state.animate !== false;
@@ -211,6 +214,16 @@ window.FluxionOptionsPanel = (function () {
         };
         listen('optTopN', 'input', () => readTop(false));
         listen('optTopN', 'change', () => readTop(true));
+        const readLast = clamp => {
+            const el = $('optLastN');
+            if (el.value === '') { delete state.last_n; return; }
+            const n = parseInt(el.value, 10);
+            if (!Number.isFinite(n)) return;
+            if (n >= 3 && n <= 200) state.last_n = n;
+            else if (clamp) { const c = Math.min(200, Math.max(3, n)); el.value = c; state.last_n = c; }
+        };
+        listen('optLastN', 'input', () => readLast(false));
+        listen('optLastN', 'change', () => readLast(true));
         listen('optFontSize', 'input', () => readFont(false));
         listen('optFontSize', 'change', () => readFont(true));
         listen('optColorsReset', 'click', () => {
