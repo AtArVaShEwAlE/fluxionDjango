@@ -467,6 +467,328 @@ window.FluxionExtras = (function () {
         };
     }
 
+    // ---------- 18C: centre total, insight caption, zoom/pan, hi-res export ----------
+    const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
+    const COMBO_LINES = ['#F59E0B', '#2563EB', '#E5484D', '#7C3AED'];
+
+    function centerTotalPlugin(o, F) {
+        return {
+            id: 'fxCenterTotal',
+            afterDatasetsDraw: function (chart) {
+                const meta = chart.getDatasetMeta(0);
+                const ds = chart.data.datasets[0];
+                if (!meta || !ds || !meta.data.length) return;
+                let total = 0;
+                meta.data.forEach(function (el, j) {
+                    if (chart.getDataVisibility(j)) total += num(ds.data[j]) || 0;
+                });
+                const p = meta.data[0].getProps(['x', 'y', 'innerRadius'], true);
+                if (!p.innerRadius) return;
+                const ctx = chart.ctx;
+                const big = Math.max(14, Math.min(30, p.innerRadius * 0.42));
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = tok().ink;
+                ctx.font = '700 ' + big + 'px ' + tok().font;
+                ctx.fillText(F.tick(total), p.x, p.y - big * 0.15);
+                ctx.fillStyle = tok().soft;
+                ctx.font = '500 ' + Math.max(10, big * 0.42) + 'px ' + tok().font;
+                ctx.fillText('Total', p.x, p.y + big * 0.75);
+                ctx.restore();
+            }
+        };
+    }
+
+    function insightText(chart, type, F) {
+        const labels = chart.data.labels || [];
+        const sets = chart.data.datasets;
+        const ds = sets[0];
+        if (!ds) return '';
+        const nameOf = function (j) {
+            if (labels.length) return String(labels[j]);
+            const raw = ds.data[j];
+            return raw && raw.x !== undefined ? String(raw.x) : String(j + 1);
+        };
+        let vals = ds.data.map((v, j) => numAt(ds, j));
+        if (type === 'stacked') {
+            vals = ds.data.map(function (v, j) {
+                return sets.reduce((s, d) => s + (numAt(d, j) || 0), 0);
+            });
+        }
+        const idx = [];
+        vals.forEach(function (v, j) { if (v !== null) idx.push(j); });
+        if (!idx.length) return '';
+        let hi = idx[0], lo = idx[0], sum = 0;
+        idx.forEach(function (j) {
+            if (vals[j] > vals[hi]) hi = j;
+            if (vals[j] < vals[lo]) lo = j;
+            sum += vals[j];
+        });
+        const parts = [];
+        if (type === 'pie' || type === 'doughnut') {
+            if (!sum) return '';
+            const order = idx.slice().sort((a, b) => vals[b] - vals[a]);
+            parts.push('Top: ' + nameOf(order[0]) + ' ' + Math.round(vals[order[0]] / sum * 1000) / 10 + '%');
+            if (order.length >= 3) {
+                parts.push('Top 2: ' + Math.round((vals[order[0]] + vals[order[1]]) / sum * 1000) / 10 + '%');
+            }
+            parts.push(order.length + ' slices');
+        } else if (type === 'histogram') {
+            parts.push('Most common: ' + nameOf(hi) + ' (' + F.full(vals[hi]) + ')');
+            parts.push('Total ' + F.full(sum));
+        } else if (type === 'radar') {
+            parts.push('Strongest: ' + nameOf(hi) + ' ' + F.tick(vals[hi]));
+            parts.push('Weakest: ' + nameOf(lo) + ' ' + F.tick(vals[lo]));
+        } else {
+            const word = type === 'stacked' ? ['Highest total', 'Lowest'] : ['Peak', 'Low'];
+            parts.push(word[0] + ' ' + nameOf(hi) + ' ' + F.tick(vals[hi]));
+            parts.push(word[1] + ' ' + nameOf(lo) + ' ' + F.tick(vals[lo]));
+            parts.push('Avg ' + F.tick(sum / idx.length));
+            if (idx.length >= 3 && vals[idx[0]] !== 0) {
+                const first = vals[idx[0]];
+                const last = vals[idx[idx.length - 1]];
+                const pct = Math.round((last - first) / Math.abs(first) * 100);
+                parts.push((pct >= 0 ? '\u2197 +' : '\u2198 ') + pct + '% first to last');
+            }
+        }
+        return parts.join(' \u00B7 ');
+    }
+
+    function insightPlugin(o, F, type) {
+        const size = 12;
+        return {
+            id: 'fxInsight',
+            afterDraw: function (chart) {
+                const text = insightText(chart, type, F);
+                if (!text) return;
+                const ctx = chart.ctx;
+                ctx.save();
+                ctx.font = '500 ' + size + 'px ' + tok().font;
+                const maxW = chart.width - 24;
+                const lines = [];
+                let cur = '';
+                text.split(' \u00B7 ').forEach(function (part) {
+                    const t = cur ? cur + ' \u00B7 ' + part : part;
+                    if (cur && ctx.measureText(t).width > maxW) {
+                        lines.push(cur);
+                        cur = part;
+                    } else {
+                        cur = t;
+                    }
+                });
+                if (cur) lines.push(cur);
+                const shown = lines.slice(0, 2);
+                ctx.fillStyle = tok().soft;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                shown.forEach(function (line, i) {
+                    let t = line;
+                    while (t.length > 3 && ctx.measureText(t).width > maxW) t = t.slice(0, -2);
+                    if (t !== line) t += '\u2026';
+                    ctx.fillText(t, chart.width / 2, chart.height - 6 - (shown.length - 1 - i) * (size + 4));
+                });
+                ctx.restore();
+            }
+        };
+    }
+
+    // wheel / pinch zoom, drag pan, double-click or button reset
+    function zoomPlugin() {
+        const isZoomed = function (chart) {
+            const z = chart.$fxZ;
+            const x = chart.scales.x;
+            return !!(z && z.full && x && (x.min > z.full.min + 1e-9 || x.max < z.full.max - 1e-9));
+        };
+        const setRange = function (chart, min, max) {
+            const z = chart.$fxZ;
+            const sx = chart.options.scales.x;
+            if (z.cat) { min = Math.round(min); max = Math.round(max); }
+            if (min <= z.full.min && max >= z.full.max) {
+                sx.min = undefined;
+                sx.max = undefined;
+            } else {
+                sx.min = Math.max(min, z.full.min);
+                sx.max = Math.min(max, z.full.max);
+            }
+            chart.update('none');
+        };
+        const zoomAt = function (chart, px, factor) {
+            const z = chart.$fxZ;
+            const x = chart.scales.x;
+            if (!z.full || !x) return;
+            const c = x.getValueForPixel(px);
+            if (!Number.isFinite(c)) return;
+            const fullR = z.full.max - z.full.min;
+            const minR = z.cat ? Math.min(3, fullR) : fullR / 40;
+            const cur = x.max - x.min;
+            if (!(cur > 0)) return;
+            const r = Math.max(minR, Math.min(fullR, cur * factor));
+            let nmin = c - (c - x.min) * (r / cur);
+            let nmax = nmin + r;
+            if (nmin < z.full.min) { nmax += z.full.min - nmin; nmin = z.full.min; }
+            if (nmax > z.full.max) { nmin -= nmax - z.full.max; nmax = z.full.max; }
+            setRange(chart, nmin, nmax);
+        };
+        const inArea = function (chart, px, py) {
+            const a = chart.chartArea;
+            return !!a && px >= a.left && px <= a.right && py >= a.top && py <= a.bottom;
+        };
+        const local = function (chart, e) {
+            const r = chart.canvas.getBoundingClientRect();
+            return { x: e.clientX - r.left, y: e.clientY - r.top };
+        };
+        const reset = function (chart) {
+            const sx = chart.options.scales.x;
+            sx.min = undefined;
+            sx.max = undefined;
+            chart.update('none');
+        };
+        return {
+            id: 'fxZoom',
+            afterInit: function (chart) {
+                const z = { full: null, cat: false, pts: new Map(), pinch: 0, panned: 0, h: {} };
+                chart.$fxZ = z;
+                const cv = chart.canvas;
+                z.cv = cv;
+                cv.style.touchAction = 'pan-y';
+                z.h.wheel = function (e) {
+                    const p = local(chart, e);
+                    if (!inArea(chart, p.x, p.y)) return;
+                    e.preventDefault();
+                    zoomAt(chart, p.x, e.deltaY < 0 ? 0.8 : 1.25);
+                };
+                z.h.down = function (e) {
+                    z.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+                    z.panned = 0;
+                    z.pinch = 0;
+                    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+                };
+                z.h.move = function (e) {
+                    const prev = z.pts.get(e.pointerId);
+                    if (!prev) return;
+                    const now = { x: e.clientX, y: e.clientY };
+                    z.pts.set(e.pointerId, now);
+                    const x = chart.scales.x;
+                    if (z.pts.size >= 2) {
+                        const pts = Array.from(z.pts.values());
+                        const d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+                        const r = cv.getBoundingClientRect();
+                        if (z.pinch && d > 0) zoomAt(chart, (pts[0].x + pts[1].x) / 2 - r.left, z.pinch / d);
+                        z.pinch = d;
+                        z.panned = 99;
+                        return;
+                    }
+                    if (!isZoomed(chart) || !x) return;
+                    const a = chart.chartArea;
+                    const dx = now.x - prev.x;
+                    z.panned += Math.abs(dx);
+                    const dv = -dx * (x.max - x.min) / (a.right - a.left);
+                    let nmin = x.min + dv, nmax = x.max + dv;
+                    if (nmin < z.full.min) { nmax += z.full.min - nmin; nmin = z.full.min; }
+                    if (nmax > z.full.max) { nmin -= nmax - z.full.max; nmax = z.full.max; }
+                    setRange(chart, nmin, nmax);
+                };
+                z.h.up = function (e) {
+                    const wasTap = z.panned < 4 && z.pts.size === 1;
+                    z.pts.delete(e.pointerId);
+                    z.pinch = 0;
+                    if (wasTap && z.btn) {
+                        const p = local(chart, e);
+                        const b = z.btn;
+                        if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) reset(chart);
+                    }
+                };
+                z.h.dbl = function () { reset(chart); };
+                cv.addEventListener('wheel', z.h.wheel, { passive: false });
+                cv.addEventListener('pointerdown', z.h.down);
+                cv.addEventListener('pointermove', z.h.move);
+                cv.addEventListener('pointerup', z.h.up);
+                cv.addEventListener('pointercancel', z.h.up);
+                cv.addEventListener('dblclick', z.h.dbl);
+            },
+            afterLayout: function (chart) {
+                const z = chart.$fxZ;
+                const x = chart.scales.x;
+                if (z && !z.full && x && Number.isFinite(x.min) && Number.isFinite(x.max) && x.max > x.min) {
+                    z.full = { min: x.min, max: x.max };
+                    z.cat = x.type === 'category';
+                }
+            },
+            afterDraw: function (chart) {
+                const z = chart.$fxZ;
+                const a = chart.chartArea;
+                if (!z || !a) return;
+                chart.canvas.style.cursor = isZoomed(chart) ? 'grab' : '';
+                z.btn = null;
+                if (isZoomed(chart)) {
+                    z.btn = pill(chart, 'Reset zoom', a.right - 4, a.top + 12, '#10201A', '#FFFFFF', 11, 'right');
+                }
+            },
+            afterDestroy: function (chart) {
+                const z = chart.$fxZ;
+                if (!z || !z.cv) return;
+                const cv = z.cv;
+                cv.removeEventListener('wheel', z.h.wheel);
+                cv.removeEventListener('pointerdown', z.h.down);
+                cv.removeEventListener('pointermove', z.h.move);
+                cv.removeEventListener('pointerup', z.h.up);
+                cv.removeEventListener('pointercancel', z.h.up);
+                cv.removeEventListener('dblclick', z.h.dbl);
+            }
+        };
+    }
+
+    // Sharp copy of a chart on a white background (for PNG / PDF / board export).
+    function hiResCanvas(chart, scale) {
+        const dpr0 = chart.options.devicePixelRatio;
+        const anim0 = chart.options.animation;
+        const s = Math.max(1, Math.min(scale || 3, 8000 / Math.max(chart.width, chart.height, 1)));
+        try {
+            chart.options.devicePixelRatio = s;
+            chart.options.animation = false;
+            chart.resize();
+            const out = document.createElement('canvas');
+            out.width = chart.canvas.width;
+            out.height = chart.canvas.height;
+            const c = out.getContext('2d');
+            c.fillStyle = '#FFFFFF';
+            c.fillRect(0, 0, out.width, out.height);
+            c.drawImage(chart.canvas, 0, 0);
+            return out;
+        } finally {
+            chart.options.devicePixelRatio = dpr0 || window.devicePixelRatio || 1;
+            chart.options.animation = anim0;
+            chart.resize();
+        }
+    }
+
+    // canvas.toDataURL() on a chart canvas now returns the sharp white-background PNG,
+    // so every existing download button gets it with no change.
+    function hiResPlugin() {
+        return {
+            id: 'fxHiRes',
+            afterInit: function (chart) {
+                const cv = chart.canvas;
+                if (cv.$fxHi) return;
+                cv.$fxHi = true;
+                const orig = cv.toDataURL.bind(cv);
+                cv.toDataURL = function (type) {
+                    if (type === undefined || type === 'image/png') {
+                        try { return hiResCanvas(chart, 3).toDataURL('image/png'); } catch (e) { /* fall back */ }
+                    }
+                    return orig.apply(cv, arguments);
+                };
+            }
+        };
+    }
+
+    function hiRes(canvas, scale) {
+        const chart = window.Chart && window.Chart.getChart ? window.Chart.getChart(canvas) : null;
+        if (!chart) return canvas;
+        try { return hiResCanvas(chart, scale || 2); } catch (e) { return canvas; }
+    }
+
     // ---------- config patch ----------
     function solidify(datasets) {
         datasets.forEach(function (ds) {
@@ -534,13 +856,44 @@ window.FluxionExtras = (function () {
             });
         }
 
+        if (type === 'combo') {
+            const custom = Array.isArray(o.series_colors) ? o.series_colors : [];
+            config.data.datasets.forEach(function (ds, i) {
+                if (i === 0) return;
+                if (!custom[i]) {
+                    const c = COMBO_LINES[(i - 1) % COMBO_LINES.length];
+                    ds.borderColor = c;
+                    ds.backgroundColor = c;
+                    ds.pointBorderColor = c;
+                    ds.pointHoverBackgroundColor = c;
+                    ds.pointHoverBorderColor = alpha(c, 0.25);
+                }
+                if (o.second_axis) ds.yAxisID = 'y2';
+            });
+            if (o.second_axis && scales.y) {
+                scales.y2 = {
+                    type: 'linear', position: 'right', beginAtZero: true,
+                    grid: { drawOnChartArea: false, drawTicks: false }, border: { display: false },
+                    ticks: Object.assign({}, scales.y.ticks)
+                };
+            }
+        }
+        if (o.insight) {
+            opt.layout = opt.layout || {};
+            opt.layout.padding = Object.assign({}, opt.layout.padding, { bottom: 38 });
+        }
+
         const list = [];
         if (o.value_labels && !radar) list.push(valueLabelsPlugin(o, F));
         if (Array.isArray(o.ref_lines) && o.ref_lines.length && REF_OK.indexOf(type) !== -1) list.push(refLinesPlugin(o, F));
         if (o.trendline && TREND_OK.indexOf(type) !== -1) list.push(trendPlugin(o, F));
         if (o.highlight && HI_OK.indexOf(type) !== -1) list.push(highlightPlugin(o, F));
-        if (list.length) config.plugins = (config.plugins || []).concat([resetPlugin], list);
+        if (o.center_total && type === 'doughnut') list.push(centerTotalPlugin(o, F));
+        if (o.insight) list.push(insightPlugin(o, F, type));
+        if (o.zoom && ZOOM_OK.indexOf(type) !== -1) list.push(zoomPlugin());
+        list.push(hiResPlugin());
+        config.plugins = (config.plugins || []).concat([resetPlugin], list);
     }
 
-    return { prepare: prepare, apply: apply };
+    return { prepare: prepare, apply: apply, hiRes: hiRes };
 })();

@@ -68,6 +68,7 @@ check('colors 11 -> 10', len(clean_options({'series_colors': ['#112233'] * 11})[
 check('colors empty list omitted', clean_options({'series_colors': []}), {})
 check('colors non-list dropped', clean_options({'series_colors': '#112233'}), {})
 
+# Phase 18B keys
 FULL2 = {
     'value_labels': True, 'highlight': False, 'trendline': True, 'log_scale': False,
     'gradient': False, 'animate': False, 'ref_lines': ['avg', 'min', 'max'],
@@ -98,6 +99,9 @@ check('top_n str dropped', clean_options({'top_n': '5'}), {})
 check('top_n True dropped', clean_options({'top_n': True}), {})
 check('top_n 5.0 -> 5', clean_options({'top_n': 5.0}), {'top_n': 5})
 check('top_n 5.5 dropped', clean_options({'top_n': 5.5}), {})
+for k in ('second_axis', 'center_total', 'insight', 'zoom'):
+    check(f'{k} "yes" dropped', clean_options({k: 'yes'}), {})
+    check(f'{k} True kept', clean_options({k: True}), {k: True})
 
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:

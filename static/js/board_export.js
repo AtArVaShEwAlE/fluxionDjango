@@ -73,7 +73,7 @@ window.FluxionBoardExport = (function () {
             const chartCanvas = tile.querySelector('canvas');
             if (chartCanvas && chartCanvas.width && chartCanvas.height) {
                 const cr = chartCanvas.getBoundingClientRect();
-                ctx.drawImage(chartCanvas, cr.left - gr.left + PAD, cr.top - gr.top + top, cr.width, cr.height);
+                ctx.drawImage(window.FluxionExtras ? window.FluxionExtras.hiRes(chartCanvas, 2) : chartCanvas, cr.left - gr.left + PAD, cr.top - gr.top + top, cr.width, cr.height);
             }
         });
         return out;

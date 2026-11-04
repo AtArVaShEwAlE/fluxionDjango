@@ -12,6 +12,7 @@ window.FluxionOptionsPanel = (function () {
     const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut'];
     const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut'];
     const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area'];
+    const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
     const MAX_COLORS = 10;
 
     let state = {};
@@ -103,6 +104,9 @@ window.FluxionOptionsPanel = (function () {
         show('topn', TOPN_OK.indexOf(type) !== -1);
         show('log', LOG_NO.indexOf(type) === -1);
         show('gradient', GRAD_OK.indexOf(type) !== -1);
+        show('axis2', type === 'combo');
+        show('total', type === 'doughnut');
+        show('zoom', ZOOM_OK.indexOf(type) !== -1);
     }
 
     function syncControls() {
@@ -129,6 +133,10 @@ window.FluxionOptionsPanel = (function () {
         $('optNumFormat').value = state.number_format || 'auto';
         $('optGradient').checked = state.gradient !== false;
         $('optAnimate').checked = state.animate !== false;
+        $('optAxis2').checked = state.second_axis === true;
+        $('optTotal').checked = state.center_total === true;
+        $('optInsight').checked = state.insight === true;
+        $('optZoom').checked = state.zoom === true;
         applyVisibility();
         colorSig = sig();
         renderColors();
@@ -176,6 +184,10 @@ window.FluxionOptionsPanel = (function () {
         flag('optHighlight', 'highlight');
         flag('optTrend', 'trendline');
         flag('optLog', 'log_scale');
+        flag('optAxis2', 'second_axis');
+        flag('optTotal', 'center_total');
+        flag('optInsight', 'insight');
+        flag('optZoom', 'zoom');
         const unflag = (id, key) => listen(id, 'change', e => { if (e.target.checked) delete state[key]; else state[key] = false; });
         unflag('optGradient', 'gradient');
         unflag('optAnimate', 'animate');
