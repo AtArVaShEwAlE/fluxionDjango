@@ -57,7 +57,7 @@ const colorSchemes = {
     default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
     blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
     rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6'],
-    gradient: ['#667eea', '#764ba2', '#f093fb', '#4facfe'],
+    gradient: ['#1F9D6E', '#34C08D', '#3B82F6', '#8B5CF6'],
     dynamic: ['#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b']
 };
 
@@ -377,6 +377,13 @@ function initializeLiveChart() {
     const ctx = liveChartCanvas.getContext('2d');
     const chartType = liveChartType.value;
     const speed = parseInt(animationSpeed.value);
+
+    // Soft look from live_style.js (falls back to the old look below if it is missing)
+    if (window.LiveStyle) {
+        liveChart = new Chart(ctx, LiveStyle.config(chartType, speed));
+        liveChart.$liveColors = liveColorSpec(1);
+        return;
+    }
     
     liveChart = new Chart(ctx, {
         type: chartType === 'gauge' ? 'doughnut' : chartType,
@@ -455,6 +462,12 @@ function updateChartWithData() {
     const values = dataBuffer.map(d => d.value);
     const scheme = liveColorScheme.value;
     
+    if (window.LiveStyle) {
+        LiveStyle.sync(liveChart, liveChartType.value, labels, values, liveColorSpec(values.length));
+        liveChart.update('active');
+        return;
+    }
+
     liveChart.data.labels = labels;
     liveChart.data.datasets[0].data = values;
     
@@ -473,6 +486,19 @@ function updateChartWithData() {
     }
     
     liveChart.update('active');
+}
+
+// Colour(s) for the live chart from the Color Scheme select:
+// one colour string, or one colour per point
+function liveColorSpec(count) {
+    const scheme = liveColorScheme.value;
+    const n = Math.max(count, 1);
+    if (scheme === 'dynamic' || scheme === 'rainbow') return getColors(n);
+    if (scheme === 'gradient') {
+        const g = colorSchemes.gradient;
+        return Array.from({ length: n }, (_, i) => g[Math.min(g.length - 1, Math.floor(i / n * g.length))]);
+    }
+    return getColors(1)[0];
 }
 
 // Update Statistics
@@ -605,7 +631,8 @@ async function exportChartAsImage() {
     }
     
     try {
-        const canvas = document.getElementById('liveChart');
+        const canvas = window.LiveStyle ? LiveStyle.hiRes(liveChart) : document.getElementById('liveChart');
+        const scaleK = window.LiveStyle ? canvas.width / liveChart.width : 1;
         
         // Create a temporary canvas for watermark
         const watermarkedCanvas = document.createElement('canvas');
@@ -618,7 +645,10 @@ async function exportChartAsImage() {
         ctx.drawImage(canvas, 0, 0);
         
         // Add watermark
-        await addWatermark(ctx, watermarkedCanvas.width, watermarkedCanvas.height);
+        ctx.save();
+        ctx.scale(scaleK, scaleK);
+        await addWatermark(ctx, watermarkedCanvas.width / scaleK, watermarkedCanvas.height / scaleK);
+        ctx.restore();
         
         // Convert to blob and download
         watermarkedCanvas.toBlob(function(blob) {
@@ -646,7 +676,7 @@ async function exportChartAsImage() {
 // Add Watermark to Canvas
 async function addWatermark(ctx, width, height) {
     // Logo watermark (top-right corner)
-    const logoPath = '/static/img/fluxionlogo.svg';
+    const logoPath = '/static/img/greenlogo.png';
     
     try {
         const logo = await loadImage(logoPath);
