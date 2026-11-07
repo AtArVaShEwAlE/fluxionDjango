@@ -1285,7 +1285,7 @@ body.page-landing .lx-cta-card p {
 
 @media (max-width: 960px) {
     body.page-landing .lx-hero {
-        padding: 3rem 1.5rem 4.5rem;
+        padding: 0 1.5rem 4.5rem;
     }
 
     body.page-landing .lx-hero-inner,

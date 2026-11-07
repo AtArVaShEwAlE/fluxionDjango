@@ -1,0 +1,471 @@
+/* ==========================================================================
+   Fluxion - Landing page: section polish
+   Loaded LAST on the landing page (after landing.css and landing-v2.css).
+   Restyles: section headings, buttons (.ln-btn), Use cases, chart-type
+   marquee, FAQ teaser and the final CTA. Every selector starts with
+   body.page-landing, so nothing leaks into the app pages.
+   ========================================================================== */
+
+/* ---------- section heading ---------- */
+
+body.page-landing .ln-section-head {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    max-width: 720px;
+    margin: 0 auto 3rem;
+    text-align: center;
+}
+
+body.page-landing .ln-section-head h2 {
+    margin: 0;
+    text-wrap: balance;
+}
+
+body.page-landing .ln-section-sub {
+    max-width: 620px;
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--ln-ink-soft, #55655F);
+}
+
+body.page-landing .ln-section-head .ln-eyebrow,
+body.page-landing .lx-section:not(.lx-live-sec) .lx-split-copy .ln-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.9rem;
+    background: var(--ln-accent-soft, #E6F5EF);
+    border: 1px solid rgba(31, 157, 110, 0.18);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ln-accent-dark, #157A56);
+}
+
+/* ---------- buttons ---------- */
+
+body.page-landing .ln-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    padding: 0.75rem 1.6rem;
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    font-family: var(--ln-font-body, 'Inter', sans-serif);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+body.page-landing .ln-btn-primary {
+    background: var(--ln-accent, #1F9D6E);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(31, 157, 110, 0.25);
+}
+
+body.page-landing .ln-btn-primary:hover {
+    background: var(--ln-accent-dark, #157A56);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(31, 157, 110, 0.32);
+}
+
+body.page-landing .ln-btn-ghost {
+    background: #ffffff;
+    border-color: var(--ln-border-strong, #CBD6D1);
+    color: var(--ln-ink, #10201A);
+}
+
+body.page-landing .ln-btn-ghost:hover {
+    background: var(--ln-bg-soft, #F6F9F7);
+    border-color: var(--ln-ink-soft, #55655F);
+    color: var(--ln-ink, #10201A);
+    transform: translateY(-2px);
+}
+
+body.page-landing .ln-btn-lg {
+    min-height: 54px;
+    padding: 0.95rem 2.2rem;
+    font-size: 1.05rem;
+    border-radius: 14px;
+}
+
+body.page-landing .ln-btn:focus-visible {
+    outline: 2px solid var(--ln-accent, #1F9D6E);
+    outline-offset: 3px;
+}
+
+/* ---------- use cases ---------- */
+
+body.page-landing .lx-uses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+    counter-reset: lx-use;
+}
+
+body.page-landing .lx-use {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding: 1.7rem 1.6rem 1.9rem;
+    background: #ffffff;
+    border: 1px solid var(--ln-border, #E3E9E6);
+    border-left: 1px solid var(--ln-border, #E3E9E6);
+    border-radius: 20px;
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.04);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+/* numbered badge, drawn by CSS so the markup stays as it is */
+body.page-landing .lx-use::before {
+    counter-increment: lx-use;
+    content: counter(lx-use, decimal-leading-zero);
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 1.1rem;
+    background: linear-gradient(135deg, #E6F5EF 0%, #CDEEDF 100%);
+    border-radius: 13px;
+    font-family: var(--ln-font-display, 'Bricolage Grotesque', sans-serif);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--ln-accent-dark, #157A56);
+    transition: background 0.28s ease, color 0.28s ease, transform 0.28s ease;
+}
+
+/* accent line that draws in along the bottom edge on hover */
+body.page-landing .lx-use::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+    z-index: 0;
+    opacity: 1;
+    background: linear-gradient(90deg, var(--ln-accent, #1F9D6E), #6EE7B7);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.page-landing .lx-use:hover {
+    transform: translateY(-4px);
+    border-color: rgba(31, 157, 110, 0.35);
+    box-shadow: 0 18px 38px rgba(16, 32, 26, 0.09);
+}
+
+body.page-landing .lx-use:hover::before {
+    background: linear-gradient(135deg, #1F9D6E 0%, #34C08D 100%);
+    color: #ffffff;
+    transform: rotate(-6deg) scale(1.05);
+}
+
+body.page-landing .lx-use:hover::after {
+    opacity: 1;
+    transform: scaleX(1);
+}
+
+body.page-landing .lx-use h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.12rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-wrap: balance;
+    color: var(--ln-ink, #10201A);
+}
+
+body.page-landing .lx-use:hover h3 {
+    color: var(--ln-accent-dark, #157A56);
+}
+
+body.page-landing .lx-use p {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--ln-ink-soft, #55655F);
+}
+
+/* ---------- chart types marquee ---------- */
+
+body.page-landing .lx-marquee-sec {
+    padding: 3rem 0;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+body.page-landing .lx-marquee {
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+body.page-landing .lx-marquee-track {
+    gap: 0.85rem;
+    padding: 0.4rem 0;
+    animation-duration: 42s;
+}
+
+body.page-landing .lx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 1.3rem;
+    background: #ffffff;
+    border: 1.5px solid var(--ln-border, #E3E9E6);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(16, 32, 26, 0.05);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ln-ink, #10201A);
+}
+
+body.page-landing .lx-chip::before {
+    content: '';
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ln-accent, #1F9D6E), #6EE7B7);
+}
+
+body.page-landing .lx-chip:nth-child(even) {
+    background: var(--ln-accent-soft, #E6F5EF);
+    border-color: rgba(31, 157, 110, 0.22);
+}
+
+body.page-landing .lx-chip:hover {
+    transform: translateY(-3px);
+    border-color: var(--ln-accent, #1F9D6E);
+    background: #ffffff;
+    color: var(--ln-accent-dark, #157A56);
+    box-shadow: 0 10px 22px rgba(31, 157, 110, 0.18);
+}
+
+/* ---------- FAQ teaser ---------- */
+
+body.page-landing .lx-narrow {
+    max-width: 780px;
+}
+
+body.page-landing .lx-faq {
+    display: grid;
+    gap: 0.9rem;
+}
+
+body.page-landing .lx-q {
+    padding: 0 1.5rem;
+    background: #ffffff;
+    border: 1px solid var(--ln-border, #E3E9E6);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.04);
+    transition: border-color 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+body.page-landing .lx-q:hover {
+    border-color: var(--ln-border-strong, #CBD6D1);
+}
+
+body.page-landing .lx-q[open] {
+    background: linear-gradient(180deg, #ffffff 0%, #F6FBF9 100%);
+    border-color: rgba(31, 157, 110, 0.55);
+    box-shadow: 0 14px 32px rgba(31, 157, 110, 0.12);
+}
+
+body.page-landing .lx-q summary {
+    min-height: 60px;
+    padding: 0.5rem 0;
+    gap: 1.25rem;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+body.page-landing .lx-q summary::after {
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    transition: transform 0.3s ease, background 0.25s ease, color 0.25s ease;
+}
+
+body.page-landing .lx-q[open] summary::after {
+    background: var(--ln-accent, #1F9D6E);
+    color: #ffffff;
+    transform: rotate(135deg);
+}
+
+body.page-landing .lx-q p {
+    margin: 0;
+    padding: 0.15rem 2.5rem 1.4rem 0;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--ln-ink-soft, #55655F);
+}
+
+body.page-landing .lx-more {
+    margin: 2rem 0 0;
+    text-align: center;
+}
+
+body.page-landing .lx-more .auth-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem 1.3rem;
+    border: 1.5px solid rgba(31, 157, 110, 0.35);
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ln-accent-dark, #157A56);
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+body.page-landing .lx-more .auth-link:hover {
+    background: var(--ln-accent, #1F9D6E);
+    border-color: var(--ln-accent, #1F9D6E);
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+body.page-landing .lx-more .auth-link:focus-visible {
+    outline: 2px solid var(--ln-accent, #1F9D6E);
+    outline-offset: 3px;
+}
+
+/* ---------- final CTA ---------- */
+
+body.page-landing .lx-cta {
+    padding: 3rem 2rem 6rem;
+}
+
+body.page-landing .lx-cta-card {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4.5rem 2rem;
+    background:
+        radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 1px, transparent 0) 0 0 / 22px 22px,
+        linear-gradient(135deg, #10201A 0%, #1A362C 100%);
+    border-radius: 28px;
+    box-shadow: 0 30px 60px rgba(16, 32, 26, 0.22);
+    text-align: center;
+}
+
+body.page-landing .lx-cta-card h2 {
+    max-width: 680px;
+    margin: 0 auto 1rem;
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    color: #ffffff;
+}
+
+body.page-landing .lx-cta-card p {
+    max-width: 520px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* on the dark card the green button would disappear: use a white one */
+body.page-landing .lx-cta-card .ln-btn-primary {
+    background: #ffffff;
+    color: var(--ln-accent-dark, #157A56);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+body.page-landing .lx-cta-card .ln-btn-primary:hover {
+    background: var(--ln-accent-soft, #E6F5EF);
+    color: var(--ln-accent-dark, #157A56);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+body.page-landing .lx-cta-card .ln-btn-primary:focus-visible {
+    outline-color: #ffffff;
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 900px) {
+    body.page-landing .lx-cta {
+        padding: 2rem 1.25rem 4rem;
+    }
+}
+
+@media (max-width: 640px) {
+    body.page-landing .ln-section-head {
+        margin-bottom: 2rem;
+    }
+
+    body.page-landing .lx-uses {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
+    }
+
+    body.page-landing .lx-use {
+        padding: 1.4rem 1.3rem 1.6rem;
+        border-radius: 18px;
+    }
+
+    body.page-landing .lx-marquee-sec {
+        padding: 2rem 0;
+    }
+
+    body.page-landing .lx-chip {
+        padding: 0.55rem 1.05rem;
+        font-size: 0.9rem;
+    }
+
+    body.page-landing .lx-q {
+        padding: 0 1.15rem;
+        border-radius: 14px;
+    }
+
+    body.page-landing .lx-q summary {
+        min-height: 56px;
+        font-size: 1rem;
+    }
+
+    body.page-landing .lx-q p {
+        padding-right: 0;
+    }
+
+    body.page-landing .lx-cta-card {
+        padding: 3rem 1.4rem;
+        border-radius: 22px;
+    }
+
+    body.page-landing .lx-cta-card .ln-btn-lg {
+        width: 100%;
+    }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    body.page-landing .lx-use,
+    body.page-landing .lx-use::before,
+    body.page-landing .lx-use::after,
+    body.page-landing .lx-chip,
+    body.page-landing .lx-q,
+    body.page-landing .lx-q summary::after,
+    body.page-landing .ln-btn,
+    body.page-landing .lx-more .auth-link {
+        transition: none;
+    }
+
+    body.page-landing .lx-marquee-track {
+        animation: none;
+    }
+}
