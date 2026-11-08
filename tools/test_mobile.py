@@ -148,7 +148,22 @@ if _ex is not None:
     check('chart_extras.js defines FluxionExtras', 'window.FluxionExtras' in _ex, True)
 for _n in ('create_chart', 'shared_chart', 'shared_report', 'shared_board', 'charts', 'reports', 'view_board'):
     _t = read('templates', _n + '.html') or ''
-    check(_n + ' loads chart_extras.js once, after chart_render.js', _t.count('js/chart_extras.js') == 1 and _t.index('js/chart_extras.js') > _t.index('js/chart_render.js'), True)
+    check(_n + ' includes chart_scripts partial once', _t.count('partials/chart_scripts.html'), 1)
+    check(_n + ' has no loose chart_render/chart_extras tags', _t.count('js/chart_render.js') + _t.count('js/chart_extras.js'), 0)
+w = max(len(r[1]) for r in rows)
+_cs = read('templates', 'partials', 'chart_scripts.html')
+check('chart_scripts.html exists', _cs is not None, True)
+if _cs is not None:
+    _idx = [_cs.find(s) for s in ('npm/chart.js@', 'js/chart_types.js', 'js/chart_render.js', 'js/chart_extras.js')]
+    check('chart_scripts.html order: chart.js, types, render, extras', _idx == sorted(_idx) and min(_idx) >= 0, True)
+    check('chart_scripts.html pins chart.js to an exact version', bool(re.search(r'npm/chart\.js@\d+\.\d+\.\d+/', _cs)), True)
+    for _p in re.findall(r"\{% static '([^']+)' %\}", _cs):
+        check('chart_scripts.html static exists: ' + _p, os.path.exists(os.path.join(ROOT, 'static', _p)), True)
+_ty = read('static', 'js', 'chart_types.js')
+check('chart_types.js exists', _ty is not None, True)
+if _ty is not None:
+    check('chart_types.js defines FluxionTypes', 'window.FluxionTypes' in _ty, True)
+w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':
         print(f'{res:<5} {label:<{w}} {got}  {exp}')

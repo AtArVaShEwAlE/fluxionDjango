@@ -32,17 +32,11 @@ let selectedChartType = 'bar';
 
 // Types that use Labels + Values (like pie) instead of X / Y
 function usesLabelValue(type) {
-    return type === 'pie' || type === 'doughnut';
+    return FluxionTypes.usesLabelValue(type);
 }
 
-const TYPE_TITLES = {
-    bar: 'Bar', line: 'Line', pie: 'Pie', scatter: 'Scatter',
-    hbar: 'Horizontal Bar', area: 'Area', doughnut: 'Doughnut', radar: 'Radar',
-    stacked: 'Stacked Bar', combo: 'Combo', histogram: 'Histogram'
-};
-
 function defaultTitle() {
-    return `${TYPE_TITLES[selectedChartType] || 'Chart'} Chart`;
+    return `${FluxionTypes.title(selectedChartType)} Chart`;
 }
 
 // Colour palettes live in chart_render.js (FluxionChart.colorSchemes)
@@ -380,7 +374,7 @@ function addOptionToSelects(selects, value, text) {
 const MAX_Y = 10;   // same as MAX_SERIES in datasets/services.py
 
 function supportsMultiY(type) {
-    return ['bar', 'hbar', 'line', 'area', 'radar', 'stacked', 'combo'].includes(type);
+        return FluxionTypes.supportsMultiY(type);
 }
 
 function updateMultiYVisibility() {
@@ -587,6 +581,7 @@ function rerenderPreview() {
 }
 
 function createChart(result) {
+    lastResult = result;
     if (currentChart) {
         currentChart.destroy();
     }

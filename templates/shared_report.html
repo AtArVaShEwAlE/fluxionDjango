@@ -248,9 +248,7 @@
     </div>
     
     {{ report|json_script:"report-data" }}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/chart_render.js' %}"></script>
-    <script src="{% static 'js/chart_extras.js' %}"></script>
+{% include 'partials/chart_scripts.html' %}
     <script>
         const reportData = JSON.parse(document.getElementById('report-data').textContent);
         const chartInstances = [];

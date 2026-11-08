@@ -11,12 +11,13 @@ from datasets.models import Dataset
 from datasets.services import load_dataframe, run_query
 from .queries import spec_from_chart, clean_y_axes
 from .options import clean_options
+from .registry import ENABLED
 from .models import Chart, Report
 from .models import Chart
 
 logger = logging.getLogger(__name__)
 
-VALID_TYPES = {value for value, _label in Chart.CHART_TYPES}
+VALID_TYPES = set(ENABLED)
 
 
 def _json_body(request):

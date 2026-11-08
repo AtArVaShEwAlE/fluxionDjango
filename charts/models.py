@@ -3,14 +3,10 @@ import secrets
 from django.conf import settings
 from django.db import models
 from .board_models import Dashboard  # noqa: F401  (registers the model)
+from .registry import CHOICES
 
 class Chart(models.Model):
-    CHART_TYPES = [
-        ('bar', 'Bar'), ('line', 'Line'), ('pie', 'Pie'), ('scatter', 'Scatter'),
-        ('hbar', 'Horizontal Bar'), ('area', 'Area'),
-        ('doughnut', 'Doughnut'), ('radar', 'Radar'),
-        ('stacked', 'Stacked Bar'), ('combo', 'Combo'), ('histogram', 'Histogram'),
-    ]
+    CHART_TYPES = CHOICES
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                               related_name='charts')
     dataset = models.ForeignKey('datasets.Dataset', on_delete=models.CASCADE,
