@@ -11,7 +11,7 @@ body.page-landing {
     --ln-font-display: "Raleway", sans-serif;
     --ln-font-body: "Raleway", sans-serif;
 
-    background: var(--ln-bg);
+    background: var(--ln-bg); 
     color: var(--ln-ink);
     font-family: var(--ln-font-body);
     line-height: 1.6;
