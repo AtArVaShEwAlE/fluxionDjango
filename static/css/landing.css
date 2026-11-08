@@ -1,15 +1,15 @@
 body.page-landing {
-    --ln-bg: #FFFFFF;
+    --ln-bg: #ffffff;
     --ln-bg-soft: #F6F9F7;
     --ln-ink: #10201A;
     --ln-ink-soft: #55655F;
-    --ln-accent: #1F9D6E;
+    --ln-accent: #1c8860;
     --ln-accent-dark: #157A56;
     --ln-accent-soft: #E6F5EF;
     --ln-border: #E3E9E6;
     --ln-border-strong: #CBD6D1;
-    --ln-font-display: 'Bricolage Grotesque', sans-serif;
-    --ln-font-body: 'Inter', sans-serif;
+    --ln-font-display: "Raleway", sans-serif;
+    --ln-font-body: "Raleway", sans-serif;
 
     background: var(--ln-bg);
     color: var(--ln-ink);
