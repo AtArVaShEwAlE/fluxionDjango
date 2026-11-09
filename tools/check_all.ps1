@@ -4,5 +4,6 @@ python tools\test_query.py 2>$null | Select-String 'FAIL|checks,'
 python tools\test_options.py 2>$null | Select-String 'FAIL|checks,'
 python tools\test_mobile.py 2>$null | Select-String 'FAIL|checks,'
 python tools\test_registry.py 2>$null | Select-String 'FAIL|checks,'
+python tools\test_shapes.py 2>$null | Select-String 'FAIL|checks,'
 Select-String -Path templates\*.html,templates\*\*.html -Pattern 'width="28"height|<pathd|<circlecx|<rectx|<polygonp|%\}/\*\*'
 git status --short

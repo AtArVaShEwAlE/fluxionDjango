@@ -270,6 +270,9 @@ def run_query(df, spec):
 
     if spec.get('histogram'):
         return _histogram(df, x, spec.get('bins'))
+    if spec.get('shape') is not None:
+        from .shapes import run_shape
+        return run_shape(df, x, spec)
 
     raw_series = spec.get('series')
     if not isinstance(raw_series, list) or not raw_series:
