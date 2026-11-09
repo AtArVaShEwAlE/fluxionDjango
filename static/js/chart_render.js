@@ -466,13 +466,15 @@ window.FluxionChart = (function () {
     function buildConfig(result, chartType, name, opts) {
         opts = opts || {};
         const X = window.FluxionExtras;
-         if (X) result = X.prepare(result, chartType, opts.options || {});
-         const config = buildBaseConfig(result, chartType, name, opts);
+        if (X) result = X.prepare(result, chartType, opts.options || {});
+        const A = window.FluxionTierA;
+        const config = (A && A.has(chartType)) ? A.build(result, chartType, name, opts) : buildBaseConfig(result, chartType, name, opts);
         const o = opts.options;
         if (o && Object.keys(o).length) applyOptions(config, o, opts);
         if (X) X.apply(config, result, chartType, o || {}, opts);
         return config;
     }
 
-    return { colorSchemes, getColors, toChartJsData, buildConfig, tokens: T, fmtFull, fmtCompact };
+    return { colorSchemes, getColors, toChartJsData, buildConfig, tokens: T, fmtFull, fmtCompact,
+             internals: { withAlpha, lineStyle, barStyle, areaFill, schemeName, reduceMotion } };
 })();

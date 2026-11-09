@@ -154,7 +154,7 @@ w = max(len(r[1]) for r in rows)
 _cs = read('templates', 'partials', 'chart_scripts.html')
 check('chart_scripts.html exists', _cs is not None, True)
 if _cs is not None:
-    _idx = [_cs.find(s) for s in ('npm/chart.js@', 'js/chart_types.js', 'js/chart_render.js', 'js/chart_extras.js')]
+    _idx = [_cs.find(s) for s in ('npm/chart.js@', 'js/chart_types.js', 'js/chart_render.js', 'js/chart_extras.js', 'js/chart_tier_a.js')]
     check('chart_scripts.html order: chart.js, types, render, extras', _idx == sorted(_idx) and min(_idx) >= 0, True)
     check('chart_scripts.html pins chart.js to an exact version', bool(re.search(r'npm/chart\.js@\d+\.\d+\.\d+/', _cs)), True)
     for _p in re.findall(r"\{% static '([^']+)' %\}", _cs):

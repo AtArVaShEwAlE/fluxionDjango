@@ -10,7 +10,7 @@ window.FluxionExtras = (function () {
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
-    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut'];
+        const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt'];
     const CURRENCY = { usd: 'USD', eur: 'EUR', inr: 'INR', gbp: 'GBP' };
     const PCT_NAME = /%|percent|pct/i;
     const COLORS = { avg: '#F59E0B', min: '#64748B', max: '#10201A', hiMax: '#157A56', hiMin: '#E5484D' };
@@ -846,9 +846,10 @@ window.FluxionExtras = (function () {
         const horiz = type === 'hbar';
         const valueKey = radar ? 'r' : horiz ? 'x' : 'y';
         const column = result && result.series && result.series[0] ? result.series[0].column : '';
+        const tierA = !!(window.FluxionTierA && window.FluxionTierA.has(type));   // these build their own formats
         const fc = FC();
 
-        const fmt = type === 'histogram' ? null : makeFmt(o.number_format, column);
+        const fmt = (type === 'histogram' || tierA) ? null : makeFmt(o.number_format, column);
         const F = fmt || { tick: fc.fmtCompact, full: fc.fmtFull };
 
         if (fmt) {
@@ -943,5 +944,5 @@ window.FluxionExtras = (function () {
         config.plugins = (config.plugins || []).concat([resetPlugin], list);
     }
 
-    return { prepare: prepare, apply: apply, hiRes: hiRes };
+        return { prepare: prepare, apply: apply, hiRes: hiRes, makeFmt: makeFmt };
 })();

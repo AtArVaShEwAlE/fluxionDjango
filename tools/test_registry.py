@@ -62,6 +62,15 @@ if ch is not None:
     branches = set(re.findall(r"chart\.chart_type == '(\w+)'", ch))
     check('My Charts icon for every enabled type', sorted(ENABLED - branches), [])
 
+tier = read('static', 'js', 'chart_tier_a.js')
+check('chart_tier_a.js exists', tier is not None, True)
+if tier is not None:
+    m = re.search(r'const BUILDERS = \{(.*?)\};', tier, re.S)
+    check('chart_tier_a.js builds every Tier A type', sorted(re.findall(r'(\w+):', m.group(1))) if m else [], sorted(k for k, _l, _o in CHART_TYPES[11:]))
+    check('chart_tier_a.js defines FluxionTierA', 'window.FluxionTierA' in tier, True)
+rend = read('static', 'js', 'chart_render.js')
+check('chart_render.js hands Tier A types to FluxionTierA', rend is not None and 'FluxionTierA' in rend and 'internals' in rend, True)
+check('chart_extras.js exports makeFmt for Tier A', 'makeFmt: makeFmt' in (read('static', 'js', 'chart_extras.js') or ''), True)
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':
