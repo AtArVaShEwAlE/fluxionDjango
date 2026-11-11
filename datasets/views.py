@@ -12,6 +12,7 @@ from django.db.models import Count
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.utils import timezone
 from .models import Dataset
+from charts.queries import SHAPE_TYPES, spec_from_chart
 from .services import (allowed_file, analyze_dataframe, clean_dataframe, delete_cache,
                        load_dataframe, read_dataframe, run_query, save_cache)
 
@@ -193,6 +194,9 @@ def dataset_data(request, dataset_id):
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     try:
+        if isinstance(spec, dict) and isinstance(spec.get('chart_type'), str) and spec['chart_type'] in SHAPE_TYPES:
+            cfg = spec.get('config')   # new chart types: the server builds the query from type + columns
+            spec = spec_from_chart(spec['chart_type'], cfg if isinstance(cfg, dict) else {})
         result = run_query(load_dataframe(dataset), spec)
     except ValueError as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)

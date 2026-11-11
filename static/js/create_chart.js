@@ -164,9 +164,7 @@ async function loadChartForEditing(chartId) {
         } else {
             xAxisSelect.value = config.x_axis || '';
             const savedYs = (Array.isArray(config.y_axes) && config.y_axes.length) ? config.y_axes : [config.y_axis || ''];
-            yAxisSelect.value = savedYs[0] || '';
-            clearExtraYRows();
-            savedYs.slice(1).forEach(column => addYRow(column));
+            setYColumns(savedYs);
         }
         colorScheme.value = config.color_scheme || 'default';
                 FluxionOptionsPanel.load(config.chart_options || {});
@@ -373,13 +371,66 @@ function addOptionToSelects(selects, value, text) {
 // ---------- Multiple Y columns ----------
 const MAX_Y = 10;   // same as MAX_SERIES in datasets/services.py
 
+// ---------- Fixed Y columns (bubble: Y + Size, bullet: Actual + Target, gantt: Start + End ...) ----------
+let slotRowsActive = false;
+
+function slotRow(text, value) {
+    const row = document.createElement('div');
+    row.className = 'y-row';
+    const select = document.createElement('select');
+    select.className = 'form-select';
+    const blank = document.createElement('option');
+    blank.value = '';
+    blank.textContent = 'Select ' + text + ' column...';
+    select.appendChild(blank);
+    currentDataset.column_names.forEach(column => {
+        const option = document.createElement('option');
+        option.value = column;
+        option.textContent = column;
+        select.appendChild(option);
+    });
+    select.value = value || '';
+    select.addEventListener('change', validateSelections);
+    row.appendChild(select);
+    return row;
+}
+
+// Labels + dropdowns for the current type. Called whenever the type changes.
+function syncYSlots() {
+    const slots = FluxionTypes.slots(selectedChartType);
+    const label = document.querySelector('label[for="yAxisSelect"]');
+    if (label) label.textContent = FluxionTypes.yLabel(selectedChartType);
+    yAxisSelect.options[0].textContent = slots.length ? 'Select ' + slots[0] + ' column...' : 'Select Y-Axis column...';
+    if (slots.length > 1) {
+        const old = Array.from(extraYRows.querySelectorAll('select')).map(s => s.value);
+        extraYRows.innerHTML = '';
+        slots.slice(1).forEach((text, i) => extraYRows.appendChild(slotRow(text, old[i])));
+        slotRowsActive = true;
+    } else if (slotRowsActive) {
+        clearExtraYRows();
+        slotRowsActive = false;
+    }
+    refreshAddYButton();
+}
+
+// Fill the Y dropdowns from a saved list (edit mode)
+function setYColumns(cols) {
+    yAxisSelect.value = cols[0] || '';
+    if (FluxionTypes.slots(selectedChartType).length > 1) {
+        extraYRows.querySelectorAll('select').forEach((s, i) => { s.value = cols[i + 1] || ''; });
+    } else {
+        clearExtraYRows();
+        cols.slice(1).forEach(column => addYRow(column));
+    }
+}
+
 function supportsMultiY(type) {
         return FluxionTypes.supportsMultiY(type);
 }
 
 function updateMultiYVisibility() {
     const show = supportsMultiY(selectedChartType);
-    extraYRows.style.display = show ? 'block' : 'none';
+    extraYRows.style.display = (show || FluxionTypes.slots(selectedChartType).length > 1) ? 'block' : 'none';
     addYBtn.style.display = show ? 'inline-block' : 'none';
 }
 
@@ -432,7 +483,10 @@ function clearExtraYRows() {
 
 // Chosen Y columns, no blanks, no duplicates. Only row 1 for types without multi-Y.
 function getYColumns() {
-    if (selectedChartType === 'histogram') return [];   // one column only, no Y
+    if (FluxionTypes.fields(selectedChartType) === 'x') return [];   // one column only, no Y
+    if (FluxionTypes.slots(selectedChartType).length) {   // fixed columns: keep the order, blanks stay blank
+        return [yAxisSelect.value].concat(Array.from(extraYRows.querySelectorAll('select')).map(s => s.value));
+    }
     const cols = [yAxisSelect.value];
     if (supportsMultiY(selectedChartType)) {
         extraYRows.querySelectorAll('select').forEach(s => cols.push(s.value));
@@ -458,12 +512,12 @@ function updateFormFields() {
         valueGroup.style.display = 'block';
         labelGroup.style.display = 'block';
     } else {
-        yAxisGroup.style.display = selectedChartType === 'histogram' ? 'none' : 'block';
+        yAxisGroup.style.display = FluxionTypes.fields(selectedChartType) === 'x' ? 'none' : 'block';
         valueGroup.style.display = 'none';
         labelGroup.style.display = 'none';
     }
-    document.querySelector('label[for="xAxisSelect"]').textContent =
-        selectedChartType === 'histogram' ? 'Column (numbers)' : 'X-Axis (Categories)';
+    document.querySelector('label[for="xAxisSelect"]').textContent = FluxionTypes.xLabel(selectedChartType);
+    syncYSlots();
     updateMultiYVisibility();
 }
 
@@ -471,10 +525,11 @@ function validateSelections() {
     let isValid = false;
     if (usesLabelValue(selectedChartType)) {
         isValid = valueSelect.value !== '' && labelSelect.value !== '';
-    } else if (selectedChartType === 'histogram') {
+    } else if (FluxionTypes.fields(selectedChartType) === 'x') {
         isValid = xAxisSelect.value !== '';
     } else {
-        isValid = xAxisSelect.value !== '' && getYColumns().length > 0;
+        const ys = getYColumns();
+        isValid = xAxisSelect.value !== '' && ys.length > 0 && ys.every(c => c !== '') && new Set(ys).size === ys.length;
     }
     FluxionOptionsPanel.refresh();
     updateChartBtn.disabled = !isValid;
@@ -532,6 +587,9 @@ function showChartSuccess() {
 
 // Same rules as charts/queries.py, so builder and saved chart match.
 function buildQuerySpec() {
+    if (FluxionTypes.serverSpec(selectedChartType)) {   // server builds the query (charts/queries.py): one source of truth
+        return { chart_type: selectedChartType, config: { x_axis: xAxisSelect.value, y_axes: getYColumns() } };
+    }
     if (usesLabelValue(selectedChartType)) {
         return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
     }
@@ -569,10 +627,10 @@ async function prepareChartData() {
 
 // One name per colour picker in the Customise panel
 function getSeriesNames() {
-    if (selectedChartType === 'histogram') return [xAxisSelect.value || 'Value'];
+    if (FluxionTypes.fields(selectedChartType) === 'x') return [xAxisSelect.value || 'Value'];
     const ys = getYColumns();
     if (!ys.length) return ['Series 1'];
-    return selectedChartType === 'scatter' ? [ys[0]] : ys;
+    return FluxionTypes.seriesNames(selectedChartType, ys);
 }
 
 // Re-draw with the last server result (no refetch), e.g. after a Customise change

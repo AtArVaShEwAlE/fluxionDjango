@@ -34,15 +34,15 @@ check('registry key format', [k for k in keys if not re.match(r'^[a-z][a-z_]*$',
 check('first 11 choices unchanged (keeps DB choices stable)', CHOICES[:11], OLD)
 check('every label non-empty', [k for k, l, _o in CHART_TYPES if not l.strip()], [])
 check('Tier A keys registered after the 11', keys[11:], TIER_A)
-check('enabled = the 11 shipped types', sorted(ENABLED), sorted(k for k, _l in OLD))
-check('Tier A not enabled yet', sorted(ENABLED & set(TIER_A)), [])
+check('enabled = the 11 shipped + 9 Tier A types', sorted(ENABLED), sorted([k for k, _l in OLD] + TIER_A))
+check('Tier A enabled', sorted(ENABLED & set(TIER_A)), sorted(TIER_A))
 check('CHOICES length = registry length', len(CHOICES), len(CHART_TYPES))
 
 js = read('static', 'js', 'chart_types.js')
 check('chart_types.js exists', js is not None, True)
 if js is not None:
     check('chart_types.js defines FluxionTypes', 'window.FluxionTypes' in js, True)
-    found = re.findall(r"^\s+(\w+): \{ title: '([^']+)', fields: '([\w-]+)', multiY: (true|false) \}", js, re.M)
+    found = re.findall(r"^\s+(\w+): \{ title: '([^']+)', fields: '([\w-]+)', multiY: (true|false)", js, re.M)
     jskeys = [f[0] for f in found]
     check('JS keys unique', len(jskeys), len(set(jskeys)))
     check('JS keys = Python enabled keys', sorted(jskeys), sorted(ENABLED))
@@ -53,7 +53,8 @@ if js is not None:
 cc = read('templates', 'create_chart.html')
 check('create_chart.html exists', cc is not None, True)
 if cc is not None:
-    btns = re.findall(r'chart-type-btn[^"]*"\s+data-type="(\w+)"', cc)
+    extra = read('templates', 'partials', 'chart_type_buttons_a.html') or ''
+    btns = re.findall(r'chart-type-btn[^"]*"\s+data-type="(\w+)"', cc + extra)
     check('builder buttons = enabled types', sorted(btns), sorted(ENABLED))
 
 ch = read('templates', 'charts.html')
@@ -71,6 +72,9 @@ if tier is not None:
 rend = read('static', 'js', 'chart_render.js')
 check('chart_render.js hands Tier A types to FluxionTierA', rend is not None and 'FluxionTierA' in rend and 'internals' in rend, True)
 check('chart_extras.js exports makeFmt for Tier A', 'makeFmt: makeFmt' in (read('static', 'js', 'chart_extras.js') or ''), True)
+icons = read('templates', 'partials', 'chart_icon_a.html')
+check('chart_icon_a.html exists', icons is not None, True)
+check('icon partial draws every Tier A type', [k for k in TIER_A if icons is None or "== '" + k + "'" not in icons], [])
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':

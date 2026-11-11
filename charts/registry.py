@@ -18,16 +18,16 @@ CHART_TYPES = [
     ('stacked', 'Stacked Bar', True),
     ('combo', 'Combo', True),
     ('histogram', 'Histogram', True),
-    # Phase 19 Tier A: choices only until 19C
-    ('stacked_area', 'Stacked Area', False),
-    ('bubble', 'Bubble', False),
-    ('waterfall', 'Waterfall', False),
-    ('funnel', 'Funnel', False),
-    ('pareto', 'Pareto', False),
-    ('bullet', 'Bullet', False),
-    ('dual_line', 'Dual-Axis Line', False),
-    ('density', 'Density', False),
-    ('gantt', 'Gantt', False),
+    # Phase 19 Tier A
+    ('stacked_area', 'Stacked Area', True),
+    ('bubble', 'Bubble', True),
+    ('waterfall', 'Waterfall', True),
+    ('funnel', 'Funnel', True),
+    ('pareto', 'Pareto', True),
+    ('bullet', 'Bullet', True),
+    ('dual_line', 'Dual-Axis Line', True),
+    ('density', 'Density', True),
+    ('gantt', 'Gantt', True),
 ]
 
 CHOICES = [(key, label) for key, label, _on in CHART_TYPES]

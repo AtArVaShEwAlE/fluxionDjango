@@ -258,6 +258,47 @@ try:
             check(f'chart-data {t}', A.get(f'/chart-data/{tid}').status_code, 200)
         check('save-chart invalid type', p11_save('banana', x_axis='name', y_axis='sales')[1], 400)
 
+        # ---- Phase 19C: Tier A chart types ----
+        A19 = {
+            'stacked_area': dict(x_axis='name', y_axes=['sales', 'cost']),
+            'dual_line': dict(x_axis='name', y_axes=['sales', 'cost']),
+            'bubble': dict(x_axis='cost', y_axes=['sales', 'cost']),
+            'waterfall': dict(x_axis='name', y_axes=['sales']),
+            'funnel': dict(x_axis='name', y_axes=['sales']),
+            'pareto': dict(x_axis='name', y_axes=['sales']),
+            'bullet': dict(x_axis='name', y_axes=['sales', 'cost']),
+            'density': dict(x_axis='sales'),
+            'gantt': dict(x_axis='name', y_axes=['cost', 'sales']),
+        }
+        a19 = {}
+        for t19, cfg19 in A19.items():
+            tid19, st19 = p11_save(t19, **cfg19)
+            a19[t19] = tid19
+            check(f'save-chart {t19}', st19, 200)
+            check(f'chart-data {t19}', A.get(f'/chart-data/{tid19}').status_code, 200)
+        check('waterfall labels + Total', p11_data(a19['waterfall']).get('labels'), [['a', 'b', 'c', 'Total']])
+        check('waterfall change values', p11_data(a19['waterfall']).get('series', [{}])[0].get('values'), [[10, 20, 30, 60]])
+        check('funnel sorted largest first', p11_data(a19['funnel']).get('labels'), [['c', 'b', 'a']])
+        check('pareto cumulative %', p11_data(a19['pareto']).get('series', [{}, {}])[1].get('values'), [[50.0, 83.33, 100.0]])
+        check('bubble size series', p11_data(a19['bubble']).get('series', [{}, {}])[1].get('values'), [[1, 2, 3]])
+        check('density 100 grid points', len(p11_data(a19['density']).get('labels', [])), 100)
+        check('gantt number kind', p11_data(a19['gantt']).get('meta', {}).get('kind'), 'number')
+        check('bullet two series', len(p11_data(a19['bullet']).get('series', [])), 2)
+        spec19 = {'chart_type': 'funnel', 'config': {'x_axis': 'name', 'y_axes': ['sales']}}
+        r = jpost(A, f'/dataset-data/{ds}', spec19)
+        check('dataset-data chart_type spec', r.status_code, 200)
+        check('dataset-data chart_type values', js(r).get('series', [{}])[0].get('values'), [[30, 20, 10]])
+        check('dataset-data chart_type incomplete config', jpost(A, f'/dataset-data/{ds}', {'chart_type': 'bubble', 'config': {'x_axis': 'cost'}}).status_code, 400)
+        check('dataset-data chart_type config not a dict', jpost(A, f'/dataset-data/{ds}', {'chart_type': 'funnel', 'config': 'x'}).status_code, 400)
+        check('dataset-data chart_type not a string', jpost(A, f'/dataset-data/{ds}', {'chart_type': ['funnel']}).status_code, 400)
+        check('B dataset-data chart_type', jpost(B, f'/dataset-data/{ds}', spec19).status_code, [403, 404])
+        r = A.post(f'/share-chart/{a19["bubble"]}')
+        check('share-chart new type', r.status_code, 200)
+        btok19 = js(r).get('share_token')
+        if btok19:
+            check('shared-data new type anon', anon.get(f'/shared-data/{btok19}').status_code, 200)
+            check('shared page new type anon', anon.get(f'/shared/{btok19}').status_code, 200)
+
         # Histogram: one numeric column, counted in bins
         hid, st = p11_save('histogram', x_axis='sales')
         check('save-chart histogram', st, 200)

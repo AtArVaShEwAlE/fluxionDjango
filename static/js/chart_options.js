@@ -3,16 +3,16 @@
 // Keys match charts/options.py. Server cleans again on save.
 window.FluxionOptionsPanel = (function () {
     const ROUND = ['pie', 'doughnut'];
-    const SMOOTH = ['line', 'area', 'combo'];
-    const LABEL_NO = ['radar'];
+    const SMOOTH = ['line', 'area', 'combo', 'stacked_area', 'dual_line', 'density'];
+    const LABEL_NO = ['radar', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
     const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
     const LAST_OK = ['line', 'area', 'scatter'];
-    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut'];
-    const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area'];
+    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt'];
+    const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area', 'pareto'];
     const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
     const MAX_COLORS = 10;
 
