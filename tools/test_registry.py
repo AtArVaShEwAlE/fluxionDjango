@@ -33,8 +33,9 @@ check('registry keys unique', len(keys), len(set(keys)))
 check('registry key format', [k for k in keys if not re.match(r'^[a-z][a-z_]*$', k) or len(k) > 50], [])
 check('first 11 choices unchanged (keeps DB choices stable)', CHOICES[:11], OLD)
 check('every label non-empty', [k for k, l, _o in CHART_TYPES if not l.strip()], [])
-check('Tier A keys registered after the 11', keys[11:], TIER_A)
-check('enabled = the 11 shipped + 9 Tier A types', sorted(ENABLED), sorted([k for k, _l in OLD] + TIER_A))
+WIDGETS = ['gauge', 'sparkline']
+check('Tier A + widget keys registered after the 11', keys[11:], TIER_A + WIDGETS)
+check('enabled = the 11 shipped + Tier A + widgets', sorted(ENABLED), sorted([k for k, _l in OLD] + TIER_A + WIDGETS))
 check('Tier A enabled', sorted(ENABLED & set(TIER_A)), sorted(TIER_A))
 check('CHOICES length = registry length', len(CHOICES), len(CHART_TYPES))
 
@@ -48,12 +49,12 @@ if js is not None:
     check('JS keys = Python enabled keys', sorted(jskeys), sorted(ENABLED))
     label_of = {k: l for k, l, _o in CHART_TYPES}
     check('JS titles = Python labels', [f[0] for f in found if label_of.get(f[0]) != f[1]], [])
-    check('JS fields valid', [f[0] for f in found if f[2] not in ('xy', 'label-value', 'x')], [])
+    check('JS fields valid', [f[0] for f in found if f[2] not in ('xy', 'label-value', 'x', 'none')], [])
 
 cc = read('templates', 'create_chart.html')
 check('create_chart.html exists', cc is not None, True)
 if cc is not None:
-    extra = read('templates', 'partials', 'chart_type_buttons_a.html') or ''
+    extra = (read('templates', 'partials', 'chart_type_buttons_a.html') or '') + (read('templates', 'partials', 'chart_type_buttons_b.html') or '')
     btns = re.findall(r'chart-type-btn[^"]*"\s+data-type="(\w+)"', cc + extra)
     check('builder buttons = enabled types', sorted(btns), sorted(ENABLED))
 
@@ -67,7 +68,7 @@ tier = read('static', 'js', 'chart_tier_a.js')
 check('chart_tier_a.js exists', tier is not None, True)
 if tier is not None:
     m = re.search(r'const BUILDERS = \{(.*?)\};', tier, re.S)
-    check('chart_tier_a.js builds every Tier A type', sorted(re.findall(r'(\w+):', m.group(1))) if m else [], sorted(k for k, _l, _o in CHART_TYPES[11:]))
+    check('chart_tier_a.js builds every Tier A type', sorted(re.findall(r'(\w+):', m.group(1))) if m else [], sorted(k for k, _l, _o in CHART_TYPES[11:20]))
     check('chart_tier_a.js defines FluxionTierA', 'window.FluxionTierA' in tier, True)
 rend = read('static', 'js', 'chart_render.js')
 check('chart_render.js hands Tier A types to FluxionTierA', rend is not None and 'FluxionTierA' in rend and 'internals' in rend, True)
@@ -75,6 +76,9 @@ check('chart_extras.js exports makeFmt for Tier A', 'makeFmt: makeFmt' in (read(
 icons = read('templates', 'partials', 'chart_icon_a.html')
 check('chart_icon_a.html exists', icons is not None, True)
 check('icon partial draws every Tier A type', [k for k in TIER_A if icons is None or "== '" + k + "'" not in icons], [])
+widg = read('static', 'js', 'chart_widgets.js')
+check('chart_widgets.js exists', widg is not None, True)
+check('chart_widgets.js registers every widget', sorted(re.findall(r"A\.register\('(\w+)'", widg or '')), sorted(WIDGETS))
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':

@@ -68,7 +68,8 @@ def clean_options(raw):
         return {}
     out = {}
     for key in ('show_title', 'grid', 'smooth', 'value_labels', 'highlight', 'trendline',
-                'log_scale', 'gradient', 'animate', 'second_axis', 'center_total', 'insight', 'zoom'):
+                'log_scale', 'gradient', 'animate', 'second_axis', 'center_total', 'insight', 'zoom',
+                'spark_points', 'spark_minmax', 'spark_header'):
         if isinstance(raw.get(key), bool):
             out[key] = raw[key]
     for key, limit in (('title_text', MAX_TITLE), ('x_title', MAX_AXIS_TITLE),

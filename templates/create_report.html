@@ -37,7 +37,7 @@
                             <span class="chart-picker-order" id="order-{{ chart.id }}"></span>
                             <div class="chart-picker-info">
                                 <span class="chart-picker-title">{{ chart.title }}</span>
-                                <span class="chart-picker-meta">{{ chart.chart_type|capfirst }} chart &middot; {{ chart.created_at|date:"M d, Y" }}</span>
+                                <span class="chart-picker-meta">{{ chart.get_chart_type_display }} &middot; {{ chart.created_at|date:"M d, Y" }}</span>
                             </div>
                         </label>
                     {% endfor %}

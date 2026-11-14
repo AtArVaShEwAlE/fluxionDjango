@@ -594,6 +594,9 @@ window.FluxionTierA = (function () {
     return {
         has: function (type) { return Object.prototype.hasOwnProperty.call(BUILDERS, type); },
         keys: function () { return Object.keys(BUILDERS); },
+        register: function (type, fn) { BUILDERS[type] = fn; },   // chart_widgets.js adds the widgets
+        kit: K,
+        fmtFor: fmtFor,
         build: function (result, type, name, opts) {
             opts = opts || {};
             return BUILDERS[type](result, name, opts, opts.options || {});

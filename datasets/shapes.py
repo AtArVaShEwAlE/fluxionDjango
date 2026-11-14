@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 
 from .services import _py, run_query
+from .widgets import WIDGETS
 
 MAX_BUBBLE_POINTS = 500
 MAX_GANTT_TASKS = 100
@@ -180,6 +181,8 @@ SHAPES = {'bubble': _bubble, 'waterfall': _waterfall, 'pareto': _pareto,
 
 def run_shape(df, x, spec):
     shape = spec.get('shape')
+    if isinstance(shape, str) and shape in WIDGETS:
+        return WIDGETS[shape](df, spec)
     if not isinstance(shape, str) or shape not in SHAPES:
         raise ValueError(f'Bad shape: {shape}')
     return SHAPES[shape](df, x, spec)

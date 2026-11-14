@@ -33,7 +33,7 @@
                             <input type="checkbox" class="board-picker-checkbox" value="{{ chart.id }}">
                             <div class="board-picker-info">
                                 <span class="board-picker-title">{{ chart.title }}</span>
-                                <span class="board-picker-meta">{{ chart.chart_type|capfirst }} chart &middot; {{ chart.created_at|date:"M d, Y" }}</span>
+                                <span class="board-picker-meta">{{ chart.get_chart_type_display }} &middot; {{ chart.created_at|date:"M d, Y" }}</span>
                             </div>
                         </label>
                     {% endfor %}

@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 from datasets.models import Dataset
 from datasets.services import load_dataframe, run_query
-from .queries import spec_from_chart, clean_y_axes
+from .queries import spec_from_chart, clean_y_axes, widget_config
 from .options import clean_options
 from .registry import ENABLED
 from .models import Chart, Report
@@ -37,6 +37,7 @@ def _owned_chart(request, chart_id):
 def _build_config(data, keep_options=None):
     y_axes = clean_y_axes(data.get('y_axes'))
     return {
+        **widget_config(data),
         'x_axis': data.get('x_axis'),
         'y_axis': y_axes[0] if y_axes else data.get('y_axis'),
         'y_axes': y_axes,

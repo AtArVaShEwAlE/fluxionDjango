@@ -8,8 +8,8 @@ body.page-landing {
     --ln-accent-soft: #E6F5EF;
     --ln-border: #E3E9E6;
     --ln-border-strong: #CBD6D1;
-    --ln-font-display: "Raleway", sans-serif;
-    --ln-font-body: "Raleway", sans-serif;
+    --ln-font-display: "Instrument Sans", sans-serif;
+    --ln-font-body: "Instrument Sans", sans-serif;
 
     background: var(--ln-bg); 
     color: var(--ln-ink);

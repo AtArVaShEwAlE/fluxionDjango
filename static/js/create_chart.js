@@ -36,7 +36,8 @@ function usesLabelValue(type) {
 }
 
 function defaultTitle() {
-    return `${FluxionTypes.title(selectedChartType)} Chart`;
+    const name = FluxionTypes.title(selectedChartType);
+    return FluxionTypes.isWidget(selectedChartType) ? name : `${name} Chart`;
 }
 
 // Colour palettes live in chart_render.js (FluxionChart.colorSchemes)
@@ -167,6 +168,7 @@ async function loadChartForEditing(chartId) {
             setYColumns(savedYs);
         }
         colorScheme.value = config.color_scheme || 'default';
+        loadWidgetConfig(config);
                 FluxionOptionsPanel.load(config.chart_options || {});
 
         // Show the edit banner
@@ -413,6 +415,86 @@ function syncYSlots() {
     refreshAddYButton();
 }
 
+// ---------- Widgets (KPI, cards, progress, gauge, sparkline, text) ----------
+let widgetBound = false;
+
+function widgetParts() {
+    return FluxionTypes.widgetParts(selectedChartType);
+}
+
+// Show the settings a widget needs, hide X / Y / Customise where they make no sense
+function syncWidgetFields() {
+    const parts = widgetParts();
+    const box = document.getElementById('widgetFields');
+    if (!box) return;
+    if (!widgetBound) {
+        ['wAgg', 'wBucket', 'wTarget', 'wGaugeMin', 'wGaugeMax', 'wHeading', 'wText'].forEach(id => {
+            document.getElementById(id).addEventListener('input', validateSelections);
+        });
+        widgetBound = true;
+    }
+    box.style.display = parts.length ? 'block' : 'none';
+    const show = (id, on) => { document.getElementById(id).style.display = on ? 'block' : 'none'; };
+    show('wAggGroup', parts.includes('agg'));
+    show('wBucketGroup', parts.includes('bucket'));
+    show('wTargetGroup', parts.includes('target'));
+    show('wGaugeGroup', parts.includes('gauge'));
+    show('wTextGroup', parts.includes('text'));
+    xAxisSelect.closest('.field-group').style.display = FluxionTypes.noX(selectedChartType) ? 'none' : 'block';
+    if (FluxionTypes.noY(selectedChartType)) yAxisGroup.style.display = 'none';
+    const panel = document.getElementById('customisePanel');
+    if (panel) panel.style.display = FluxionTypes.noCustomise(selectedChartType) ? 'none' : '';
+}
+
+function numberOrNull(id) {
+    const v = document.getElementById(id).value;
+    return v === '' || !Number.isFinite(Number(v)) ? null : Number(v);
+}
+
+// Extra settings saved with the chart (server keeps only what it knows: charts/queries.py widget_config)
+function widgetConfig() {
+    const parts = widgetParts();
+    const cfg = {};
+    if (parts.includes('agg')) cfg.agg = document.getElementById('wAgg').value;
+    if (parts.includes('bucket')) cfg.bucket = document.getElementById('wBucket').value;
+    if (parts.includes('target') && numberOrNull('wTarget') !== null) cfg.target = numberOrNull('wTarget');
+    if (parts.includes('gauge')) {
+        if (numberOrNull('wGaugeMin') !== null) cfg.gauge_min = numberOrNull('wGaugeMin');
+        if (numberOrNull('wGaugeMax') !== null) cfg.gauge_max = numberOrNull('wGaugeMax');
+    }
+    if (parts.includes('text')) {
+        const heading = document.getElementById('wHeading').value.trim();
+        const text = document.getElementById('wText').value.trim();
+        if (heading) cfg.heading = heading;
+        if (text) cfg.text = text;
+    }
+    return cfg;
+}
+
+function widgetValid() {
+    const t = selectedChartType;
+    const parts = widgetParts();
+    const cfg = widgetConfig();
+    if (!FluxionTypes.noX(t) && !FluxionTypes.xOptional(t) && xAxisSelect.value === '') return false;
+    if (!FluxionTypes.noY(t) && getYColumns().length === 0) return false;
+    if (parts.includes('target') && !(cfg.target > 0)) return false;
+    if (parts.includes('gauge') && !(Number.isFinite(cfg.gauge_max) && cfg.gauge_max > (cfg.gauge_min || 0))) return false;
+    if (parts.includes('text') && !(cfg.text || cfg.heading)) return false;
+    return true;
+}
+
+// Edit mode: put the saved settings back into the form
+function loadWidgetConfig(cfg) {
+    const set = (id, value) => { document.getElementById(id).value = value === undefined || value === null ? '' : value; };
+    set('wAgg', cfg.agg || 'sum');
+    set('wBucket', cfg.bucket || 'month');
+    set('wTarget', cfg.target);
+    set('wGaugeMin', cfg.gauge_min === undefined ? 0 : cfg.gauge_min);
+    set('wGaugeMax', cfg.gauge_max);
+    set('wHeading', cfg.heading);
+    set('wText', cfg.text);
+}
+
 // Fill the Y dropdowns from a saved list (edit mode)
 function setYColumns(cols) {
     yAxisSelect.value = cols[0] || '';
@@ -519,11 +601,14 @@ function updateFormFields() {
     document.querySelector('label[for="xAxisSelect"]').textContent = FluxionTypes.xLabel(selectedChartType);
     syncYSlots();
     updateMultiYVisibility();
+    syncWidgetFields();
 }
 
 function validateSelections() {
     let isValid = false;
-    if (usesLabelValue(selectedChartType)) {
+    if (FluxionTypes.isWidget(selectedChartType)) {
+        isValid = widgetValid();
+    } else if (usesLabelValue(selectedChartType)) {
         isValid = valueSelect.value !== '' && labelSelect.value !== '';
     } else if (FluxionTypes.fields(selectedChartType) === 'x') {
         isValid = xAxisSelect.value !== '';
@@ -588,7 +673,7 @@ function showChartSuccess() {
 // Same rules as charts/queries.py, so builder and saved chart match.
 function buildQuerySpec() {
     if (FluxionTypes.serverSpec(selectedChartType)) {   // server builds the query (charts/queries.py): one source of truth
-        return { chart_type: selectedChartType, config: { x_axis: xAxisSelect.value, y_axes: getYColumns() } };
+        return { chart_type: selectedChartType, config: Object.assign({ x_axis: xAxisSelect.value, y_axes: getYColumns() }, widgetConfig()) };
     }
     if (usesLabelValue(selectedChartType)) {
         return { x: labelSelect.value, series: [{ column: valueSelect.value, agg: 'sum' }], sort: 'none' };
@@ -749,6 +834,7 @@ function buildChartConfigPayload() {
         chartConfig.y_axis = yColumns[0] || '';
     }
 
+    Object.assign(chartConfig, widgetConfig());
     return chartConfig;
 }
 

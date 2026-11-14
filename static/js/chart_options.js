@@ -3,16 +3,16 @@
 // Keys match charts/options.py. Server cleans again on save.
 window.FluxionOptionsPanel = (function () {
     const ROUND = ['pie', 'doughnut'];
-    const SMOOTH = ['line', 'area', 'combo', 'stacked_area', 'dual_line', 'density'];
-    const LABEL_NO = ['radar', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt'];
+    const SMOOTH = ['line', 'area', 'combo', 'stacked_area', 'dual_line', 'density', 'sparkline'];
+    const LABEL_NO = ['radar', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt', 'sparkline'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
     const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
     const LAST_OK = ['line', 'area', 'scatter'];
-    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt'];
-    const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area', 'pareto'];
+    const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt', 'sparkline'];
+    const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area', 'pareto', 'sparkline'];
     const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
     const MAX_COLORS = 10;
 
@@ -93,8 +93,8 @@ window.FluxionOptionsPanel = (function () {
     function applyVisibility() {
         const type = cfg.getType();
         const round = ROUND.indexOf(type) !== -1;
-        show('axes', !round && type !== 'radar');
-        show('grid', !round);
+        show('axes', !round && type !== 'radar' && type !== 'sparkline');
+        show('grid', !round && type !== 'sparkline');
         show('smooth', SMOOTH.indexOf(type) !== -1);
         show('colors', !round);
         show('vlabels', LABEL_NO.indexOf(type) === -1);
@@ -109,6 +109,7 @@ window.FluxionOptionsPanel = (function () {
         show('axis2', type === 'combo');
         show('total', type === 'doughnut');
         show('zoom', ZOOM_OK.indexOf(type) !== -1);
+        show('spark', type === 'sparkline');
     }
 
     function syncControls() {
@@ -140,6 +141,9 @@ window.FluxionOptionsPanel = (function () {
         $('optTotal').checked = state.center_total === true;
         $('optInsight').checked = state.insight === true;
         $('optZoom').checked = state.zoom === true;
+        $('optSparkHeader').checked = state.spark_header !== false;
+        $('optSparkPoints').checked = state.spark_points === true;
+        $('optSparkMinMax').checked = state.spark_minmax === true;
         applyVisibility();
         colorSig = sig();
         renderColors();
@@ -191,9 +195,12 @@ window.FluxionOptionsPanel = (function () {
         flag('optTotal', 'center_total');
         flag('optInsight', 'insight');
         flag('optZoom', 'zoom');
+        flag('optSparkPoints', 'spark_points');
+        flag('optSparkMinMax', 'spark_minmax');
         const unflag = (id, key) => listen(id, 'change', e => { if (e.target.checked) delete state[key]; else state[key] = false; });
         unflag('optGradient', 'gradient');
         unflag('optAnimate', 'animate');
+        unflag('optSparkHeader', 'spark_header');
         const readRefs = () => {
             const r = [];
             if ($('optRefAvg').checked) r.push('avg');

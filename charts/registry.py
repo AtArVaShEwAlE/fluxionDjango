@@ -28,6 +28,13 @@ CHART_TYPES = [
     ('dual_line', 'Dual-Axis Line', True),
     ('density', 'Density', True),
     ('gantt', 'Gantt', True),
+    # Phase 20 widgets
+    ('kpi', 'KPI Card', True),
+    ('multi_card', 'Multi-Row Card', True),
+    ('progress', 'Progress Bar', True),
+    ('gauge', 'Gauge', True),
+    ('sparkline', 'Sparkline', True),
+    ('text', 'Text', True),
 ]
 
 CHOICES = [(key, label) for key, label, _on in CHART_TYPES]

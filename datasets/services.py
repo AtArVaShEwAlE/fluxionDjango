@@ -264,6 +264,10 @@ def run_query(df, spec):
     if not isinstance(spec, dict):
         raise ValueError('Invalid query')
 
+    if spec.get('shape') == 'gauge':   # a gauge has no X, so it runs before the X check
+        from .shapes import run_shape
+        return run_shape(df, spec.get('x'), spec)
+
     x = spec.get('x')
     if not isinstance(x, str) or x not in df.columns:
         raise ValueError(f'Unknown column: {x}')

@@ -112,6 +112,7 @@
                         <span>Histogram</span>
                     </button>
                     {% include 'partials/chart_type_buttons_a.html' %}
+                    {% include 'partials/chart_type_buttons_b.html' %}
                 </div>
             </div>
 
@@ -144,6 +145,47 @@
                     </select>
                     <div id="extraYRows"></div>
                     <button type="button" class="btn-add-y" id="addYBtn">+ Add column</button>
+                </div>
+
+                <!-- Widget settings (KPI, cards, progress, gauge, sparkline, text) -->
+                <div id="widgetFields" style="display: none;">
+                    <div class="field-group" id="wAggGroup">
+                        <label for="wAgg">Calculate</label>
+                        <select id="wAgg" class="form-select">
+                            <option value="sum">Sum</option>
+                            <option value="avg">Average</option>
+                            <option value="count">Count</option>
+                            <option value="min">Minimum</option>
+                            <option value="max">Maximum</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wBucketGroup">
+                        <label for="wBucket">Group dates by</label>
+                        <select id="wBucket" class="form-select">
+                            <option value="month">Month</option>
+                            <option value="day">Day</option>
+                            <option value="week">Week</option>
+                            <option value="quarter">Quarter</option>
+                            <option value="year">Year</option>
+                            <option value="none">No grouping</option>
+                        </select>
+                    </div>
+                    <div class="field-group" id="wTargetGroup">
+                        <label for="wTarget">Target (number above 0)</label>
+                        <input type="number" id="wTarget" class="form-input" step="any" placeholder="e.g. 10000">
+                    </div>
+                    <div class="field-group" id="wGaugeGroup">
+                        <label for="wGaugeMin">Gauge minimum</label>
+                        <input type="number" id="wGaugeMin" class="form-input" step="any" value="0">
+                        <label for="wGaugeMax" style="margin-top: 0.75rem;">Gauge maximum</label>
+                        <input type="number" id="wGaugeMax" class="form-input" step="any" placeholder="e.g. 100">
+                    </div>
+                    <div class="field-group" id="wTextGroup">
+                        <label for="wHeading">Heading (optional)</label>
+                        <input type="text" id="wHeading" class="form-input" maxlength="80" placeholder="e.g. Q4 note">
+                        <label for="wText" style="margin-top: 0.75rem;">Text</label>
+                        <textarea id="wText" class="form-input" rows="5" maxlength="600" placeholder="Write a note..."></textarea>
+                    </div>
                 </div>
 
                 <!-- Value Selection (for pie charts) -->
@@ -267,6 +309,11 @@
                             <label class="opt-check" data-opt="axis2"><input type="checkbox" id="optAxis2"> Second Y axis for lines</label>
                             <label class="opt-check" data-opt="total"><input type="checkbox" id="optTotal"> Centre total</label>
                             <label class="opt-check" data-opt="zoom"><input type="checkbox" id="optZoom"> Zoom and pan</label>
+                            <div data-opt="spark">
+                                <label class="opt-check"><input type="checkbox" id="optSparkHeader"> Show value on top</label>
+                                <label class="opt-check"><input type="checkbox" id="optSparkPoints"> Show points</label>
+                                <label class="opt-check"><input type="checkbox" id="optSparkMinMax"> Mark highest and lowest</label>
+                            </div>
                             <label class="opt-check"><input type="checkbox" id="optInsight"> Insight caption</label>
                         </div>
                         <button type="button" class="btn btn-secondary btn-block btn-sm" id="optReset">Reset customisation</button>

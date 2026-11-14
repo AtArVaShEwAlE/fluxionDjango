@@ -299,6 +299,28 @@ try:
             check('shared-data new type anon', anon.get(f'/shared-data/{btok19}').status_code, 200)
             check('shared page new type anon', anon.get(f'/shared/{btok19}').status_code, 200)
 
+        # ---- Phase 20: widgets (gauge, sparkline) ----
+        W20 = {
+            'gauge': dict(y_axes=['sales'], agg='max', gauge_min=0, gauge_max=60),
+            'sparkline': dict(x_axis='name', y_axes=['sales'], agg='sum', bucket='none'),
+        }
+        w20 = {}
+        for t20, cfg20 in W20.items():
+            tid20, st20 = p11_save(t20, **cfg20)
+            w20[t20] = tid20
+            check(f'save-chart {t20}', st20, 200)
+            check(f'chart-data {t20}', A.get(f'/chart-data/{tid20}').status_code, 200)
+        check('gauge pct', p11_data(w20['gauge']).get('meta', {}).get('pct'), 50.0)
+        check('sparkline labels', p11_data(w20['sparkline']).get('labels'), [['a', 'b', 'c']])
+        check('widget settings saved', js(A.get(f'/get-chart/{w20["gauge"]}')).get('chart', {}).get('config', {}).get('gauge_max'), 60)
+        tid20, _ = p11_save('gauge', y_axes=['sales'], agg='sum')
+        check('gauge without max is 400', A.get(f'/chart-data/{tid20}').status_code, 400)
+        tid20, _ = p11_save('sparkline', x_axis='name', y_axes=['sales'], agg='median', bucket='none')
+        check('widget bad agg dropped on save', 'agg' in js(A.get(f'/get-chart/{tid20}')).get('chart', {}).get('config', {}), False)
+        r = jpost(A, f'/dataset-data/{ds}', {'chart_type': 'gauge', 'config': {'y_axes': ['sales'], 'agg': 'max', 'gauge_max': 60}})
+        check('dataset-data widget preview', r.status_code, 200)
+        check('dataset-data widget value', js(r).get('meta', {}).get('value'), 30)
+
         # Histogram: one numeric column, counted in bins
         hid, st = p11_save('histogram', x_axis='sales')
         check('save-chart histogram', st, 200)
