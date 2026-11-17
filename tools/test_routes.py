@@ -320,6 +320,21 @@ try:
         r = jpost(A, f'/dataset-data/{ds}', {'chart_type': 'gauge', 'config': {'y_axes': ['sales'], 'agg': 'max', 'gauge_max': 60}})
         check('dataset-data widget preview', r.status_code, 200)
         check('dataset-data widget value', js(r).get('meta', {}).get('value'), 30)
+        # ---- Phase 20B: view file + row range ----
+        r = A.get(f'/dataset-rows/{ds}?page=1&size=2')
+        check('dataset-rows owner', r.status_code, 200)
+        check('dataset-rows total', js(r).get('total'), 3)
+        check('dataset-rows page size', len(js(r).get('rows', [])), 2)
+        check('dataset-rows row numbers', [row[0] for row in js(r).get('rows', [])], [[1, 2]])
+        check('dataset-rows page 2 starts at row 3', [row[0] for row in js(A.get(f'/dataset-rows/{ds}?page=2&size=2')).get('rows', [])], [[3]])
+        check('dataset-rows bad page', A.get(f'/dataset-rows/{ds}?page=x').status_code, 400)
+        check('B dataset-rows', B.get(f'/dataset-rows/{ds}').status_code, [403, 404])
+        check('anon dataset-rows', anon.get(f'/dataset-rows/{ds}').status_code, 302)
+        tid20, _ = p11_save('bar', x_axis='name', y_axis='sales', chart_options={'row_from': 2, 'row_to': 3})
+        check('row range chart labels', p11_data(tid20).get('labels'), [['b', 'c']])
+        check('row range chart values', p11_data(tid20).get('series', [{}])[0].get('values'), [[20, 30]])
+        r = jpost(A, f'/dataset-data/{ds}', {'x': 'name', 'series': [{'column': 'sales'}], 'row_from': 2})
+        check('dataset-data row_from', js(r).get('labels'), [['b', 'c']])
 
         # Histogram: one numeric column, counted in bins
         hid, st = p11_save('histogram', x_axis='sales')

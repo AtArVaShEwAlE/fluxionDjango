@@ -4,6 +4,12 @@ let currentDataset = null;
 let currentChart = null;
 let builderReady = false;
 let lastResult = null;   // last server result: option changes re-render without a refetch
+let lastRowKey = '';     // row range of that result: a new range needs a new fetch
+
+function rowKey() {
+    const o = (window.FluxionOptionsPanel && FluxionOptionsPanel.get()) || {};
+    return (o.row_from || '') + '-' + (o.row_to || '');
+}
 let editingChartId = null; // set when we're editing an existing chart instead of creating a new one
 
 const noDataState = document.getElementById('noDataState');
@@ -164,7 +170,7 @@ async function loadChartForEditing(chartId) {
             labelSelect.value = config.label_column || '';
         } else {
             xAxisSelect.value = config.x_axis || '';
-            const savedYs = (Array.isArray(config.y_axes) && config.y_axes.length) ? config.y_axes : [config.y_axis || ''];
+            const savedYs = (Array.isArray(config.y_axes) && config.y_axes.length) ? config.y_axes : [config.y_axis || (selectedChartType === 'density' ? config.x_axis : '') || ''];
             setYColumns(savedYs);
         }
         colorScheme.value = config.color_scheme || 'default';
@@ -204,6 +210,7 @@ function showChartBuilder() {
     noDataState.style.display = 'none';
     chartBuilder.style.display = 'block';
     document.getElementById('datasetName').textContent = currentDataset.filename;
+    if (window.FluxionGuide) FluxionGuide.renderSuggestions(currentDataset);
     document.getElementById('datasetRows').textContent = `${currentDataset.rows.toLocaleString()} rows`;
     document.getElementById('datasetCols').textContent = `${currentDataset.columns} columns`;
 }
@@ -440,7 +447,7 @@ function syncWidgetFields() {
     show('wTargetGroup', parts.includes('target'));
     show('wGaugeGroup', parts.includes('gauge'));
     show('wTextGroup', parts.includes('text'));
-    xAxisSelect.closest('.field-group').style.display = FluxionTypes.noX(selectedChartType) ? 'none' : 'block';
+    xAxisSelect.closest('.field-group').style.display = (FluxionTypes.noX(selectedChartType) || FluxionTypes.usesLabelValue(selectedChartType)) ? 'none' : 'block';
     if (FluxionTypes.noY(selectedChartType)) yAxisGroup.style.display = 'none';
     const panel = document.getElementById('customisePanel');
     if (panel) panel.style.display = FluxionTypes.noCustomise(selectedChartType) ? 'none' : '';
@@ -602,6 +609,7 @@ function updateFormFields() {
     syncYSlots();
     updateMultiYVisibility();
     syncWidgetFields();
+    if (window.FluxionGuide) FluxionGuide.showGuide(selectedChartType);
 }
 
 function validateSelections() {
@@ -614,7 +622,7 @@ function validateSelections() {
         isValid = xAxisSelect.value !== '';
     } else {
         const ys = getYColumns();
-        isValid = xAxisSelect.value !== '' && ys.length > 0 && ys.every(c => c !== '') && new Set(ys).size === ys.length;
+        isValid = (FluxionTypes.noX(selectedChartType) || xAxisSelect.value !== '') && ys.length > 0 && ys.every(c => c !== '') && new Set(ys).size === ys.length;
     }
     FluxionOptionsPanel.refresh();
     updateChartBtn.disabled = !isValid;
@@ -672,6 +680,18 @@ function showChartSuccess() {
 
 // Same rules as charts/queries.py, so builder and saved chart match.
 function buildQuerySpec() {
+    const spec = buildQuerySpecCore();
+    const o = (window.FluxionOptionsPanel && FluxionOptionsPanel.get()) || {};
+    if (spec.chart_type) {   // the server builds the query: send the Customise options too (row range)
+        spec.config.chart_options = o;
+    } else {
+        if (o.row_from) spec.row_from = o.row_from;
+        if (o.row_to) spec.row_to = o.row_to;
+    }
+    return spec;
+}
+
+function buildQuerySpecCore() {
     if (FluxionTypes.serverSpec(selectedChartType)) {   // server builds the query (charts/queries.py): one source of truth
         return { chart_type: selectedChartType, config: Object.assign({ x_axis: xAxisSelect.value, y_axes: getYColumns() }, widgetConfig()) };
     }
@@ -688,6 +708,7 @@ function buildQuerySpec() {
 }
 
 async function fetchChartData() {
+    lastRowKey = rowKey();
     const response = await fetch(`/dataset-data/${currentDataset.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -720,7 +741,10 @@ function getSeriesNames() {
 
 // Re-draw with the last server result (no refetch), e.g. after a Customise change
 function rerenderPreview() {
-    if (lastResult && currentChart) createChart(lastResult);
+    if (lastResult && currentChart) {
+        if (rowKey() !== lastRowKey) handleUpdateChart();   // row range changed: ask the server again
+        else createChart(lastResult);
+    }
 }
 
 function createChart(result) {

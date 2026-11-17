@@ -9,6 +9,18 @@ def clean_y_axes(value):
     return cols
 
 def spec_from_chart(chart_type, config):
+    """Saved chart -> query spec. Adds the Customise row range (Rows from / to) to every chart."""
+    spec = _spec_core(chart_type, config)
+    options = config.get('chart_options') if isinstance(config, dict) else None
+    if isinstance(options, dict):
+        for key in ('row_from', 'row_to'):
+            value = options.get(key)
+            if isinstance(value, int) and not isinstance(value, bool):
+                spec[key] = value
+    return spec
+
+
+def _spec_core(chart_type, config):
     """Saved-chart config -> query spec. Old configs (only y_axis) keep rendering."""
     config = config or {}
     if chart_type in SHAPE_TYPES:
@@ -46,10 +58,13 @@ def _shape_spec(chart_type, config):
         ys = [config['y_axis']]
     if chart_type in WIDGET_TYPES:
         return _widget_spec(chart_type, config, x, ys)
+    if chart_type == 'density':   # one or more number columns (old charts: the X column)
+        cols = ys or ([x] if x else [])
+        if not cols:
+            raise ValueError('Chart config is incomplete')
+        return {'shape': 'density', 'series': [{'column': c} for c in cols]}
     if not x:
         raise ValueError('Chart config is incomplete')
-    if chart_type == 'density':
-        return {'x': x, 'shape': 'density'}
     if len(ys) < (2 if chart_type in NEEDS_TWO else 1):
         raise ValueError('Chart config is incomplete')
     if chart_type == 'stacked_area':

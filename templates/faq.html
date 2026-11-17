@@ -29,6 +29,7 @@
             <button type="button" class="fq-chip" data-cat="charts" aria-pressed="false">Charts &amp; boards</button>
             <button type="button" class="fq-chip" data-cat="sharing" aria-pressed="false">Sharing</button>
             <button type="button" class="fq-chip" data-cat="data" aria-pressed="false">Data &amp; privacy</button>
+            <button type="button" class="fq-chip" data-cat="types" aria-pressed="false">Chart types</button>
         </div>
         <div class="fq-actions">
             <span id="faqCount" aria-live="polite">10 questions</span>
@@ -133,5 +134,6 @@
 
 {% block extra_js %}
 <script src="{% static 'js/info-motion.js' %}"></script>
+<script src="{% static 'js/chart_guide.js' %}"></script>
 <script src="{% static 'js/faq.js' %}"></script>
 {% endblock %}

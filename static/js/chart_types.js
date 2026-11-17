@@ -5,7 +5,7 @@
 // slots:   fixed Y columns, in order, one dropdown each (labels shown in the builder)
 // x / y:   label text of the X dropdown / first Y dropdown (default: X-Axis (Categories) / Y-Axis (Values))
 // server:  builder asks the server to build the query (charts/queries.py), one source of truth
-// colors:  'one' = one colour picker | 'pareto' = bars + cumulative line | (absent) = one per Y column
+// colors:  'one' = one colour picker | 'pareto' = bars + cumulative line | 'waterfall' = increase, decrease, total | (absent) = one per Y column
 // widget:  settings a widget needs: agg, bucket, gauge. noX / noY hide the dropdown, xOptional = X may stay empty, noCustomise hides the Customise panel
 window.FluxionTypes = (function () {
     const T = {
@@ -23,11 +23,11 @@ window.FluxionTypes = (function () {
         stacked_area: { title: 'Stacked Area', fields: 'xy', multiY: true, server: true },
         dual_line: { title: 'Dual-Axis Line', fields: 'xy', multiY: false, server: true, slots: ['Left axis (first line)', 'Right axis (second line)'] },
         bubble: { title: 'Bubble', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'X (numbers)', slots: ['Y (numbers)', 'Size (numbers)'] },
-        waterfall: { title: 'Waterfall', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Steps (labels)', y: 'Change (numbers)' },
+        waterfall: { title: 'Waterfall', fields: 'xy', multiY: false, server: true, colors: 'waterfall', x: 'Steps (labels)', y: 'Change (numbers)' },
         funnel: { title: 'Funnel', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Stages (labels)', y: 'Value (numbers)' },
         pareto: { title: 'Pareto', fields: 'xy', multiY: false, server: true, colors: 'pareto', x: 'Categories (labels)', y: 'Amount (numbers)' },
         bullet: { title: 'Bullet', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Categories (labels)', slots: ['Actual (numbers)', 'Target (numbers)'] },
-        density: { title: 'Density', fields: 'x', multiY: false, server: true, colors: 'one', x: 'Column (numbers)' },
+        density: { title: 'Density', fields: 'xy', multiY: true, server: true, noX: true, y: 'Columns (numbers)' },
         gantt: { title: 'Gantt', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Tasks (labels)', slots: ['Start (date or number)', 'End (date or number)'] },
         gauge: { title: 'Gauge', fields: 'xy', multiY: false, server: true, colors: 'one', y: 'Value (numbers)', noX: true, noCustomise: true, widget: ['agg', 'gauge'] },
         sparkline: { title: 'Sparkline', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Date or category column', y: 'Value (numbers)', widget: ['agg', 'bucket'] }
@@ -61,6 +61,7 @@ window.FluxionTypes = (function () {
             if (!ys.length) return ['Series 1'];
             if (mode === 'one') return [ys[0]];
             if (mode === 'pareto') return [ys[0], 'Cumulative %'];
+            if (mode === 'waterfall') return ['Increase', 'Decrease', 'Total'];
             return ys;
         }
     };

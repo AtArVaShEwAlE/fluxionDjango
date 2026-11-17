@@ -13,6 +13,8 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from django.utils import timezone
 from .models import Dataset
 from charts.queries import SHAPE_TYPES, spec_from_chart
+from .services import _py
+import pandas as pd
 from .services import (allowed_file, analyze_dataframe, clean_dataframe, delete_cache,
                        load_dataframe, read_dataframe, run_query, save_cache)
 
@@ -229,3 +231,46 @@ def delete_dataset(request, dataset_id):
     dataset.delete()
     return JsonResponse({'success': True, 'charts_deleted': charts_deleted,
                          'message': 'Dataset deleted successfully!'})
+
+
+ROWS_PAGE_MAX = 100
+
+
+@login_required
+@require_GET
+def dataset_rows(request, dataset_id):
+    """One page of the dataset for the 'View file' window: row numbers + values. Owner only."""
+    dataset, error = _owned_dataset(request, dataset_id)
+    if error:
+        return error
+    try:
+        page = max(1, int(request.GET.get('page', 1)))
+        size = max(1, min(int(request.GET.get('size', 50)), ROWS_PAGE_MAX))
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Bad page'}, status=400)
+    try:
+        df = load_dataframe(dataset)
+    except FileNotFoundError:
+        return JsonResponse({'success': False, 'error': 'Dataset file is missing'}, status=404)
+    except Exception as e:
+        logger.exception('Error reading dataset %s', dataset_id)
+        return JsonResponse({'success': False, 'error': f'Error reading data: {e}'}, status=500)
+
+    def cell(value):
+        value = _py(value)
+        return value[:200] if isinstance(value, str) else value
+
+    def kind(col):
+        if pd.api.types.is_datetime64_any_dtype(df[col]):
+            return 'date'
+        return 'number' if pd.api.types.is_numeric_dtype(df[col]) else 'text'
+
+    total = len(df)
+    start = (page - 1) * size
+    chunk = df.iloc[start:start + size]
+    rows = [[start + i + 1] + [cell(v) for v in row]
+            for i, row in enumerate(chunk.itertuples(index=False, name=None))]
+    return JsonResponse({'success': True, 'columns': [str(c) for c in df.columns],
+                         'types': {str(c): kind(c) for c in df.columns}, 'rows': rows,
+                         'page': page, 'size': size, 'total': total,
+                         'pages': max(1, -(-total // size))})

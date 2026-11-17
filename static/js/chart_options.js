@@ -9,8 +9,8 @@ window.FluxionOptionsPanel = (function () {
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const LAST_OK = ['line', 'area', 'scatter'];
+    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo', 'funnel', 'gantt', 'bubble', 'stacked_area'];
+    const LAST_OK = ['line', 'area', 'scatter', 'stacked_area', 'dual_line', 'sparkline'];
     const LOG_NO = ['stacked', 'histogram', 'radar', 'pie', 'doughnut', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt', 'sparkline'];
     const GRAD_OK = ['bar', 'hbar', 'combo', 'histogram', 'area', 'pareto', 'sparkline'];
     const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
@@ -61,6 +61,14 @@ window.FluxionOptionsPanel = (function () {
                 JSON.stringify(state.series_colors || null)].join('|');
     }
 
+    // colour shown in a picker before the user changes it (matches what the chart really uses)
+    function defaultColor(i, pal) {
+        const type = cfg.getType();
+        if (type === 'waterfall') return [pal[0], '#E5484D', '#334155'][i] || pal[0];
+        if ((type === 'pareto' || type === 'dual_line') && i === 1) return '#F59E0B';
+        return pal[i % pal.length];
+    }
+
     function renderColors() {
         const box = $('optColors');
         const pal = palette();
@@ -71,7 +79,7 @@ window.FluxionOptionsPanel = (function () {
             row.className = 'opt-color-row';
             const input = document.createElement('input');
             input.type = 'color';
-            input.value = toHex(custom[i] || pal[i % pal.length]);
+            input.value = toHex(custom[i] || defaultColor(i, pal));
             const text = document.createElement('span');
             text.textContent = name;
             input.addEventListener('input', function () {
@@ -109,7 +117,10 @@ window.FluxionOptionsPanel = (function () {
         show('axis2', type === 'combo');
         show('total', type === 'doughnut');
         show('zoom', ZOOM_OK.indexOf(type) !== -1);
-        show('spark', type === 'sparkline');
+        show('spark1', type === 'sparkline');
+        show('spark2', type === 'sparkline');
+        show('spark3', type === 'sparkline');
+        show('xrange', type === 'density');
     }
 
     function syncControls() {
@@ -144,6 +155,10 @@ window.FluxionOptionsPanel = (function () {
         $('optSparkHeader').checked = state.spark_header !== false;
         $('optSparkPoints').checked = state.spark_points === true;
         $('optSparkMinMax').checked = state.spark_minmax === true;
+        $('optRowFrom').value = state.row_from || '';
+        $('optRowTo').value = state.row_to || '';
+        $('optXMin').value = state.x_min === undefined ? '' : state.x_min;
+        $('optXMax').value = state.x_max === undefined ? '' : state.x_max;
         applyVisibility();
         colorSig = sig();
         renderColors();
@@ -201,6 +216,12 @@ window.FluxionOptionsPanel = (function () {
         unflag('optGradient', 'gradient');
         unflag('optAnimate', 'animate');
         unflag('optSparkHeader', 'spark_header');
+        const readRow = (id, key) => { const v = parseInt($(id).value, 10); if (Number.isFinite(v) && v >= 1) state[key] = v; else delete state[key]; };
+        listen('optRowFrom', 'change', () => readRow('optRowFrom', 'row_from'));
+        listen('optRowTo', 'change', () => readRow('optRowTo', 'row_to'));
+        const readRange = (id, key) => { const el = $(id); const v = Number(el.value); if (el.value !== '' && Number.isFinite(v)) state[key] = v; else delete state[key]; };
+        listen('optXMin', 'change', () => readRange('optXMin', 'x_min'));
+        listen('optXMax', 'change', () => readRange('optXMax', 'x_max'));
         const readRefs = () => {
             const r = [];
             if ($('optRefAvg').checked) r.push('avg');

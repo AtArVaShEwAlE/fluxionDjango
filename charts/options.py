@@ -3,6 +3,7 @@
 Anything not on the whitelist, or with a bad value, is dropped silently.
 Never raises. Output only holds keys the user actually set.
 """
+import math
 import re
 
 HEX_COLOR = re.compile(r'^#[0-9a-fA-F]{6}$')
@@ -19,6 +20,7 @@ MIN_TOP_N = 3
 MAX_TOP_N = 20
 MIN_LAST_N = 3
 MAX_LAST_N = 200
+MAX_ROW = 10_000_000
 
 
 def _text(value, limit):
@@ -101,6 +103,18 @@ def clean_options(raw):
         last = int(last)
     if isinstance(last, int) and not isinstance(last, bool) and MIN_LAST_N <= last <= MAX_LAST_N:
         out['last_n'] = last
+    for key in ('row_from', 'row_to'):   # Customise: Rows from / to (1-based row numbers)
+        value = raw.get(key)
+        if isinstance(value, float) and value.is_integer():
+            value = int(value)
+        if isinstance(value, int) and not isinstance(value, bool) and 1 <= value <= MAX_ROW:
+            out[key] = value
+    if 'row_from' in out and 'row_to' in out and out['row_to'] < out['row_from']:
+        del out['row_to']
+    for key in ('x_min', 'x_max'):   # density: value range
+        value = raw.get(key)
+        if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) and abs(value) <= 1e15:
+            out[key] = float(value)
     colors = _colors(raw.get('series_colors'))
     if colors:
         out['series_colors'] = colors

@@ -124,7 +124,7 @@ body.page-app .chart-type-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 0.55rem 0.9rem;
     border: 1.5px solid var(--pa-border);
     border-radius: 10px;
     background: #ffffff;
@@ -132,7 +132,7 @@ body.page-app .chart-type-btn {
     transition: all 0.18s ease;
     font-family: inherit;
     color: var(--pa-ink-soft);
-    min-width: 120px;
+    min-width: 92px;
 }
 
 body.page-app .chart-type-btn:hover {
@@ -619,3 +619,265 @@ body.page-app .chart-preview-card {
         width: 100%;
     }
 }
+
+
+/* Phase 20B: grouped chart types, guide card, suggestions, View file */
+body.page-app .chart-type-grid.chart-type-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+    gap: 1rem 1.5rem;
+    justify-content: stretch;
+    text-align: left;
+}
+
+body.page-app .chart-type-group h6 {
+    margin: 0 0 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .chart-type-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+body.page-app .chart-type-btn .icon-lg {
+    width: 26px;
+    height: 26px;
+}
+
+body.page-app .chart-type-btn .icon-lg svg {
+    width: 100%;
+    height: 100%;
+}
+
+body.page-app .chart-type-btn span {
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+}
+
+body.page-app .dataset-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+}
+
+body.page-app .dataset-title-row h4 {
+    margin: 0;
+}
+
+body.page-app .chart-guide {
+    margin-top: 1rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--pa-accent-soft);
+    border-left: 4px solid var(--pa-accent);
+    border-radius: 10px;
+}
+
+body.page-app .chart-guide[hidden],
+body.page-app .chart-suggest[hidden] {
+    display: none;
+}
+
+body.page-app .chart-guide-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.4rem;
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .chart-guide-head span {
+    font-size: 0.8rem;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .chart-guide dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.25rem 1rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+body.page-app .chart-guide dt {
+    font-weight: 700;
+    color: var(--pa-ink);
+}
+
+body.page-app .chart-guide dd {
+    margin: 0;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .chart-suggest {
+    margin-top: 1rem;
+}
+
+body.page-app .chart-suggest h5 {
+    margin: 0 0 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--pa-ink);
+}
+
+body.page-app .chart-suggest-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+body.page-app .suggest-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.45rem 0.8rem;
+    background: #ffffff;
+    border: 1.5px solid var(--pa-border);
+    border-radius: 10px;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+body.page-app .suggest-chip:hover {
+    border-color: var(--pa-accent);
+    transform: translateY(-1px);
+}
+
+body.page-app .suggest-chip strong {
+    font-size: 0.85rem;
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .suggest-chip span {
+    font-size: 0.78rem;
+    color: var(--pa-ink-soft);
+}
+
+/* View file window */
+.fv-modal[hidden] { display: none; }
+
+.fv-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fv-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 32, 26, 0.55);
+}
+
+.fv-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(1100px, 94vw);
+    max-height: 88dvh;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(16, 32, 26, 0.3);
+    overflow: hidden;
+}
+
+.fv-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid #E3E9E6;
+}
+
+.fv-title { margin: 0; font-size: 1.05rem; }
+
+.fv-close {
+    border: none;
+    background: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #55655F;
+}
+
+.fv-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    background: #F6F9F7;
+    border-bottom: 1px solid #E3E9E6;
+    font-size: 0.85rem;
+}
+
+.fv-field { display: flex; align-items: center; gap: 0.4rem; margin: 0; }
+.fv-field .form-select, .fv-field .form-input { width: auto; padding: 0.35rem 0.5rem; }
+.fv-field .form-input { width: 90px; }
+.fv-info { margin-left: auto; color: #55655F; }
+
+.fv-body { overflow: auto; flex: 1; }
+.fv-msg { padding: 2rem; text-align: center; color: #55655F; }
+
+.fv-table { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: 0.85rem; }
+
+.fv-table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    background: #F6F9F7;
+    border-bottom: 1px solid #E3E9E6;
+    white-space: nowrap;
+}
+
+.fv-table td {
+    padding: 0.4rem 0.75rem;
+    border-bottom: 1px solid #EEF2F0;
+    max-width: 260px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fv-table .fv-rownum {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: #F6F9F7;
+    color: #55655F;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    border-right: 1px solid #E3E9E6;
+}
+
+.fv-table th.fv-rownum { z-index: 3; }
+.fv-table tr.fv-hit td { background: #FFF6D6; }
+.fv-table tr.fv-hit td.fv-rownum { background: #FFE9A3; }
+
+.fv-badge {
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 6px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    background: #E3E9E6;
+    color: #55655F;
+}
+
+.fv-badge.fv-number { background: #E6F5EF; color: #157A56; }
+.fv-badge.fv-date { background: #E8EEFF; color: #3B5BDB; }

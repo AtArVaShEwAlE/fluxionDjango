@@ -288,7 +288,7 @@ window.FluxionTierA = (function () {
         };
         const cfg = shell(result, opts, {
             type: 'bar',
-            data: { labels: result.labels, datasets: [bar('Increase', up, pal[0]), bar('Decrease', down, RED), bar('Total', total, pal[2] || INK)] },
+            data: { labels: result.labels, datasets: [bar('Increase', up, (o.series_colors || [])[0] || pal[0]), bar('Decrease', down, (o.series_colors || [])[1] || RED), bar('Total', total, (o.series_colors || [])[2] || '#334155')] },
             legend: true,
             interaction: { mode: 'nearest', intersect: true },
             tooltip: k.tooltip({
@@ -519,31 +519,39 @@ window.FluxionTierA = (function () {
         });
     }
 
-    // ---------- density ----------
+    // ---------- density (one or more columns on a shared grid) ----------
     function density(result, name, opts, o) {
         const k = K();
         const pal = k.palette(name, o.series_colors);
-        const c = pal[0];
-        const ys = result.series[0].values;
-        const xName = (result.meta && result.meta.x) || result.series[0].column;
         const curve = o.smooth === false ? 0 : 0.4;
-        const pts = result.labels.map((x, i) => ({ x: Number(x), y: ys[i] }));
+        const multi = result.series.length > 1;
+        const xName = multi ? 'Value' : ((result.meta && result.meta.x) || result.series[0].column);
+        const has = v => v !== undefined && v !== null && Number.isFinite(Number(v));
+        const datasets = result.series.map(function (s, i) {
+            const c = pal[i % pal.length];
+            const pts = result.labels.map((x, j) => ({ x: Number(x), y: s.values[j] }));
+            return Object.assign({ label: s.column, data: pts }, k.lineStyle(c, curve, 100, true),
+                { pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 10 });
+        });
+        const xScale = { type: 'linear', grid: k.noGrid, border: k.noBorder,
+            ticks: Object.assign({}, k.tick(), { callback: v => numText(v) }), title: axisTitle(xName) };
+        if (has(o.x_min)) xScale.min = Number(o.x_min);   // Customise: value range
+        if (has(o.x_max)) xScale.max = Number(o.x_max);
         return shell(result, opts, {
             type: 'line',
-            data: { datasets: [Object.assign({ label: 'Density', data: pts }, k.lineStyle(c, curve, 100, true), { pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 10 })] },
-            legend: false,
+            data: { datasets: datasets },
+            legend: multi,
             interaction: { mode: 'nearest', axis: 'x', intersect: false },
             tooltip: k.tooltip({
                 title: items => (items.length ? xName + ': ' + numText(items[0].parsed.x) : ''),
-                label: ctx => ' Density: ' + Number(ctx.parsed.y.toPrecision(3))
+                label: ctx => ' ' + (ctx.dataset.label || 'Density') + ': ' + Number(ctx.parsed.y.toPrecision(3))
             }),
             scales: {
-                x: { type: 'linear', grid: k.noGrid, border: k.noBorder, ticks: Object.assign({}, k.tick(), { callback: v => numText(v) }), title: axisTitle(xName) },
+                x: xScale,
                 y: { beginAtZero: true, grid: k.grid, border: k.noBorder, ticks: Object.assign({}, k.tick(), { callback: v => numText(v) }), title: axisTitle('Density') }
             }
         });
     }
-
     // ---------- Gantt ----------
     function gantt(result, name, opts, o) {
         need(result, 2, 'Gantt chart');

@@ -49,10 +49,10 @@ check('spec bubble y+size', spec_from_chart('bubble', cfg('y', 's')),
       {'x': 'cat', 'series': [{'column': 'y'}, {'column': 's'}], 'shape': 'bubble'})
 check('spec gantt start+end', spec_from_chart('gantt', cfg('s', 'e', x='task')),
       {'x': 'task', 'series': [{'column': 's'}, {'column': 'e'}], 'shape': 'gantt'})
-check('spec density needs only x', spec_from_chart('density', {'x_axis': 'v'}), {'x': 'v', 'shape': 'density'})
+check('spec density takes the X column (old charts)', spec_from_chart('density', {'x_axis': 'v'}), {'shape': 'density', 'series': [{'column': 'v'}]})
 check('spec old y_axis still works', spec_from_chart('waterfall', {'x_axis': 'c', 'y_axis': 'a'})['series'],
       [{'column': 'a', 'agg': 'sum'}])
-for t in ('stacked_area', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'dual_line', 'gantt', 'density'):
+for t in ('stacked_area', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'dual_line', 'gantt'):
     raises(f'spec {t} no x', lambda t=t: spec_from_chart(t, {'y_axes': ['a', 'b']}))
 for t in ('bubble', 'bullet', 'dual_line', 'gantt'):
     raises(f'spec {t} one Y only', lambda t=t: spec_from_chart(t, cfg('a')))

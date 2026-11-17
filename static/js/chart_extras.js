@@ -5,8 +5,8 @@
 // Option keys match charts/options.py.
 window.FluxionExtras = (function () {
     const SORT_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo'];
-    const LAST_OK = ['line', 'area', 'scatter'];
+    const TOPN_OK = ['bar', 'hbar', 'pie', 'doughnut', 'stacked', 'combo', 'funnel'];
+    const LAST_OK = ['line', 'area', 'scatter', 'stacked_area', 'dual_line', 'sparkline'];
     const REF_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo'];
     const TREND_OK = ['line', 'area', 'bar', 'scatter', 'combo'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
@@ -25,13 +25,40 @@ window.FluxionExtras = (function () {
     }
 
     // ---------- data: sort, top N ----------
+    // Show-top-N for the newer chart types (they are not "sort by the first series" charts)
+    const TIER_TOP = ['gantt', 'bubble', 'stacked_area'];
+    function prepareTier(result, type, o) {
+        const n = o.top_n;
+        if (!n || !result || !Array.isArray(result.series) || !result.series.length) return result;
+        const num = v => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+        const keep = idxs => Object.assign({}, result, {
+            labels: idxs.map(i => result.labels[i]),
+            series: result.series.map(s => Object.assign({}, s, { values: idxs.map(i => s.values[i]) }))
+        });
+        if (type === 'gantt') {   // first N tasks (already in start order)
+            return result.labels.length > n ? keep(Array.from({ length: n }, (_, i) => i)) : result;
+        }
+        if (type === 'bubble') {   // the N biggest bubbles, original order kept
+            if (result.labels.length <= n) return result;
+            const sizes = (result.series[1] || { values: [] }).values;
+            const order = Array.from({ length: result.labels.length }, (_, i) => i)
+                .sort((a, b) => num(sizes[b]) - num(sizes[a])).slice(0, n).sort((a, b) => a - b);
+            return keep(order);
+        }
+        if (result.series.length <= n) return result;   // stacked area: keep the N series with the biggest totals
+        const total = s => s.values.reduce((sum, v) => sum + num(v), 0);
+        const best = result.series.map((s, i) => i).sort((a, b) => total(result.series[b]) - total(result.series[a])).slice(0, n).sort((a, b) => a - b);
+        return Object.assign({}, result, { series: best.map(i => result.series[i]) });
+    }
+
     function prepare(result, type, o) {
         o = o || {};
+        if (TIER_TOP.indexOf(type) !== -1) result = prepareTier(result, type, o);
         if (o.last_n && LAST_OK.indexOf(type) !== -1 && result && result.labels && result.labels.length > o.last_n && result.series) {
             const from = result.labels.length - o.last_n;
             return Object.assign({}, result, {
                 labels: result.labels.slice(from),
-                series: result.series.map(s => ({ column: s.column, values: s.values.slice(from) }))
+                series: result.series.map(s => Object.assign({}, s, { values: s.values.slice(from) }))
             });
         }
         const doSort = o.sort && SORT_OK.indexOf(type) !== -1;

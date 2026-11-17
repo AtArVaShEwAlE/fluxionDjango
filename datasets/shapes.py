@@ -17,6 +17,7 @@ MAX_BUBBLE_POINTS = 500
 MAX_GANTT_TASKS = 100
 DENSITY_POINTS = 100
 MAX_DENSITY_SAMPLE = 5000
+MAX_DENSITY_COLUMNS = 6
 EPOCH = pd.Timestamp('1970-01-01')
 
 
@@ -111,29 +112,52 @@ def _pareto(df, x, spec):
 
 
 def _density(df, x, spec):
-    arr = _numeric(df, x).to_numpy()
-    arr = arr[np.isfinite(arr)]
-    if len(arr) < 2:
-        raise ValueError(f"Column '{x}' needs at least 2 numbers for a density plot")
-    used = len(arr)
-    sampled = used > MAX_DENSITY_SAMPLE
-    if sampled:
-        arr = np.random.default_rng(0).choice(arr, MAX_DENSITY_SAMPLE, replace=False)
-    std = float(arr.std(ddof=1))
-    q75, q25 = np.percentile(arr, [75, 25])
-    iqr = float(q75 - q25)
-    spread = min(std, iqr / 1.34) if iqr > 0 else std
-    if not np.isfinite(spread) or spread <= 0:
-        raise ValueError(f"Column '{x}' needs at least 2 different values for a density plot")
-    bw = 0.9 * spread * len(arr) ** -0.2   # Silverman's rule of thumb
-    grid = np.linspace(float(arr.min()) - 3 * bw, float(arr.max()) + 3 * bw, DENSITY_POINTS)
-    z = (grid[:, None] - arr[None, :]) / bw
-    dens = np.exp(-0.5 * z * z).sum(axis=1) / (len(arr) * bw * np.sqrt(2 * np.pi))
+    """Smooth distribution of one or more numeric columns on a shared grid."""
+    series = spec.get('series')
+    cols = []
+    if isinstance(series, list) and series:
+        for item in series[:MAX_DENSITY_COLUMNS]:
+            col = item.get('column') if isinstance(item, dict) else None
+            if not isinstance(col, str) or col not in df.columns:
+                raise ValueError(f'Unknown column: {col}')
+            cols.append(col)
+    elif isinstance(x, str) and x in df.columns:
+        cols = [x]
+    if not cols:
+        raise ValueError('Choose at least one number column')
+    samples, used, sampled = [], {}, False
+    for col in cols:
+        arr = _numeric(df, col).to_numpy()
+        arr = arr[np.isfinite(arr)]
+        if len(arr) < 2:
+            raise ValueError(f"Column '{col}' needs at least 2 numbers for a density plot")
+        used[col] = len(arr)
+        if len(arr) > MAX_DENSITY_SAMPLE:
+            arr = np.random.default_rng(0).choice(arr, MAX_DENSITY_SAMPLE, replace=False)
+            sampled = True
+        samples.append(arr)
+    widths = []
+    for col, arr in zip(cols, samples):
+        std = float(arr.std(ddof=1))
+        q75, q25 = np.percentile(arr, [75, 25])
+        iqr = float(q75 - q25)
+        spread = min(std, iqr / 1.34) if iqr > 0 else std
+        if not np.isfinite(spread) or spread <= 0:
+            raise ValueError(f"Column '{col}' needs at least 2 different values for a density plot")
+        widths.append(0.9 * spread * len(arr) ** -0.2)   # Silverman's rule of thumb
+    low = min(float(a.min()) - 3 * b for a, b in zip(samples, widths))
+    high = max(float(a.max()) + 3 * b for a, b in zip(samples, widths))
+    grid = np.linspace(low, high, DENSITY_POINTS)
+    out = []
+    for col, arr, bw in zip(cols, samples, widths):
+        z = (grid[:, None] - arr[None, :]) / bw
+        dens = np.exp(-0.5 * z * z).sum(axis=1) / (len(arr) * bw * np.sqrt(2 * np.pi))
+        out.append({'name': col, 'column': col, 'agg': 'density', 'values': [_sig(d) for d in dens]})
     return {
         'labels': [_sig(g) for g in grid],
-        'series': [{'name': 'density', 'column': x, 'agg': 'density', 'values': [_sig(d) for d in dens]}],
-        'meta': {'mode': 'density', 'rows_in': len(df), 'x': x, 'values_used': used,
-                 'sampled': sampled, 'bandwidth': _sig(bw)},
+        'series': out,
+        'meta': {'mode': 'density', 'rows_in': len(df), 'x': cols[0], 'columns': cols,
+                 'values_used': used[cols[0]], 'sampled': sampled, 'bandwidth': _sig(widths[0])},
     }
 
 

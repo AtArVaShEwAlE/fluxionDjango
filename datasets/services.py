@@ -247,6 +247,25 @@ def _histogram(df, x, bins):
     }
 
 
+def _row_range(df, spec):
+    """Customise 'Rows from / to': 1-based row numbers, inclusive. Missing side = start / end."""
+    def num(value):
+        if value is None or isinstance(value, bool):
+            return None
+        try:
+            n = int(value)
+        except (TypeError, ValueError):
+            return None
+        return n if n >= 1 else None
+
+    start, end = num(spec.get('row_from')), num(spec.get('row_to'))
+    if start is None and end is None:
+        return df
+    if start is not None and end is not None and end < start:
+        raise ValueError('Rows: "to" must be at least "from"')
+    return df.iloc[(start or 1) - 1:end]
+
+
 def run_query(df, spec):
     """Aggregate a full dataframe server-side.
 
@@ -264,7 +283,9 @@ def run_query(df, spec):
     if not isinstance(spec, dict):
         raise ValueError('Invalid query')
 
-    if spec.get('shape') == 'gauge':   # a gauge has no X, so it runs before the X check
+    df = _row_range(df, spec)   # Customise: Rows from / to
+
+    if spec.get('shape') in ('gauge', 'density'):   # no single X column, so these run before the X check
         from .shapes import run_shape
         return run_shape(df, spec.get('x'), spec)
 

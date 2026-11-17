@@ -54,7 +54,10 @@
 
             <!-- Dataset Info -->
             <div class="dataset-info">
-                <h4 id="datasetName">Dataset Name</h4>
+                <div class="dataset-title-row">
+                    <h4 id="datasetName">Dataset Name</h4>
+                    <button type="button" class="btn btn-secondary btn-sm" id="viewFileBtn">View file</button>
+                </div>
                 <div class="dataset-meta">
                     <span id="datasetRows">0 rows</span> • 
                     <span id="datasetCols">0 columns</span>
@@ -117,6 +120,19 @@
             </div>
 
             <!-- Chart Title Input -->
+            <div class="chart-guide" id="chartGuide" hidden>
+                <div class="chart-guide-head"><strong id="guideTitle"></strong><span>about this chart</span></div>
+                <dl>
+                    <dt>What it shows</dt><dd id="guideWhat"></dd>
+                    <dt>Data to use</dt><dd id="guideData"></dd>
+                    <dt>Tip</dt><dd id="guideTip"></dd>
+                </dl>
+            </div>
+            <div class="chart-suggest" id="chartSuggest" hidden>
+                <h5>Suggested charts for your columns (click one to try it)</h5>
+                <div class="chart-suggest-list" id="chartSuggestList"></div>
+            </div>
+
             <div class="chart-title-section">
                 <label for="chartTitle">Chart Title</label>
                 <input type="text" id="chartTitle" class="chart-title-input" placeholder="Enter your chart title...">
@@ -291,6 +307,16 @@
                             <label for="optLastN">Show last points (3-200)</label>
                             <input type="number" id="optLastN" class="form-input" min="3" max="200" placeholder="All">
                         </div>
+                        <div class="opt-group" data-opt="rows">
+                            <label for="optRowFrom">Rows from / to (row numbers)</label>
+                            <input type="number" id="optRowFrom" class="form-input" min="1" step="1" placeholder="First row">
+                            <input type="number" id="optRowTo" class="form-input" min="1" step="1" placeholder="Last row" style="margin-top: 0.4rem;">
+                        </div>
+                        <div class="opt-group" data-opt="xrange">
+                            <label for="optXMin">Value range (min / max)</label>
+                            <input type="number" id="optXMin" class="form-input" step="any" placeholder="Min">
+                            <input type="number" id="optXMax" class="form-input" step="any" placeholder="Max" style="margin-top: 0.4rem;">
+                        </div>
                         <div class="opt-group">
                             <label for="optNumFormat">Number format</label>
                             <select id="optNumFormat" class="form-select">
@@ -309,11 +335,9 @@
                             <label class="opt-check" data-opt="axis2"><input type="checkbox" id="optAxis2"> Second Y axis for lines</label>
                             <label class="opt-check" data-opt="total"><input type="checkbox" id="optTotal"> Centre total</label>
                             <label class="opt-check" data-opt="zoom"><input type="checkbox" id="optZoom"> Zoom and pan</label>
-                            <div data-opt="spark">
-                                <label class="opt-check"><input type="checkbox" id="optSparkHeader"> Show value on top</label>
-                                <label class="opt-check"><input type="checkbox" id="optSparkPoints"> Show points</label>
-                                <label class="opt-check"><input type="checkbox" id="optSparkMinMax"> Mark highest and lowest</label>
-                            </div>
+                            <label class="opt-check" data-opt="spark1"><input type="checkbox" id="optSparkHeader"> Show value on top</label>
+                            <label class="opt-check" data-opt="spark2"><input type="checkbox" id="optSparkPoints"> Show points</label>
+                            <label class="opt-check" data-opt="spark3"><input type="checkbox" id="optSparkMinMax"> Mark highest and lowest</label>
                             <label class="opt-check"><input type="checkbox" id="optInsight"> Insight caption</label>
                         </div>
                         <button type="button" class="btn btn-secondary btn-block btn-sm" id="optReset">Reset customisation</button>
@@ -371,5 +395,7 @@
 {% block extra_js %}
 {% include 'partials/chart_scripts.html' %}
 <script src="{% static 'js/chart_options.js' %}"></script>
+<script src="{% static 'js/chart_guide.js' %}"></script>
+<script src="{% static 'js/file_viewer.js' %}"></script>
 <script src="{% static 'js/create_chart.js' %}"></script>
 {% endblock %}

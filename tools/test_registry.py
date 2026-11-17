@@ -79,6 +79,9 @@ check('icon partial draws every Tier A type', [k for k in TIER_A if icons is Non
 widg = read('static', 'js', 'chart_widgets.js')
 check('chart_widgets.js exists', widg is not None, True)
 check('chart_widgets.js registers every widget', sorted(re.findall(r"A\.register\('(\w+)'", widg or '')), sorted(WIDGETS))
+guide = read('static', 'js', 'chart_guide.js')
+check('chart_guide.js exists', guide is not None, True)
+check('chart_guide.js has a text for every chart type', sorted(set(ENABLED) - set(re.findall(r"^\s+(\w+): \['", guide or '', re.M))), [])
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':
