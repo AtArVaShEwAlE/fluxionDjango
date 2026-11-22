@@ -1,752 +1,435 @@
-// Live Data Visualization JavaScript
+// Live Data page. Streams points over the WebSocket (streaming/consumers.py) and draws them with
+// LiveCharts (live_charts.js): same chart types as saved charts, only the new point is added.
+(function () {
+    'use strict';
+    const $ = id => document.getElementById(id);
 
-// Global Variables
-let socket = null;
-let liveChart = null;
-let sessionId = null;
-let isStreaming = false;
-let isPaused = false;
-let dataBuffer = [];
-let animationFrame = null;
-let apiErrorCount = 0;     // API replies skipped this run (bad value / request failed)
-let lastApiNotice = 0;     // ms timestamp of last notice shown
+    const dataSource = $('dataSource');
+    const datasetGroup = $('datasetGroup');
+    const datasetSelect = $('datasetSelect');
+    const xGroup = $('xColumnGroup');
+    const yGroup = $('yColumnGroup');
+    const xSelect = $('xColumnSelect');
+    const ySelect = $('yColumnSelect');
+    const rowGroup = $('rowRangeGroup');
+    const rowFrom = $('liveRowFrom');
+    const rowTo = $('liveRowTo');
+    const apiIds = ['apiUrlGroup', 'apiValuePathGroup', 'apiLabelPathGroup', 'apiTestGroup'];
+    const typeSelect = $('liveChartType');
+    const intervalInput = $('updateInterval');
+    const maxInput = $('maxDataPoints');
+    const speedSelect = $('animationSpeed');
+    const schemeSelect = $('liveColorScheme');
+    const startBtn = $('startStreamBtn');
+    const pauseBtn = $('pauseStreamBtn');
+    const stopBtn = $('stopStreamBtn');
+    const clearBtn = $('clearDataBtn');
+    const exportBtn = $('exportImageBtn');
+    const shareBtn = $('shareImageBtn');
+    const statusDot = $('statusDot');
+    const statusText = $('statusText');
+    const canvas = $('liveChart');
+    const placeholder = $('chartPlaceholder');
+    const statusLine = $('liveStatusLine');
 
-// DOM Elements
-const exportImageBtn = document.getElementById('exportImageBtn');
-const statusDot = document.getElementById('statusDot');
-const statusText = document.getElementById('statusText');
-const dataSource = document.getElementById('dataSource');
-const liveChartType = document.getElementById('liveChartType');
-const updateInterval = document.getElementById('updateInterval');
-const maxDataPoints = document.getElementById('maxDataPoints');
-const animationSpeed = document.getElementById('animationSpeed');
-const liveColorScheme = document.getElementById('liveColorScheme');
+    const controller = LiveCharts.create(canvas);
+    let socket = null;
+    let sessionId = null;
+    let streaming = false;
+    let paused = false;
+    let queue = [];
+    let received = 0;
+    let rowStart = 1;
+    let lastBlob = null;
+    let apiErrors = 0;
+    let lastApiNotice = 0;
 
-// Dataset elements
-const datasetGroup = document.getElementById('datasetGroup');
-const datasetSelect = document.getElementById('datasetSelect');
-const xColumnGroup = document.getElementById('xColumnGroup');
-const yColumnGroup = document.getElementById('yColumnGroup');
-const xColumnSelect = document.getElementById('xColumnSelect');
-const yColumnSelect = document.getElementById('yColumnSelect');
+    // ---------- small helpers ----------
+    function fmt(v) {
+        const n = Number(v);
+        return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '--';
+    }
 
-// API elements
-const apiUrlGroup = document.getElementById('apiUrlGroup');
-const apiValuePathGroup = document.getElementById('apiValuePathGroup');
-const apiLabelPathGroup = document.getElementById('apiLabelPathGroup');
-const apiTestGroup = document.getElementById('apiTestGroup');
-const apiUrl = document.getElementById('apiUrl');
-const apiValuePath = document.getElementById('apiValuePath');
-const apiLabelPath = document.getElementById('apiLabelPath');
-const testApiBtn = document.getElementById('testApiBtn');
-const apiTestResult = document.getElementById('apiTestResult');
+    function clampInt(value, lo, hi, fallback) {
+        const n = parseInt(value, 10);
+        return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : fallback;
+    }
 
-const startStreamBtn = document.getElementById('startStreamBtn');
-const pauseStreamBtn = document.getElementById('pauseStreamBtn');
-const stopStreamBtn = document.getElementById('stopStreamBtn');
-const clearDataBtn = document.getElementById('clearDataBtn');
+    function show(node, on) {
+        if (node) node.style.display = on ? '' : 'none';
+    }
 
-const liveChartCanvas = document.getElementById('liveChart');
-const chartPlaceholder = document.getElementById('chartPlaceholder');
-const dataPointCount = document.getElementById('dataPointCount');
-const latestValue = document.getElementById('latestValue');
-const avgValue = document.getElementById('avgValue');
-
-// Color Schemes
-const colorSchemes = {
-    default: ['#1F9D6E', '#34C08D', '#157A56', '#6EE7B7', '#0E5C40'],
-    blue: ['#3B82F6', '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A'],
-    rainbow: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6'],
-    gradient: ['#1F9D6E', '#34C08D', '#3B82F6', '#8B5CF6'],
-    dynamic: ['#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f59e0b']
-};
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    initializeWebSocket();
-    setupEventListeners();
-    sessionId = generateSessionId();
-});
-
-// Initialize WebSocket Connection
-function initializeWebSocket() {
-    socket = io();
-    
-    socket.on('connect', function() {
-        updateStatus('connected', 'Connected');
-        console.log('WebSocket connected');
-    });
-    
-    socket.on('disconnect', function() {
-        updateStatus('disconnected', 'Disconnected');
-        console.log('WebSocket disconnected');
-    });
-    
-    socket.on('new_data_point', function(data) {
-        if (data.session_id === sessionId && !isPaused) {
-            handleNewDataPoint(data.data);
+    function notify(message, type) {
+        let box = document.querySelector('.notification-container');
+        if (!box) {
+            box = document.createElement('div');
+            box.className = 'notification-container';
+            document.body.appendChild(box);
         }
-    });
-    
-    socket.on('error', function(data) {
-        if (!data || data.session_id !== sessionId) return;
-        apiErrorCount++;
-        const now = Date.now();
-        if (now - lastApiNotice < 5000) return;
-        lastApiNotice = now;
-        const safe = String(data.message || '').replace(/[&<>"']/g,
-        c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-        showNotification('API problem (' + apiErrorCount + ' skipped so far): ' + safe, 'error');
-    });
-
-    socket.on('error', function(data) {
-        testApiBtn.disabled = false;
-        testApiBtn.textContent = '✅ API Ready';
-        testApiBtn.style.background = '#10b981';
-        testApiBtn.style.color = '#fff';
-        apiTestResult.innerHTML = '<span style="color: #10b981;">✅ Good to go!</span>';
-        console.log('API sample data:', data.sample_data);
-    });
-
-    socket.on('api_test_failed', function(data) {
-        testApiBtn.disabled = false;
-        testApiBtn.textContent = '❌ Test Failed';
-        testApiBtn.style.background = '#ef4444';
-        testApiBtn.style.color = '#fff';
-        apiTestResult.innerHTML = '<span style="color: #ef4444;">❌ ' + data.message + '</span>';
-    });
-}
-
-// Setup Event Listeners
-function setupEventListeners() {
-    if (exportImageBtn) {
-        exportImageBtn.addEventListener('click', exportChartAsImage);
+        const note = document.createElement('div');
+        note.className = 'notification notification-' + (type || 'info');
+        const text = document.createElement('span');
+        text.textContent = message;
+        const close = document.createElement('button');
+        close.type = 'button';
+        close.innerHTML = '&times;';
+        close.addEventListener('click', () => note.remove());
+        note.append(text, close);
+        box.appendChild(note);
+        setTimeout(function () {
+            note.classList.add('fade-out');
+            setTimeout(() => note.remove(), 300);
+        }, 4500);
     }
-    
-    startStreamBtn.addEventListener('click', startStream);
-    pauseStreamBtn.addEventListener('click', togglePause);
-    stopStreamBtn.addEventListener('click', stopStream);
-    clearDataBtn.addEventListener('click', clearData);
-    
-    liveChartType.addEventListener('change', recreateChart);
-    liveColorScheme.addEventListener('change', updateChartColors);
-    
-    dataSource.addEventListener('change', handleDataSourceChange);
-    datasetSelect.addEventListener('change', handleDatasetSelection);
-    testApiBtn.addEventListener('click', testApiEndpoint);
-}
 
-// Handle Data Source Change
-function handleDataSourceChange() {
-    const source = dataSource.value;
-    
-    // Hide all optional groups
-    datasetGroup.style.display = 'none';
-    xColumnGroup.style.display = 'none';
-    yColumnGroup.style.display = 'none';
-    apiUrlGroup.style.display = 'none';
-    apiValuePathGroup.style.display = 'none';
-    apiLabelPathGroup.style.display = 'none';
-    apiTestGroup.style.display = 'none';
-    
-    // Show relevant groups
-    if (source === 'dataset') {
-        datasetGroup.style.display = 'block';
-    } else if (source === 'api') {
-        apiUrlGroup.style.display = 'block';
-        apiValuePathGroup.style.display = 'block';
-        apiLabelPathGroup.style.display = 'block';
-        apiTestGroup.style.display = 'block';
+    function setStatus(kind, text) {
+        statusDot.className = 'status-dot' + (kind ? ' ' + kind : '');
+        statusText.textContent = text;
     }
-}
 
-// Handle Dataset Selection
-async function handleDatasetSelection() {
-    const datasetId = datasetSelect.value;
-    
-    console.log('Dataset selected:', datasetId);
-    
-    if (!datasetId) {
-        xColumnGroup.style.display = 'none';
-        yColumnGroup.style.display = 'none';
-        return;
+    function setButtons() {
+        startBtn.disabled = streaming;
+        pauseBtn.disabled = !streaming;
+        pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+        stopBtn.disabled = !streaming;
+        dataSource.disabled = streaming;
+        datasetSelect.disabled = streaming;
     }
-    
-    try {
-        console.log('Fetching columns for dataset:', datasetId);
-        const response = await fetch(`/get-dataset-columns/${datasetId}`);
-        console.log('Response status:', response.status);
-        
-        const data = await response.json();
-        console.log('Response data:', data);
-        
-        if (data.success) {
-            console.log('Columns received:', data.columns);
-            
-            // Populate column selects
-            xColumnSelect.innerHTML = '<option value="">Select column...</option>';
-            yColumnSelect.innerHTML = '<option value="">Select column...</option>';
-            
-            data.columns.forEach(col => {
-                console.log('Adding column:', col);
-                
-                const xOption = document.createElement('option');
-                xOption.value = col;
-                xOption.textContent = col;
-                xColumnSelect.appendChild(xOption);
-                
-                const yOption = document.createElement('option');
-                yOption.value = col;
-                yOption.textContent = col;
-                yColumnSelect.appendChild(yOption);
-            });
-            
-            // Show column groups
-            xColumnGroup.style.display = 'block';
-            yColumnGroup.style.display = 'block';
-        } else {
-            console.error('API returned error:', data.error);
-            alert('Error loading columns: ' + data.error);
-        }
-    } catch (error) {
-        console.error('Error fetching columns:', error);
-        alert('Error loading dataset columns: ' + error.message);
-    }
-}
 
-// Test API Endpoint
-function testApiEndpoint() {
-    const url = apiUrl.value;
-    
-    if (!url) {
-        alert('Please enter an API URL');
-        return;
+    // ---------- stats + status line ----------
+    function updateStats(lastPoint) {
+        const pts = controller.points();
+        $('dataPointCount').textContent = received.toLocaleString();
+        $('latestValue').textContent = lastPoint ? fmt(lastPoint.value) : '--';
+        $('avgValue').textContent = pts.length ? fmt(pts.reduce((a, p) => a + p.value, 0) / pts.length) : '--';
     }
-    
-    testApiBtn.disabled = true;
-    testApiBtn.textContent = '🔄 Testing...';
-    apiTestResult.textContent = '';
-    
-    socket.emit('test_api_endpoint', { api_url: url });
-}
 
-// Start Live Stream
-function startStream() {
-    if (isStreaming) return;
-    
-    const source = dataSource.value;
-    const interval = parseInt(updateInterval.value);
-    const chartType = liveChartType.value;
-    
-    // Validate based on source
-    if (source === 'dataset') {
-        const datasetId = datasetSelect.value;
-        const xCol = xColumnSelect.value;
-        const yCol = yColumnSelect.value;
-        
-        if (!datasetId || !xCol || !yCol) {
-            alert('Please select a dataset and both columns');
+    function setLine(point, finished) {
+        if (!statusLine) return;
+        if (!point) {
+            statusLine.textContent = finished || 'Waiting for data...';
+            statusLine.classList.remove('is-live');
             return;
         }
-        
-        // Start dataset streaming
-        socket.emit('stream_from_dataset', {
-            session_id: sessionId,
-            dataset_id: datasetId,
-            interval: interval,
-            x_column: xCol,
-            y_column: yCol
+        const where = point.row ? 'Row ' + point.row + ' \u00B7 ' : '';
+        statusLine.textContent = (finished ? finished + ' \u00B7 last: ' : 'Now fetching: ') + where + point.label + ' = ' + fmt(point.value);
+        statusLine.classList.toggle('is-live', !finished);
+    }
+
+    // ---------- data flow card ----------
+    function pulseFlow() {
+        ['sourceNode', 'processNode', 'chartNode'].forEach(function (id, i) {
+            const node = $(id);
+            if (!node) return;
+            setTimeout(function () {
+                node.classList.add('active');
+                setTimeout(() => node.classList.remove('active'), 450);
+            }, i * 220);
         });
-        
-    } else if (source === 'api') {
-        const url = apiUrl.value;
-        const valuePath = apiValuePath.value;
-        const labelPath = apiLabelPath.value;
-        
-        if (!url) {
-            alert('Please enter an API endpoint URL');
-            return;
-        }
-        
-        // Start API streaming
-        socket.emit('stream_from_api', {
-            session_id: sessionId,
-            api_url: url,
-            interval: interval,
-            value_path: valuePath,
-            label_path: labelPath
-        });
-        
-        // Update test button state
-        testApiBtn.textContent = '🔴 Streaming...';
-        testApiBtn.disabled = true;
-        testApiBtn.style.background = '#ef4444';
-        testApiBtn.style.color = '#fff';
-        
-    } else {
-        // Start simulation
-        socket.emit('start_simulation', {
-            session_id: sessionId,
-            chart_type: chartType,
-            interval: interval
+        ['dataParticles', 'dataParticles2'].forEach(function (id, i) {
+            const box = $(id);
+            if (!box) return;
+            const dot = document.createElement('span');
+            dot.className = 'data-particle';
+            dot.style.animationDelay = (i * 0.2) + 's';
+            box.appendChild(dot);
+            setTimeout(() => dot.remove(), 2300);
         });
     }
-    
-    apiErrorCount = 0;
-        lastApiNotice = 0;
-        isStreaming = true;
-    isPaused = false;
-    
-    // Update UI
-    updateStatus('streaming', 'Streaming');
-    startStreamBtn.disabled = true;
-    pauseStreamBtn.disabled = false;
-    stopStreamBtn.disabled = false;
-    chartPlaceholder.style.display = 'none';
-    liveChartCanvas.classList.add('active');
-    
-    // Join session
-    socket.emit('join_live_session', { session_id: sessionId });
-    
-    // Initialize chart if needed
-    if (!liveChart) {
-        initializeLiveChart();
-    }
-    
-    // Start data flow animation
-    startDataFlowAnimation();
-}
 
-// Toggle Pause
-function togglePause() {
-    isPaused = !isPaused;
-    
-    if (isPaused) {
-        updateStatus('paused', 'Paused');
-        pauseStreamBtn.innerHTML = '▶️ Resume';
-        stopDataFlowAnimation();
-    } else {
-        updateStatus('streaming', 'Streaming');
-        pauseStreamBtn.innerHTML = '⏸️ Pause';
-        startDataFlowAnimation();
-    }
-}
-
-// Stop Stream
-function stopStream() {
-    isStreaming = false;
-    isPaused = false;
-    
-    updateStatus('connected', 'Connected');
-    startStreamBtn.disabled = false;
-    pauseStreamBtn.disabled = true;
-    stopStreamBtn.disabled = true;
-    pauseStreamBtn.innerHTML = '⏸️ Pause';
-    
-    // Reset API test button
-    if (testApiBtn) {
-        testApiBtn.disabled = false;
-        testApiBtn.textContent = '🔍 Test API Endpoint';
-        testApiBtn.style.background = '';
-        testApiBtn.style.color = '';
+    // ---------- adding points ----------
+    function addPoint(point) {
+        received += 1;
+        placeholder.style.display = 'none';
+        canvas.classList.add('active');
+        controller.push(point);
+        updateStats(point);
+        setLine(point);
+        pulseFlow();
     }
 
-    socket.emit('stop_stream', { session_id: sessionId });
-    // Leave session
-    socket.emit('leave_live_session', { session_id: sessionId });
-    
-    // Stop animations
-    stopDataFlowAnimation();
-}
-
-// Clear Data
-function clearData() {
-    dataBuffer = [];
-    
-    if (liveChart) {
-        liveChart.data.labels = [];
-        liveChart.data.datasets[0].data = [];
-        liveChart.update('none');
+    function onPoint(msg) {
+        if (!msg || !msg.data) return;
+        if (msg.session_id !== undefined && String(msg.session_id) !== String(sessionId)) return;   // late point of an old run
+        const d = msg.data;
+        const value = Number(d.value);
+        if (!Number.isFinite(value)) return;
+        const label = d.label !== undefined && d.label !== null && d.label !== '' ? d.label : d.timestamp;
+        const point = { label: String(label), value: value, row: typeof d.row_index === 'number' ? rowStart + d.row_index : null };
+        if (paused) queue.push(point);
+        else addPoint(point);
     }
-    
-    updateStats();
-}
 
-// Initialize Live Chart
-function initializeLiveChart() {
-    const ctx = liveChartCanvas.getContext('2d');
-    const chartType = liveChartType.value;
-    const speed = parseInt(animationSpeed.value);
-
-    // Soft look from live_style.js (falls back to the old look below if it is missing)
-    if (window.LiveStyle) {
-        liveChart = new Chart(ctx, LiveStyle.config(chartType, speed));
-        liveChart.$liveColors = liveColorSpec(1);
-        return;
+    // ---------- start / pause / stop / clear ----------
+    function newSession() {
+        sessionId = 'live_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        return sessionId;
     }
-    
-    liveChart = new Chart(ctx, {
-        type: chartType === 'gauge' ? 'doughnut' : chartType,
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Live Data',
-                data: [],
-                backgroundColor: getColors(1)[0],
-                borderColor: getColors(1)[0],
-                borderWidth: 2,
-                tension: 0.4,
-                fill: chartType === 'line' ? false : true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: speed
-            },
-            scales: chartType !== 'gauge' ? {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: '#E3E9E6' },
-                    color: '#55655F'
-                },
-                x: {
-                    grid: { color: '#E3E9E6' },
-                    ticks: { 
-                        color: '#55655F',
-                        maxTicksLimit: 10
-                    }
-                }
-            } : {},
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                }
+
+    function resetRun() {
+        controller.clear();
+        queue = [];
+        received = 0;
+        apiErrors = 0;
+        paused = false;
+        canvas.classList.remove('active');
+        placeholder.style.display = '';
+        updateStats(null);
+        setLine(null);
+    }
+
+    function startStream() {
+        if (streaming) return;
+        const source = dataSource.value;
+        const interval = clampInt(intervalInput.value, 100, 5000, 1000);
+        let payload;
+        let event;
+        if (source === 'dataset') {
+            if (!datasetSelect.value || !xSelect.value || !ySelect.value) {
+                notify('Choose a dataset, an X column and a Y column first', 'error');
+                return;
             }
+            const from = parseInt(rowFrom.value, 10);
+            const to = parseInt(rowTo.value, 10);
+            if (Number.isFinite(from) && Number.isFinite(to) && to < from) {
+                notify('Rows: "to" must be at least "from"', 'error');
+                return;
+            }
+            event = 'stream_from_dataset';
+            payload = { dataset_id: Number(datasetSelect.value), x_column: xSelect.value, y_column: ySelect.value, interval: interval };
+            if (Number.isFinite(from) && from >= 1) payload.row_from = from;
+            if (Number.isFinite(to) && to >= 1) payload.row_to = to;
+            rowStart = payload.row_from || 1;
+        } else if (source === 'api') {
+            const url = $('apiUrl').value.trim();
+            if (!url) {
+                notify('Enter the API endpoint URL first', 'error');
+                return;
+            }
+            event = 'stream_from_api';
+            payload = { api_url: url, interval: interval, value_path: $('apiValuePath').value.trim() || 'value', label_path: $('apiLabelPath').value.trim() || 'label' };
+            rowStart = 1;
+        } else {
+            event = 'start_simulation';
+            payload = { interval: interval };
+            rowStart = 1;
         }
-    });
-}
-
-// Handle New Data Point
-function handleNewDataPoint(dataPoint) {
-    const maxPoints = parseInt(maxDataPoints.value);
-    
-    // Add to buffer
-    dataBuffer.push(dataPoint);
-    
-    // Keep only max points
-    if (dataBuffer.length > maxPoints) {
-        dataBuffer.shift();
-    }
-    
-    // Update chart
-    updateChartWithData();
-    
-    // Update stats
-    updateStats();
-    
-    // Animate data particle
-    createDataParticle();
-}
-
-// Update Chart with Data
-function updateChartWithData() {
-    if (!liveChart) return;
-    
-    const labels = dataBuffer.map(d => d.timestamp || d.label);
-    const values = dataBuffer.map(d => d.value);
-    const scheme = liveColorScheme.value;
-    
-    if (window.LiveStyle) {
-        LiveStyle.sync(liveChart, liveChartType.value, labels, values, liveColorSpec(values.length));
-        liveChart.update('active');
-        return;
+        resetRun();
+        payload.session_id = newSession();
+        socket.emit(event, payload);
+        streaming = true;
+        setStatus('streaming', 'Streaming...');
+        setButtons();
     }
 
-    liveChart.data.labels = labels;
-    liveChart.data.datasets[0].data = values;
-    
-    // Update colors based on scheme
-    if (scheme === 'dynamic') {
-        liveChart.data.datasets[0].backgroundColor = getColors(values.length);
-        liveChart.data.datasets[0].borderColor = getColors(values.length);
-    } else if (scheme === 'gradient') {
-        const gradientColors = colorSchemes.gradient;
-        const colors = values.map((_, i) => {
-            const index = Math.floor((i / values.length) * gradientColors.length);
-            return gradientColors[index];
+    function finish(label, kind) {
+        streaming = false;
+        paused = false;
+        const pts = controller.points();
+        setStatus(kind || 'connected', label);
+        setLine(pts.length ? pts[pts.length - 1] : null, label);
+        setButtons();
+    }
+
+    function stopStream() {
+        if (!streaming) return;
+        socket.emit('stop_stream', { session_id: sessionId });
+        finish('Stopped');
+    }
+
+    function togglePause() {
+        if (!streaming) return;
+        paused = !paused;
+        if (paused) {
+            setStatus('paused', 'Paused');
+        } else {
+            setStatus('streaming', 'Streaming...');
+            const waiting = queue;
+            queue = [];
+            waiting.forEach(addPoint);
+        }
+        setButtons();
+    }
+
+    function clearData() {
+        resetRun();
+        notify('Data cleared', 'info');
+    }
+
+    // ---------- save image + share ----------
+    function fileName() {
+        return 'live-' + typeSelect.value + '-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.png';
+    }
+
+    async function saveImage() {
+        if (!controller.hasData()) {
+            notify('Start a stream first, there is nothing to save yet', 'info');
+            return;
+        }
+        const blob = await controller.png();
+        if (!blob) {
+            notify('Could not create the image', 'error');
+            return;
+        }
+        lastBlob = blob;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName();
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        shareBtn.disabled = false;
+        notify('Image saved. You can share it now.', 'success');
+    }
+
+    async function shareImage() {
+        if (!lastBlob) {
+            notify('Save the image first', 'info');
+            return;
+        }
+        const file = new File([lastBlob], fileName(), { type: 'image/png' });
+        try {
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: 'Fluxion live chart' });
+            } else if (navigator.clipboard && window.ClipboardItem) {
+                await navigator.clipboard.write([new ClipboardItem({ 'image/png': lastBlob })]);
+                notify('Image copied. Paste it into any chat, mail or document.', 'success');
+            } else {
+                notify('Sharing is not supported in this browser. Use the saved PNG file.', 'info');
+            }
+        } catch (error) {
+            if (error && error.name !== 'AbortError') notify('Could not share the image: ' + error.message, 'error');
+        }
+    }
+
+    // ---------- source + dataset controls ----------
+    function onSourceChange() {
+        const source = dataSource.value;
+        show(datasetGroup, source === 'dataset');
+        show(xGroup, source === 'dataset');
+        show(yGroup, source === 'dataset');
+        show(rowGroup, source === 'dataset');
+        apiIds.forEach(id => show($(id), source === 'api'));
+    }
+
+    async function onDatasetChange() {
+        xSelect.length = 1;
+        ySelect.length = 1;
+        if (!datasetSelect.value) return;
+        try {
+            const response = await fetch('/get-dataset-columns/' + datasetSelect.value);
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.error || 'Server error (' + response.status + ')');
+            data.columns.forEach(function (col) {
+                [xSelect, ySelect].forEach(function (select) {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            });
+        } catch (error) {
+            notify('Could not load the columns: ' + error.message, 'error');
+        }
+    }
+
+    function testApi() {
+        const url = $('apiUrl').value.trim();
+        if (!url) {
+            notify('Enter the API endpoint URL first', 'error');
+            return;
+        }
+        $('apiTestResult').textContent = 'Testing...';
+        socket.emit('test_api_endpoint', { api_url: url });
+    }
+
+    // ---------- socket ----------
+    function connectSocket() {
+        socket = io();
+        socket.on('connect', function () { if (!streaming) setStatus('connected', 'Connected'); });
+        socket.on('connect_error', function () { setStatus('', 'Disconnected'); });
+        socket.on('disconnect', function () {
+            setStatus('', 'Disconnected');
+            if (streaming) finish('Connection lost', '');
         });
-        liveChart.data.datasets[0].backgroundColor = colors;
-        liveChart.data.datasets[0].borderColor = colors;
+        socket.on('new_data_point', onPoint);
+        socket.on('simulation_started', () => notify('Simulation started', 'success'));
+        socket.on('dataset_stream_started', () => notify('Streaming your dataset', 'success'));
+        socket.on('stream_stopped', function () { if (streaming) finish('Stopped'); });
+        socket.on('stream_finished', function () { finish('Finished', 'connected'); notify('Stream finished', 'info'); });
+        socket.on('api_test_success', function () {
+            $('apiTestResult').textContent = 'API works';
+            notify('API endpoint is working', 'success');
+        });
+        socket.on('api_test_failed', function (data) {
+            $('apiTestResult').textContent = 'Failed';
+            notify((data && data.message) || 'API test failed', 'error');
+        });
+        socket.on('api_error', function (data) {
+            apiErrors += 1;
+            if (Date.now() - lastApiNotice > 5000) {
+                lastApiNotice = Date.now();
+                notify(((data && data.message) || 'API error') + ' (' + apiErrors + ' so far)', 'error');
+            }
+        });
+        socket.on('error', function (data) {
+            notify((data && data.message) || 'Something went wrong', 'error');
+            if (streaming) finish('Stopped', 'connected');
+        });
     }
-    
-    liveChart.update('active');
-}
 
-// Colour(s) for the live chart from the Color Scheme select:
-// one colour string, or one colour per point
-function liveColorSpec(count) {
-    const scheme = liveColorScheme.value;
-    const n = Math.max(count, 1);
-    if (scheme === 'dynamic' || scheme === 'rainbow') return getColors(n);
-    if (scheme === 'gradient') {
-        const g = colorSchemes.gradient;
-        return Array.from({ length: n }, (_, i) => g[Math.min(g.length - 1, Math.floor(i / n * g.length))]);
+    // ---------- page setup ----------
+    function showGuide() {
+        if (window.FluxionGuide) FluxionGuide.showGuide(typeSelect.value);
     }
-    return getColors(1)[0];
-}
 
-// Update Statistics
-function updateStats() {
-    dataPointCount.textContent = dataBuffer.length;
-    
-    if (dataBuffer.length > 0) {
-        const latest = dataBuffer[dataBuffer.length - 1].value;
-        latestValue.textContent = latest.toFixed(2);
-        
-        const sum = dataBuffer.reduce((acc, d) => acc + d.value, 0);
-        const avg = sum / dataBuffer.length;
-        avgValue.textContent = avg.toFixed(2);
-    } else {
-        latestValue.textContent = '--';
-        avgValue.textContent = '--';
-    }
-}
+    document.addEventListener('DOMContentLoaded', function () {
+        window.getViewFileDataset = function () {
+            if (!datasetSelect.value) return null;
+            const option = datasetSelect.options[datasetSelect.selectedIndex];
+            return { id: Number(datasetSelect.value), filename: option ? option.textContent.trim() : 'Dataset' };
+        };
+        controller.setType(typeSelect.value);
+        controller.setScheme(schemeSelect.value);
+        controller.setMax(maxInput.value);
+        controller.setSpeed(speedSelect.value);
+        onSourceChange();
+        showGuide();
+        setButtons();
+        shareBtn.disabled = true;
+        connectSocket();
 
-// Get Colors
-function getColors(count) {
-    const scheme = liveColorScheme.value;
-    const colors = colorSchemes[scheme] || colorSchemes.default;
-    const result = [];
-    
-    for (let i = 0; i < count; i++) {
-        result.push(colors[i % colors.length]);
-    }
-    
-    return result;
-}
-
-// Recreate Chart
-function recreateChart() {
-    if (liveChart) {
-        liveChart.destroy();
-        liveChart = null;
-    }
-    
-    if (isStreaming) {
-        initializeLiveChart();
-        updateChartWithData();
-    }
-}
-
-// Update Chart Colors
-function updateChartColors() {
-    if (liveChart && dataBuffer.length > 0) {
-        updateChartWithData();
-    }
-}
-
-// Update Status
-function updateStatus(status, text) {
-    statusDot.className = 'status-dot ' + status;
-    statusText.textContent = text;
-    
-    if (status === 'streaming') {
-        statusText.innerHTML = text + '<span class="spinner"></span>';
-    }
-}
-
-// Data Flow Animation
-function startDataFlowAnimation() {
-    const nodes = document.querySelectorAll('.flow-node');
-    const lines = document.querySelectorAll('.flow-line');
-    
-    nodes.forEach(node => node.classList.add('active'));
-    lines.forEach(line => line.classList.add('active'));
-    
-    // Start particle animation loop
-    createParticleLoop();
-}
-
-function stopDataFlowAnimation() {
-    const nodes = document.querySelectorAll('.flow-node');
-    const lines = document.querySelectorAll('.flow-line');
-    
-    nodes.forEach(node => node.classList.remove('active'));
-    lines.forEach(line => line.classList.remove('active'));
-    
-    // Stop particle loop
-    if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = null;
-    }
-}
-
-function createDataParticle() {
-    const containers = document.querySelectorAll('.data-particles');
-    
-    containers.forEach((container, index) => {
-        const particle = document.createElement('div');
-        particle.className = 'data-particle';
-        
-        // Random vertical position
-        const randomY = 30 + Math.random() * 40;
-        particle.style.top = randomY + '%';
-        
-        container.appendChild(particle);
-        
-        // Remove after animation
-        setTimeout(() => {
-            particle.remove();
-        }, 2000);
+        dataSource.addEventListener('change', onSourceChange);
+        datasetSelect.addEventListener('change', onDatasetChange);
+        typeSelect.addEventListener('change', function () { controller.setType(typeSelect.value); showGuide(); });
+        schemeSelect.addEventListener('change', () => controller.setScheme(schemeSelect.value));
+        maxInput.addEventListener('change', () => controller.setMax(maxInput.value));
+        speedSelect.addEventListener('change', () => controller.setSpeed(speedSelect.value));
+        startBtn.addEventListener('click', startStream);
+        pauseBtn.addEventListener('click', togglePause);
+        stopBtn.addEventListener('click', stopStream);
+        clearBtn.addEventListener('click', clearData);
+        exportBtn.addEventListener('click', saveImage);
+        shareBtn.addEventListener('click', shareImage);
+        $('testApiBtn').addEventListener('click', testApi);
+        // ready-made public APIs (no key): the reply has the price in data.amount, there is no label so the time is used
+        const examples = {
+            btc: ['https://api.coinbase.com/v2/prices/BTC-USD/spot', 'data.amount', 'timestamp'],
+            eth: ['https://api.coinbase.com/v2/prices/ETH-USD/spot', 'data.amount', 'timestamp']
+        };
+        document.querySelectorAll('[data-api-example]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const ex = examples[btn.dataset.apiExample];
+                if (!ex) return;
+                $('apiUrl').value = ex[0];
+                $('apiValuePath').value = ex[1];
+                $('apiLabelPath').value = ex[2];
+                intervalInput.value = Math.max(Number(intervalInput.value) || 0, 3000);
+                notify('Example filled in. Press Test API Endpoint, then Start Stream.', 'info');
+            });
+        });
+        window.addEventListener('beforeunload', function () { if (socket) socket.disconnect(); });
     });
-}
-
-function createParticleLoop() {
-    if (!isStreaming || isPaused) return;
-    
-    createDataParticle();
-    
-    // Create particle every 500ms
-    setTimeout(() => {
-        animationFrame = requestAnimationFrame(createParticleLoop);
-    }, 500);
-}
-
-// Utility Functions
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// Export Chart as Image with Watermark
-async function exportChartAsImage() {
-    if (!liveChart) {
-        alert('No chart to export');
-        return;
-    }
-    
-    try {
-        const canvas = window.LiveStyle ? LiveStyle.hiRes(liveChart) : document.getElementById('liveChart');
-        const scaleK = window.LiveStyle ? canvas.width / liveChart.width : 1;
-        
-        // Create a temporary canvas for watermark
-        const watermarkedCanvas = document.createElement('canvas');
-        watermarkedCanvas.width = canvas.width;
-        watermarkedCanvas.height = canvas.height;
-        const ctx = watermarkedCanvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, watermarkedCanvas.width, watermarkedCanvas.height);
-        // Draw original chart
-        ctx.drawImage(canvas, 0, 0);
-        
-        // Add watermark
-        ctx.save();
-        ctx.scale(scaleK, scaleK);
-        await addWatermark(ctx, watermarkedCanvas.width / scaleK, watermarkedCanvas.height / scaleK);
-        ctx.restore();
-        
-        // Convert to blob and download
-        watermarkedCanvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `fluxion-chart-${Date.now()}.png`;
-            document.body.appendChild(a);
-            a.click();
-            
-            setTimeout(() => {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 100);
-            
-            showNotification('Chart exported successfully!', 'success');
-        }, 'image/png');
-        
-    } catch (error) {
-        console.error('Error exporting chart:', error);
-        showNotification('Error exporting chart: ' + error.message, 'error');
-    }
-}
-
-// Add Watermark to Canvas
-async function addWatermark(ctx, width, height) {
-    // Logo watermark (top-right corner)
-    const logoPath = '/static/img/greenlogo.png';
-    
-    try {
-        const logo = await loadImage(logoPath);
-        const logoWidth = 40;
-        const logoHeight = (logo.height / logo.width) * logoWidth;
-        
-        // Draw logo with semi-transparency
-        ctx.globalAlpha = 0.7;
-        ctx.drawImage(logo, width - logoWidth - 20, 20, logoWidth, logoHeight);
-        ctx.globalAlpha = 1.0;
-    } catch (error) {
-        console.warn('Could not load logo, using text watermark');
-        // Fallback to text watermark
-        ctx.font = 'bold 16px Arial';
-        ctx.fillStyle = 'rgba(16, 32, 26, 0.55)';
-        ctx.fillText('Fluxion', width - 100, 40);
-    }
-    
-    // Timestamp
-    const timestamp = new Date().toLocaleString();
-    ctx.font = '10px Arial';
-    ctx.fillStyle = 'rgba(16, 32, 26, 0.55)';
-    ctx.textAlign = 'right';
-    ctx.fillText(timestamp, width - 20, height - 20);
-}
-
-// Helper function to load images
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-    });
-}
-
-// Notification System
-function showNotification(message, type = 'info') {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">×</button>
-    `;
-    
-    // Add to page
-    let container = document.querySelector('.notification-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'notification-container';
-        document.body.appendChild(container);
-    }
-    
-    container.appendChild(notification);
-    
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        notification.classList.add('fade-out');
-        setTimeout(() => notification.remove(), 300);
-    }, 5000);
-}
-
-// Cleanup on page unload
-window.addEventListener('beforeunload', function() {
-    if (socket && socket.connected) {
-        socket.emit('leave_live_session', { session_id: sessionId });
-        socket.disconnect();
-    }
-    
-    if (liveChart) {
-        liveChart.destroy();
-    }
-});
+})();

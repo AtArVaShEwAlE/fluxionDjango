@@ -1,43 +1,100 @@
-/* Live Data — page-specific styles (theme tokens/cards/buttons come from app-theme.css) */
+/* Live Data page (redesign). Tokens, cards and buttons come from app-theme.css.
+   Spacing scale: 0.5 / 0.75 / 1 / 1.5 rem. Every block has a 1px border and the same radius. */
+
+body.page-app.page-live-data .live-page {
+    max-width: 1180px;
+}
 
 body.page-app .page-header {
     text-align: center;
-    margin-bottom: 2rem;
-    padding: 2rem 0;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 0 0.5rem;
 }
 
 body.page-app .page-header h1 {
     margin-top: 40px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
 }
 
 body.page-app .page-header p {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
     margin: 0;
 }
 
+/* ---------- Cards: header strip + sections ---------- */
 body.page-app .live-controls-card,
 body.page-app .live-chart-card,
 body.page-app .data-flow-card {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--pa-border);
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(16, 32, 26, 0.04);
 }
 
-body.page-app .live-controls-card .card-header,
-body.page-app .live-chart-card .card-header {
+body.page-app .live-card-head,
+body.page-app .live-chart-head {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.75rem 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--pa-bg-soft);
+    border-bottom: 1px solid var(--pa-border);
 }
 
-/* Connection status pill */
+body.page-app .live-card-head .card-title,
+body.page-app .live-chart-head .card-title {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+body.page-app .live-card-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .live-section {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+body.page-app .live-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 1rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .live-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--pa-accent-soft);
+    color: var(--pa-accent-dark);
+    font-size: 0.75rem;
+    letter-spacing: 0;
+}
+
+/* ---------- Connection status pill ---------- */
 body.page-app .status-indicator {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.9rem;
-    background: var(--pa-bg-soft);
+    padding: 0.35rem 0.85rem;
+    background: #ffffff;
     border: 1px solid var(--pa-border);
     border-radius: 100px;
     font-size: 0.85rem;
@@ -50,48 +107,54 @@ body.page-app .status-dot {
     height: 10px;
     border-radius: 50%;
     background: var(--pa-ink-faint);
-    animation: ld-pulse 2s infinite;
 }
 
 body.page-app .status-dot.connected { background: var(--pa-accent); }
-body.page-app .status-dot.streaming { background: #F59E0B; }
+body.page-app .status-dot.streaming { background: #F59E0B; animation: ld-pulse 1.4s infinite; }
 body.page-app .status-dot.paused { background: var(--pa-ink-faint); }
 
 @keyframes ld-pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    50% { opacity: 0.4; }
 }
 
-/* Controls */
+/* ---------- Controls ---------- */
 body.page-app .control-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 1.25rem 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem 1.25rem;
+    align-items: start;
 }
 
 body.page-app .control-group {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+body.page-app .control-group.control-wide {
+    grid-column: 1 / -1;
 }
 
 body.page-app .control-label {
     font-weight: 600;
     color: var(--pa-ink);
-    font-size: 0.88rem;
+    font-size: 0.85rem;
 }
 
 body.page-app .form-select,
 body.page-app .form-control {
     width: 100%;
-    padding: 0.7rem 0.8rem;
+    height: 42px;
+    padding: 0 0.8rem;
     border: 1.5px solid var(--pa-border);
     border-radius: 9px;
     background: #ffffff;
     color: var(--pa-ink);
     font-family: inherit;
-    font-size: 0.95rem;
-    transition: all 0.15s ease;
+    font-size: 0.93rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 body.page-app .form-select:focus,
@@ -101,23 +164,58 @@ body.page-app .form-control:focus {
     box-shadow: 0 0 0 3px var(--pa-accent-soft);
 }
 
+body.page-app .form-select:disabled {
+    background: var(--pa-bg-soft);
+    color: var(--pa-ink-soft);
+}
+
 body.page-app .form-control::placeholder {
     color: #9AA6A1;
 }
 
 body.page-app .form-help {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    line-height: 1.4;
     color: var(--pa-ink-soft);
 }
 
-body.page-app #apiTestResult {
-    margin-left: 0.6rem;
+body.page-app .dataset-pick {
+    display: flex;
+    gap: 0.5rem;
+}
+
+body.page-app .dataset-pick .form-select {
+    flex: 1;
+}
+
+body.page-app .dataset-pick .btn {
+    flex-shrink: 0;
+    height: 42px;
+}
+
+body.page-app .row-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+body.page-app .api-tools,
+body.page-app .api-examples {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.6rem;
+}
+
+body.page-app .api-result {
     font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--pa-accent-dark);
 }
 
 body.page-app .btn-sm {
     padding: 0.5rem 1rem;
-    font-size: 0.88rem;
+    font-size: 0.86rem;
 }
 
 body.page-app .btn:disabled {
@@ -127,14 +225,13 @@ body.page-app .btn:disabled {
     box-shadow: none;
 }
 
-/* Action buttons */
+/* ---------- Action bar ---------- */
 body.page-app .live-actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--pa-border);
+    padding: 1rem 1.5rem;
+    background: var(--pa-bg-soft);
 }
 
 body.page-app .live-actions .btn {
@@ -143,35 +240,139 @@ body.page-app .live-actions .btn {
     text-align: center;
 }
 
-/* Export row (sits above the chart card) */
-body.page-app .preview-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
+body.page-app .live-actions .btn-primary {
+    flex: 2;
 }
 
-/* Live chart */
-body.page-app .chart-stats {
+/* ---------- Guide card ---------- */
+body.page-app .chart-guide {
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--pa-accent-soft);
+    border: 1px solid var(--pa-accent);
+    border-left-width: 4px;
+    border-radius: 12px;
+}
+
+body.page-app .chart-guide[hidden] {
+    display: none;
+}
+
+body.page-app .chart-guide-head {
     display: flex;
-    gap: 1.75rem;
-    flex-wrap: wrap;
-    font-size: 0.9rem;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .chart-guide-head span {
+    font-size: 0.8rem;
     color: var(--pa-ink-soft);
 }
 
-body.page-app .chart-stats strong {
+body.page-app .chart-guide dl {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.3rem 1.25rem;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+body.page-app .chart-guide dt {
+    font-weight: 700;
     color: var(--pa-ink);
-    margin-left: 0.25rem;
+}
+
+body.page-app .chart-guide dd {
+    margin: 0;
+    color: var(--pa-ink-soft);
+}
+
+/* ---------- Live chart card ---------- */
+body.page-app .live-chart-title {
+    min-width: 0;
+}
+
+body.page-app .live-status-line {
+    margin: 0.3rem 0 0;
+    padding: 0.3rem 0.7rem;
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .live-status-line.is-live {
+    background: var(--pa-accent-soft);
+    border-color: var(--pa-accent);
+    color: var(--pa-accent-dark);
+}
+
+body.page-app .live-chart-tools {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem 1rem;
+}
+
+body.page-app .chart-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+body.page-app .stat-chip {
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 86px;
+    padding: 0.35rem 0.8rem;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 9px;
+    line-height: 1.25;
+}
+
+body.page-app .stat-chip em {
+    font-style: normal;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--pa-ink-soft);
+}
+
+body.page-app .stat-chip strong {
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-ink);
+}
+
+body.page-app .preview-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 body.page-app .live-chart-container {
     position: relative;
-    min-height: 400px;
+    min-height: 420px;
+    margin: 1.25rem 1.5rem 1.5rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 12px;
 }
 
 body.page-app #liveChart {
@@ -202,7 +403,7 @@ body.page-app .placeholder-icon {
 }
 
 body.page-app .chart-placeholder h4 {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.3rem;
     font-weight: 700;
 }
 
@@ -210,25 +411,24 @@ body.page-app .chart-placeholder p {
     margin: 0;
 }
 
-/* Data flow animation */
+/* ---------- Data flow ---------- */
 body.page-app .flow-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem 1rem;
-    min-height: 200px;
+    padding: 1.5rem;
 }
 
 body.page-app .flow-node {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1.25rem 1.5rem;
+    gap: 0.6rem;
+    padding: 1rem 1.25rem;
     background: var(--pa-bg-soft);
     border: 1.5px solid var(--pa-border);
     border-radius: 12px;
-    min-width: 120px;
+    min-width: 110px;
     transition: all 0.3s ease;
 }
 
@@ -250,15 +450,15 @@ body.page-app .flow-node.active .node-icon {
 body.page-app .node-label {
     color: var(--pa-ink);
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     text-align: center;
 }
 
 body.page-app .flow-path {
     position: relative;
     flex: 1;
-    height: 100px;
-    margin: 0 1rem;
+    height: 90px;
+    margin: 0 0.75rem;
 }
 
 body.page-app .flow-svg {
@@ -269,11 +469,6 @@ body.page-app .flow-svg {
 body.page-app .flow-line {
     stroke-dasharray: 10 5;
     animation: ld-flowDash 2s linear infinite;
-}
-
-body.page-app .flow-line.active {
-    stroke: var(--pa-accent);
-    stroke-width: 4;
 }
 
 @keyframes ld-flowDash {
@@ -303,23 +498,7 @@ body.page-app .data-particle {
     100% { left: 100%; top: 50%; opacity: 0; }
 }
 
-/* Spinner inside the status text */
-body.page-app .spinner {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin-left: 0.5rem;
-    border: 2px solid rgba(21, 122, 86, 0.25);
-    border-top-color: var(--pa-accent-dark);
-    border-radius: 50%;
-    animation: ld-spin 1s linear infinite;
-}
-
-@keyframes ld-spin {
-    to { transform: rotate(360deg); }
-}
-
-/* Notifications (created by showNotification() in live_data.js) */
+/* ---------- Notifications (created by live_data.js) ---------- */
 body.page-app .notification-container {
     position: fixed;
     top: 90px;
@@ -336,12 +515,12 @@ body.page-app .notification {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0.9rem 1.25rem;
+    padding: 0.85rem 1.1rem;
     border-radius: 10px;
     background: #ffffff;
     border: 1px solid var(--pa-border);
     box-shadow: 0 8px 24px rgba(16, 32, 26, 0.12);
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     font-weight: 500;
     animation: ld-slideInRight 0.3s ease;
 }
@@ -361,7 +540,6 @@ body.page-app .notification button {
     cursor: pointer;
     padding: 0;
     opacity: 0.6;
-    transition: opacity 0.2s;
 }
 
 body.page-app .notification button:hover { opacity: 1; }
@@ -380,37 +558,39 @@ body.page-app .notification.fade-out {
     to   { transform: translateX(100%); opacity: 0; }
 }
 
-/* Responsive */
+/* ---------- Responsive ---------- */
 @media (max-width: 1024px) {
     body.page-app .flow-container {
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     body.page-app .flow-path {
         transform: rotate(90deg);
-        width: 100px;
+        width: 90px;
         margin: 1rem 0;
     }
 }
 
 @media (max-width: 768px) {
-    body.page-app .page-header { padding: 1rem 0; }
+    body.page-app .page-header { padding: 1rem 0 0.25rem; }
 
-    body.page-app .control-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
+    body.page-app .live-card-head,
+    body.page-app .live-chart-head,
+    body.page-app .live-section { padding-left: 1rem; padding-right: 1rem; }
 
-    body.page-app .live-actions { flex-direction: column; }
-    body.page-app .live-actions .btn { width: 100%; }
+    body.page-app .control-grid { grid-template-columns: 1fr; }
 
-    body.page-app .chart-stats { flex-direction: column; gap: 0.4rem; }
+    body.page-app .live-actions { flex-direction: column; padding: 1rem; }
+    body.page-app .live-actions .btn,
+    body.page-app .live-actions .btn-primary { width: 100%; flex: none; }
 
-    body.page-app .live-chart-container { min-height: 300px; }
+    body.page-app .live-chart-tools { justify-content: flex-start; }
+    body.page-app .stat-chip { min-width: 0; flex: 1; }
 
-    body.page-app .preview-actions { justify-content: stretch; }
-    body.page-app .preview-actions .btn { flex: 1; }
+    body.page-app .live-chart-container { min-height: 320px; margin: 1rem; padding: 0.5rem; }
+
+    body.page-app .chart-guide dl { grid-template-columns: 1fr; }
 
     body.page-app .notification-container { left: 10px; right: 10px; max-width: none; }
 }

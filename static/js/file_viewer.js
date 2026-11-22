@@ -3,6 +3,11 @@
 (function () {
     const openBtn = document.getElementById('viewFileBtn');
     if (!openBtn) return;
+    // Create Chart has `currentDataset`; the Live page provides window.getViewFileDataset()
+    function datasetNow() {
+        if (typeof currentDataset !== 'undefined' && currentDataset) return currentDataset;
+        return typeof window.getViewFileDataset === 'function' ? window.getViewFileDataset() : null;
+    }
     const state = { page: 1, size: 50, pages: 1, total: 0, jump: null };
     let modal = null;
     let busy = false;
@@ -134,11 +139,12 @@
     }
 
     async function load(page) {
-        if (busy || typeof currentDataset === 'undefined' || !currentDataset) return;
+        const ds = datasetNow();
+        if (busy || !ds) return;
         busy = true;
         message('Loading...');
         try {
-            const response = await fetch('/dataset-rows/' + currentDataset.id + '?page=' + Math.max(1, page) + '&size=' + state.size);
+            const response = await fetch('/dataset-rows/' + ds.id + '?page=' + Math.max(1, page) + '&size=' + state.size);
             const data = await response.json();
             if (!response.ok || !data.success) throw new Error(data.error || 'Server error (' + response.status + ')');
             state.page = data.page;
@@ -158,9 +164,13 @@
     }
 
     openBtn.addEventListener('click', function () {
-        if (typeof currentDataset === 'undefined' || !currentDataset) return;
+        const ds = datasetNow();
+        if (!ds) {
+            alert('Choose a dataset first');
+            return;
+        }
         if (!modal) build();
-        document.getElementById('fvName').textContent = (currentDataset.filename || 'Dataset') + ' - rows';
+        document.getElementById('fvName').textContent = (ds.filename || 'Dataset') + ' - rows';
         modal.hidden = false;
         document.body.style.overflow = 'hidden';
         load(1);
