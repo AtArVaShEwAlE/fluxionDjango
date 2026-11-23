@@ -42,8 +42,10 @@ window.FluxionBoardExport = (function () {
 
         const ctx = out.getContext('2d');
         ctx.scale(scale, scale);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, cssW, cssH);
+        if (!window.FluxionExtras || window.FluxionExtras.getExportBg()) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, cssW, cssH);
+        }
 
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#10201A';

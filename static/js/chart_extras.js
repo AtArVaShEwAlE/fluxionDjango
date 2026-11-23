@@ -773,7 +773,13 @@ window.FluxionExtras = (function () {
             }
         };
     }
-
+    let exportBg = true;
+    document.addEventListener('DOMContentLoaded', function () {
+        const box = document.getElementById('exportWhiteBg');
+        if (!box) return;
+        exportBg = box.checked;
+        box.addEventListener('change', function () { exportBg = box.checked; });
+    });
     // Sharp copy of a chart on a white background (for PNG / PDF / board export).
     function hiResCanvas(chart, scale) {
         const dpr0 = chart.options.devicePixelRatio;
@@ -787,8 +793,10 @@ window.FluxionExtras = (function () {
             out.width = chart.canvas.width;
             out.height = chart.canvas.height;
             const c = out.getContext('2d');
-            c.fillStyle = '#FFFFFF';
-            c.fillRect(0, 0, out.width, out.height);
+            if (exportBg) {
+                c.fillStyle = '#FFFFFF';
+                c.fillRect(0, 0, out.width, out.height);
+            }
             c.drawImage(chart.canvas, 0, 0);
             return out;
         } finally {
@@ -971,5 +979,5 @@ window.FluxionExtras = (function () {
         config.plugins = (config.plugins || []).concat([resetPlugin], list);
     }
 
-        return { prepare: prepare, apply: apply, hiRes: hiRes, makeFmt: makeFmt };
+        return { prepare: prepare, apply: apply, hiRes: hiRes, makeFmt: makeFmt, getExportBg: function () { return exportBg; } };
 })();

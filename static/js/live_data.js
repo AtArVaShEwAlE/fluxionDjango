@@ -261,12 +261,30 @@
         return 'live-' + typeSelect.value + '-' + new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-') + '.png';
     }
 
+        function pngBlob() {
+        const cv = $('liveChart');
+        let src = window.FluxionExtras ? window.FluxionExtras.hiRes(cv, 3) : cv;
+        if (src === cv) {
+            const o = document.createElement('canvas');
+            o.width = cv.width;
+            o.height = cv.height;
+            const c = o.getContext('2d');
+            if (!window.FluxionExtras || window.FluxionExtras.getExportBg()) {
+                c.fillStyle = '#FFFFFF';
+                c.fillRect(0, 0, o.width, o.height);
+            }
+            c.drawImage(cv, 0, 0);
+            src = o;
+        }
+        return new Promise(resolve => src.toBlob(resolve, 'image/png'));
+    }
+
     async function saveImage() {
         if (!controller.hasData()) {
             notify('Start a stream first, there is nothing to save yet', 'info');
             return;
         }
-        const blob = await controller.png();
+        const blob = await pngBlob();
         if (!blob) {
             notify('Could not create the image', 'error');
             return;
