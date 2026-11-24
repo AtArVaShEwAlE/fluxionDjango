@@ -285,7 +285,7 @@ def run_query(df, spec):
 
     df = _row_range(df, spec)   # Customise: Rows from / to
 
-    if spec.get('shape') in ('gauge', 'density'):   # no single X column, so these run before the X check
+    if spec.get('shape') in ('gauge', 'density', 'table'):  # no single X column, so these run before the X check
         from .shapes import run_shape
         return run_shape(df, spec.get('x'), spec)
 

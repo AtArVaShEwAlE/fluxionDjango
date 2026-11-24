@@ -30,7 +30,10 @@ window.FluxionTypes = (function () {
         density: { title: 'Density', fields: 'xy', multiY: true, server: true, noX: true, y: 'Columns (numbers)' },
         gantt: { title: 'Gantt', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Tasks (labels)', slots: ['Start (date or number)', 'End (date or number)'] },
         gauge: { title: 'Gauge', fields: 'xy', multiY: false, server: true, colors: 'one', y: 'Value (numbers)', noX: true, noCustomise: true, widget: ['agg', 'gauge'] },
-        sparkline: { title: 'Sparkline', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Date or category column', y: 'Value (numbers)', widget: ['agg', 'bucket'] }
+        sparkline: { title: 'Sparkline', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Date or category column', y: 'Value (numbers)', widget: ['agg', 'bucket'] },
+        table: { title: 'Table', fields: 'xy', multiY: true, server: true, noX: true, y: 'Columns (numbers or text)' },
+        pivot: { title: 'Pivot Table', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Rows (labels)', slots: ['Columns (labels)', 'Value (numbers)'], widget: ['agg'] },
+        heatmap: { title: 'Heatmap', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Rows (labels)', slots: ['Columns (labels)', 'Value (numbers)'], widget: ['agg'] }
     };
     const FALLBACK = { title: 'Chart', fields: 'xy', multiY: false };
 

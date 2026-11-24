@@ -169,6 +169,37 @@ raises('shape as list', lambda: run_query(fdf, {'x': 'stage', 'series': [{'colum
 raises('shape needs known x', lambda: run_query(fdf, {'x': 'nope', 'series': [{'column': 'n'}], 'shape': 'pareto'}))
 check('plain query unaffected by shape code', run_query(fdf, {'x': 'stage', 'series': [{'column': 'n'}]})['meta']['mode'], 'grouped')
 
+# ---------- tables (Phase 21) ----------
+check('spec table needs no X', spec_from_chart('table', {'y_axes': ['region', 'v']}), {'shape': 'table', 'series': [{'column': 'region'}, {'column': 'v'}]})
+raises('spec table no columns', lambda: spec_from_chart('table', {}))
+check('spec pivot', spec_from_chart('pivot', {'x_axis': 'region', 'y_axes': ['prod', 'v'], 'agg': 'avg'}),
+      {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'prod'}, {'column': 'v'}], 'agg': 'avg'})
+check('spec heatmap = pivot shape, sum default', spec_from_chart('heatmap', {'x_axis': 'region', 'y_axes': ['prod', 'v']})['agg'], 'sum')
+raises('spec pivot one Y only', lambda: spec_from_chart('pivot', {'x_axis': 'region', 'y_axes': ['prod']}))
+raises('spec pivot no X', lambda: spec_from_chart('heatmap', {'y_axes': ['prod', 'v']}))
+tdf = pd.DataFrame({'region': ['N', 'S', 'N', 'E', 'S'], 'prod': ['a', 'a', 'b', 'b', 'a'], 'v': [10, 20, 5, 3, 7], 'note': list('vwxyz')})
+r = run_query(tdf, spec_from_chart('table', {'y_axes': ['region', 'v']}))
+check('table labels = row numbers', r['labels'], [1, 2, 3, 4, 5])
+check('table values', r['series'][1]['values'], [10, 20, 5, 3, 7])
+check('table meta', (r['meta']['mode'], r['meta']['rows_in'], r['meta']['truncated']), ('table', 5, False))
+check('table json safe', safe(r), True)
+r = run_query(tdf, {'shape': 'table', 'series': [{'column': 'v'}], 'row_from': 2, 'row_to': 3})
+check('table keeps file row numbers with Rows from / to', (r['labels'], r['series'][0]['values']), ([2, 3], [20, 5]))
+raises('table unknown column', lambda: run_query(tdf, {'shape': 'table', 'series': [{'column': 'nope'}]}))
+raises('table no columns', lambda: run_query(tdf, {'shape': 'table', 'series': []}))
+r = run_query(tdf, {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'prod'}, {'column': 'v'}], 'agg': 'sum'})
+check('pivot rows sorted', r['labels'], ['E', 'N', 'S'])
+check('pivot column a (missing = None)', r['series'][0]['values'], [None, 10, 27])
+check('pivot column b', r['series'][1]['values'], [3, 5, None])
+check('pivot totals', (r['meta']['row_totals'], r['meta']['col_totals'], r['meta']['grand_total']), ([3, 15, 27], [37, 8], 45))
+check('pivot meta', (r['meta']['mode'], r['meta']['rows_total'], r['meta']['cols_total']), ('pivot', 3, 2))
+check('pivot json safe', safe(r), True)
+r = run_query(tdf, {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'prod'}, {'column': 'v'}], 'agg': 'count'})
+check('pivot count', r['meta']['grand_total'], 5)
+raises('pivot same column twice', lambda: run_query(tdf, {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'region'}, {'column': 'v'}]}))
+raises('pivot text value', lambda: run_query(tdf, {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'prod'}, {'column': 'note'}]}))
+raises('pivot one column only', lambda: run_query(tdf, {'shape': 'pivot', 'x': 'region', 'series': [{'column': 'prod'}]}))
+
 w = max(len(r[1]) for r in rows)
 for res, label, got, exp in rows:
     if res == 'FAIL':

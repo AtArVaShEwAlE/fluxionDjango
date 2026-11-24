@@ -45,7 +45,7 @@ def _spec_core(chart_type, config):
     return {'x': x, 'series': [{'column': c, 'agg': 'sum'} for c in ys], 'sort': 'none'}
 
 
-SHAPE_TYPES = {'stacked_area', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet',
+SHAPE_TYPES = {'table', 'pivot', 'heatmap', 'stacked_area', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet',
                'dual_line', 'density', 'gantt', 'gauge', 'sparkline'}
 NEEDS_TWO = {'bubble', 'bullet', 'dual_line', 'gantt'}
 
@@ -58,6 +58,15 @@ def _shape_spec(chart_type, config):
         ys = [config['y_axis']]
     if chart_type in WIDGET_TYPES:
         return _widget_spec(chart_type, config, x, ys)
+    if chart_type == 'table':   # any columns, no X
+        if not ys:
+            raise ValueError('Chart config is incomplete')
+        return {'shape': 'table', 'series': [{'column': c} for c in ys]}
+    if chart_type in ('pivot', 'heatmap'):   # X = rows, Y1 = columns, Y2 = value
+        if not x or len(ys) < 2:
+            raise ValueError('Chart config is incomplete')
+        agg = config.get('agg') if config.get('agg') in WIDGET_AGGS else 'sum'
+        return {'shape': 'pivot', 'x': x, 'series': [{'column': ys[0]}, {'column': ys[1]}], 'agg': agg}   
     if chart_type == 'density':   # one or more number columns (old charts: the X column)
         cols = ys or ([x] if x else [])
         if not cols:

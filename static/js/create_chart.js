@@ -484,6 +484,7 @@ function widgetValid() {
     const cfg = widgetConfig();
     if (!FluxionTypes.noX(t) && !FluxionTypes.xOptional(t) && xAxisSelect.value === '') return false;
     if (!FluxionTypes.noY(t) && getYColumns().length === 0) return false;
+    if (FluxionTypes.slots(t).length && getYColumns().filter(c => c).length < FluxionTypes.slots(t).length) return false;
     if (parts.includes('target') && !(cfg.target > 0)) return false;
     if (parts.includes('gauge') && !(Number.isFinite(cfg.gauge_max) && cfg.gauge_max > (cfg.gauge_min || 0))) return false;
     if (parts.includes('text') && !(cfg.text || cfg.heading)) return false;

@@ -198,9 +198,80 @@ def _gantt(df, x, spec):
                  'min': round(float(grouped['s'].min()), 4), 'max': round(float(grouped['e'].max()), 4)},
     }
 
+MAX_TABLE_ROWS = 200
+MAX_TABLE_COLUMNS = 12
+MAX_PIVOT_ROWS = 30
+MAX_PIVOT_COLS = 12
+PIVOT_FUNCS = {'sum': 'sum', 'avg': 'mean', 'count': 'count', 'min': 'min', 'max': 'max'}
+
+
+def _table(df, x, spec):
+    """Plain rows of the chosen columns. Row numbers keep the file's numbering (Rows from / to)."""
+    series = spec.get('series')
+    if not isinstance(series, list) or not series:
+        raise ValueError('Choose at least one column')
+    cols = []
+    for item in series[:MAX_TABLE_COLUMNS]:
+        col = item.get('column') if isinstance(item, dict) else None
+        if not isinstance(col, str) or col not in df.columns:
+            raise ValueError(f'Unknown column: {col}')
+        if col not in cols:
+            cols.append(col)
+    if df.empty:
+        raise ValueError('No rows to show')
+    part = df[cols].head(MAX_TABLE_ROWS)
+    if isinstance(df.index, pd.RangeIndex):
+        numbers = [int(i) + 1 for i in part.index]
+    else:
+        numbers = list(range(1, len(part) + 1))
+    return {
+        'labels': numbers,
+        'series': [{'name': c, 'column': c, 'agg': None, 'values': [_py(v) for v in part[c]]} for c in cols],
+        'meta': {'mode': 'table', 'rows_in': len(df), 'rows': len(part), 'truncated': len(df) > len(part)},
+    }
+
+
+def _pivot(df, x, spec):
+    """Rows (X) by Columns (series 1) of an aggregated Value (series 2). Totals use the same aggregation."""
+    ccol, vcol = _columns(df, spec, 2, 'Pivot table')
+    rcol = x
+    if len({rcol, ccol, vcol}) < 3:
+        raise ValueError('Rows, Columns and Value must be three different columns')
+    agg = spec.get('agg') if spec.get('agg') in PIVOT_FUNCS else 'sum'
+    func = PIVOT_FUNCS[agg]
+    frame = df[[rcol, ccol, vcol]]
+    frame = frame[frame[rcol].notna() & frame[ccol].notna()].copy()
+    if agg != 'count':
+        if pd.api.types.is_datetime64_any_dtype(frame[vcol]):
+            raise ValueError(f"Column '{vcol}' is a date column, not numeric")
+        frame[vcol] = pd.to_numeric(frame[vcol], errors='coerce')
+        if frame[vcol].notna().sum() == 0:
+            raise ValueError(f"Column '{vcol}' is not numeric")
+    if frame.empty:
+        raise ValueError('No rows with both a row and a column value')
+    frame[rcol] = frame[rcol].astype(str)
+    frame[ccol] = frame[ccol].astype(str)
+    table = frame.pivot_table(index=rcol, columns=ccol, values=vcol, aggfunc=func)
+    if table.empty:
+        raise ValueError('No numbers to show')
+    table = table.sort_index().sort_index(axis=1)
+    rows_total, cols_total = table.shape
+    table = table.iloc[:MAX_PIVOT_ROWS, :MAX_PIVOT_COLS]
+    row_t = frame.groupby(rcol)[vcol].agg(func).reindex(table.index)
+    col_t = frame.groupby(ccol)[vcol].agg(func).reindex(table.columns)
+    grand = getattr(frame[vcol], func)()
+    return {
+        'labels': [str(i) for i in table.index],
+        'series': [{'name': str(c), 'column': vcol, 'agg': agg, 'values': [_py(v) for v in table[c]]}
+                   for c in table.columns],
+        'meta': {'mode': 'pivot', 'rows_in': len(df), 'agg': agg, 'row_label': rcol, 'col_label': ccol,
+                 'value': vcol, 'rows_total': int(rows_total), 'cols_total': int(cols_total),
+                 'row_totals': [_py(v) for v in row_t], 'col_totals': [_py(v) for v in col_t],
+                 'grand_total': _py(grand)},
+    }
 
 SHAPES = {'bubble': _bubble, 'waterfall': _waterfall, 'pareto': _pareto,
-          'density': _density, 'gantt': _gantt}
+          'density': _density, 'gantt': _gantt, 'table': _table, 'pivot': _pivot}
 
 
 def run_shape(df, x, spec):

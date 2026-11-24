@@ -3,6 +3,7 @@
 // Keys match charts/options.py. Server cleans again on save.
 window.FluxionOptionsPanel = (function () {
     const ROUND = ['pie', 'doughnut'];
+    const TABLES = ['table', 'pivot', 'heatmap'];
     const SMOOTH = ['line', 'area', 'combo', 'stacked_area', 'dual_line', 'density', 'sparkline'];
     const LABEL_NO = ['radar', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt', 'sparkline'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
@@ -101,18 +102,18 @@ window.FluxionOptionsPanel = (function () {
     function applyVisibility() {
         const type = cfg.getType();
         const round = ROUND.indexOf(type) !== -1;
-        show('axes', !round && type !== 'radar' && type !== 'sparkline');
-        show('grid', !round && type !== 'sparkline');
+        show('axes', !round && !TABLES.includes(type) && type !== 'radar' && type !== 'sparkline');
+        show('grid', !round && !TABLES.includes(type) && type !== 'sparkline');
         show('smooth', SMOOTH.indexOf(type) !== -1);
-        show('colors', !round);
-        show('vlabels', LABEL_NO.indexOf(type) === -1);
+        show('colors', !round && type !== 'table');
+        show('vlabels', LABEL_NO.indexOf(type) === -1 && !TABLES.includes(type));
         show('highlight', HI_OK.indexOf(type) !== -1);
         show('trend', TREND_OK.indexOf(type) !== -1);
         show('reflines', REF_OK.indexOf(type) !== -1);
         show('sort', SORT_OK.indexOf(type) !== -1);
         show('topn', TOPN_OK.indexOf(type) !== -1);
         show('lastn', LAST_OK.indexOf(type) !== -1);
-        show('log', LOG_NO.indexOf(type) === -1);
+        show('log', LOG_NO.indexOf(type) === -1 && !TABLES.includes(type));
         show('gradient', GRAD_OK.indexOf(type) !== -1);
         show('axis2', type === 'combo');
         show('total', type === 'doughnut');

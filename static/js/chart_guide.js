@@ -24,7 +24,10 @@ window.FluxionGuide = (function () {
         density: ['Density', 'A smooth picture of how values are spread. Several columns can share one chart.', 'One or more number columns.', 'Use Value range (min / max) to zoom in on a part.'],
         gantt: ['Gantt', 'Shows tasks as bars along a timeline.', 'A text column of tasks, a Start column and an End column (dates or numbers).', 'Rows where End is before Start are skipped.'],
         gauge: ['Gauge', 'Shows one number against a range, like a dial.', 'One number column, plus the minimum and maximum of the dial.', 'Calculate decides if the dial shows the total, average, minimum or maximum.'],
-        sparkline: ['Sparkline', 'A tiny trend line with the latest value.', 'A date (or ordered) column and one number column.', 'Group dates by month or week; mark highest and lowest in Customise.']
+        sparkline: ['Sparkline', 'A tiny trend line with the latest value.', 'A date (or ordered) column and one number column.', 'Group dates by month or week; mark highest and lowest in Customise.'],
+        table: ['Table', 'Shows your rows and columns as they are.', 'One or more columns of any type.', 'Use Rows from / to in Customise to pick which rows to show.'],
+        pivot: ['Pivot Table', 'Sums (or averages) a number for every row and column combination, with totals.', 'A Rows text column, a Columns text column and a Value number column.', 'Calculate decides sum, average, count, minimum or maximum. Keep both text columns to a few unique values.'],
+        heatmap: ['Heatmap', 'A treemap: bigger value = bigger and darker cell. Rows are groups, Columns are the cells inside.', 'A Rows text column, a Columns text column and a Value number column.', 'Zero and negative values are left out. Shows up to 30 rows and 12 columns.']
     };
 
     const GROUPS = [
@@ -33,7 +36,8 @@ window.FluxionGuide = (function () {
         ['Parts of a whole', ['pie', 'doughnut', 'funnel', 'waterfall', 'pareto']],
         ['Spread', ['histogram', 'density']],
         ['Relationship', ['scatter', 'bubble']],
-        ['Plan and progress', ['gantt', 'gauge']]
+        ['Plan and progress', ['gantt', 'gauge']],
+        ['Tables', ['table', 'pivot', 'heatmap']]
     ];
 
     function $(id) { return document.getElementById(id); }

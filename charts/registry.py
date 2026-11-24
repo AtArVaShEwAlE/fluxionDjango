@@ -35,6 +35,10 @@ CHART_TYPES = [
     ('gauge', 'Gauge', True),
     ('sparkline', 'Sparkline', True),
     ('text', 'Text', True),
+    # Phase 21 Tables
+    ('table','Table',True),
+    ('pivot','Pivot Table',True),
+    ('heatmap','Heatmap',True),
 ]
 
 CHOICES = [(key, label) for key, label, _on in CHART_TYPES]
