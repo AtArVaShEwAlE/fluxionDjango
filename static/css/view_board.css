@@ -101,3 +101,80 @@ body.page-view-board .board-empty {
 @media (max-width: 560px) {
     body.page-view-board .board-tile-s { grid-column: span 12; }
 }
+
+
+/* Slicers (board filters) */
+body.page-view-board .board-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+}
+body.page-view-board .board-filters[hidden],
+body.page-view-board .board-filter-clear[hidden],
+body.page-view-board .board-slicer-badge[hidden] { display: none; }
+body.page-view-board .board-slicer { position: relative; }
+body.page-view-board .board-slicer summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 999px;
+    background: #ffffff;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--pa-ink);
+}
+body.page-view-board .board-slicer summary::-webkit-details-marker { display: none; }
+body.page-view-board .board-slicer[open] summary { border-color: #1F9D6E; }
+body.page-view-board .board-slicer-badge {
+    background: #1F9D6E;
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    padding: 0 0.45rem;
+    min-width: 1.2rem;
+    text-align: center;
+}
+body.page-view-board .board-slicer-body {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 220px;
+    max-width: 320px;
+    max-height: 280px;
+    overflow: auto;
+    background: #ffffff;
+    border: 1px solid var(--pa-border);
+    border-radius: 12px;
+    padding: 0.6rem;
+    box-shadow: 0 12px 30px rgba(16, 32, 26, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+body.page-view-board .board-slicer-option { display: flex; align-items: center; gap: 0.5rem; font-size: 0.88rem; cursor: pointer; }
+body.page-view-board .board-slicer-number {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 8px;
+    font-family: inherit;
+}
+body.page-view-board .board-slicer-note { margin: 0.25rem 0 0; font-size: 0.78rem; color: var(--pa-ink-soft); }
+body.page-view-board .board-filter-clear {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #B42318;
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: inherit;
+    cursor: pointer;
+}

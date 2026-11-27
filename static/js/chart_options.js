@@ -3,7 +3,7 @@
 // Keys match charts/options.py. Server cleans again on save.
 window.FluxionOptionsPanel = (function () {
     const ROUND = ['pie', 'doughnut'];
-    const TABLES = ['table', 'pivot', 'heatmap'];
+    const TABLES = ['table', 'pivot', 'heatmap', 'boxplot', 'sankey', 'sunburst', 'marimekko', 'influencers'];
     const SMOOTH = ['line', 'area', 'combo', 'stacked_area', 'dual_line', 'density', 'sparkline'];
     const LABEL_NO = ['radar', 'stacked_area', 'dual_line', 'bubble', 'waterfall', 'funnel', 'pareto', 'bullet', 'density', 'gantt', 'sparkline'];
     const HI_OK = ['bar', 'hbar', 'line', 'area', 'scatter', 'combo', 'histogram'];
@@ -17,7 +17,7 @@ window.FluxionOptionsPanel = (function () {
     const ZOOM_OK = ['line', 'area', 'scatter', 'bar', 'combo'];
     const MAX_COLORS = 10;
 
-    let state = {};
+    let state = {}; 
     let cfg = null;
     let ready = false;
     let colorSig = '';
@@ -105,7 +105,7 @@ window.FluxionOptionsPanel = (function () {
         show('axes', !round && !TABLES.includes(type) && type !== 'radar' && type !== 'sparkline');
         show('grid', !round && !TABLES.includes(type) && type !== 'sparkline');
         show('smooth', SMOOTH.indexOf(type) !== -1);
-        show('colors', !round && type !== 'table');
+        show('colors', !round && ['table', 'sankey', 'sunburst', 'marimekko'].indexOf(type) === -1);
         show('vlabels', LABEL_NO.indexOf(type) === -1 && !TABLES.includes(type));
         show('highlight', HI_OK.indexOf(type) !== -1);
         show('trend', TREND_OK.indexOf(type) !== -1);

@@ -22,6 +22,8 @@ urlpatterns = [
     path('share-board/<int:board_id>', board_sharing.share_board, name='share_board'),
     path('unshare-board/<int:board_id>', board_sharing.unshare_board, name='unshare_board'),
     path('shared-board/<str:share_token>', board_sharing.view_shared_board, name='shared_board'),
+    path('board-slicers/<int:board_id>', dashboards.board_slicers, name='board_slicers'),
+    path('shared-board-slicers/<str:share_token>', board_sharing.shared_board_slicers, name='shared_board_slicers'),
     path('shared-board-data/<str:share_token>/<int:chart_id>',
          board_sharing.shared_board_chart_data, name='shared_board_chart_data'),
     path('reports', views.reports, name='reports'),

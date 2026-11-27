@@ -8,6 +8,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 
 from .board_models import BOARD_MAX_ITEMS, BOARD_REFRESH, BOARD_SIZES, Dashboard
 from .models import Chart
+from .slicers import board_slicer_options, clean_slicers
 from .views import _json_body
 
 logger = logging.getLogger(__name__)
@@ -64,6 +65,9 @@ def _owned_board(request, board_id):
         return None, JsonResponse({'error': 'Unauthorized'}, status=403)
     return board, None
 
+def _chart_columns(user):
+    """chart id -> column names of its dataset (for the slicer picker)."""
+    return {str(c.id): c.dataset.column_names for c in user.charts.select_related('dataset')}
 
 # ---------- Pages ----------
 
@@ -76,14 +80,16 @@ def boards(request):
 @login_required
 def create_board(request):
     return render(request, 'create_board.html',
-                  {'charts': request.user.charts.all(), 'board_json': None})
+                  {'charts': request.user.charts.all(), 'board_json': None,
+                   'chart_columns': _chart_columns(request.user)})
 
 
 @login_required
 def edit_board(request, board_id):
     board = get_object_or_404(Dashboard, pk=board_id, owner=request.user)   # not yours = 404
     return render(request, 'create_board.html',
-                  {'charts': request.user.charts.all(), 'board_json': board.to_dict()})
+                  {'charts': request.user.charts.all(), 'board_json': board.to_dict(),
+                   'chart_columns': _chart_columns(request.user)})
 
 
 def board_payload(board, request):
@@ -108,7 +114,9 @@ def board_payload(board, request):
         })
     return {'id': board.id, 'title': board.title,
             'refresh_seconds': board.refresh_seconds, 'tiles': tiles,
-            'is_public': board.is_public, 'share_url': share_url}
+            'is_public': board.is_public, 'share_url': share_url,
+            'slicers': board.slicers or [],
+            'slicer_url': reverse('board_slicers', args=[board.id])}
 
 
 @login_required
@@ -134,6 +142,7 @@ def save_board(request):
             title=clean_title(data.get('title')),
             items=items,
             refresh_seconds=clean_refresh(data.get('refresh_seconds')),
+            slicers=clean_slicers(data.get('slicers')),
         )
     except Exception as e:
         logger.exception('Error saving board')
@@ -161,6 +170,8 @@ def update_board(request, board_id):
         board.title = clean_title(data['title'], default=board.title)
     if 'refresh_seconds' in data:
         board.refresh_seconds = clean_refresh(data['refresh_seconds'])
+    if 'slicers' in data:
+        board.slicers = clean_slicers(data['slicers'])
     board.save()
     return JsonResponse({'success': True, 'board_id': board.id,
                          'message': 'Board updated successfully!'})
@@ -184,3 +195,14 @@ def delete_board(request, board_id):
         return error
     board.delete()
     return JsonResponse({'success': True, 'message': 'Board deleted successfully!'})
+
+
+
+@login_required
+@require_GET
+def board_slicers(request, board_id):
+    """Filter options (values, ranges) for the board's slicer columns. Owner only."""
+    board, error = _owned_board(request, board_id)
+    if error:
+        return error
+    return JsonResponse({'success': True, 'slicers': board_slicer_options(board)})

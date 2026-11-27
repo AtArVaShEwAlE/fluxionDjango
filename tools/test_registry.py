@@ -35,8 +35,9 @@ check('first 11 choices unchanged (keeps DB choices stable)', CHOICES[:11], OLD)
 check('every label non-empty', [k for k, l, _o in CHART_TYPES if not l.strip()], [])
 WIDGETS = ['gauge', 'sparkline']
 TABLES = ['table', 'pivot', 'heatmap']
-check('Tier A + widget keys registered after the 11', keys[11:], TIER_A + WIDGETS + TABLES)
-check('enabled = the 11 shipped + Tier A + widgets', sorted(ENABLED), sorted([k for k, _l in OLD] + TIER_A + WIDGETS + TABLES))
+TIER_D = ['boxplot', 'sankey', 'sunburst', 'marimekko', 'influencers']
+check('Tier A + widget keys registered after the 11', keys[11:], TIER_A + WIDGETS + TABLES + TIER_D)
+check('enabled = the 11 shipped + Tier A + widgets', sorted(ENABLED), sorted([k for k, _l in OLD] + TIER_A + WIDGETS + TABLES + TIER_D))
 check('Tier A enabled', sorted(ENABLED & set(TIER_A)), sorted(TIER_A))
 check('CHOICES length = registry length', len(CHOICES), len(CHART_TYPES))
 
@@ -83,6 +84,11 @@ check('chart_widgets.js registers every widget', sorted(re.findall(r"A\.register
 tbl = read('static', 'js', 'chart_tables.js')
 check('chart_tables.js exists', tbl is not None, True)
 check('chart_tables.js registers every table type', sorted(re.findall(r"A\.register\('(\w+)'", tbl or '')), sorted(TABLES))
+tierd = read('static', 'js', 'chart_tier_d.js')
+check('chart_tier_d.js exists', tierd is not None, True)
+check('chart_tier_d.js registers every Phase 22 type', sorted(re.findall(r"A\.register\('(\w+)'", tierd or '')), sorted(TIER_D))
+check('icon partial draws every Phase 22 type', [k for k in TIER_D if icons is None or "== '" + k + "'" not in icons], [])
+guide = read('static', 'js', 'chart_guide.js')
 check('chart_guide.js exists', guide is not None, True)
 check('chart_guide.js has a text for every chart type', sorted(set(ENABLED) - set(re.findall(r"^\s+(\w+): \['", guide or '', re.M))), [])
 w = max(len(r[1]) for r in rows)

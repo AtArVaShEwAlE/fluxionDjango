@@ -29,16 +29,18 @@ CHART_TYPES = [
     ('density', 'Density', True),
     ('gantt', 'Gantt', True),
     # Phase 20 widgets
-    ('kpi', 'KPI Card', True),
-    ('multi_card', 'Multi-Row Card', True),
-    ('progress', 'Progress Bar', True),
     ('gauge', 'Gauge', True),
     ('sparkline', 'Sparkline', True),
-    ('text', 'Text', True),
     # Phase 21 Tables
     ('table','Table',True),
     ('pivot','Pivot Table',True),
     ('heatmap','Heatmap',True),
+    # Phase 22
+    ('boxplot', 'Box Plot', True),
+    ('sankey', 'Sankey', True),
+    ('sunburst', 'Sunburst', True),
+    ('marimekko', 'Marimekko', True),   
+    ('influencers', 'Key Influencers', True),
 ]
 
 CHOICES = [(key, label) for key, label, _on in CHART_TYPES]

@@ -7,7 +7,9 @@ from django.views.decorators.http import require_GET, require_POST
 from .board_models import Dashboard
 from .dashboards import _owned_board
 from .models import Chart
-from .views import _run_chart
+from .slicers import board_slicer_options
+from .views import _filters_from_request, _run_chart
+from .views import _filters_from_request, _run_chart
 
 
 def public_board_payload(board):
@@ -28,7 +30,9 @@ def public_board_payload(board):
             'data_url': reverse('shared_board_chart_data', args=[board.share_token, chart.id]),
         })
     return {'title': board.title, 'refresh_seconds': board.refresh_seconds,
-            'chart_count': len(tiles), 'tiles': tiles}
+            'chart_count': len(tiles), 'tiles': tiles,
+            'slicers': board.slicers or [],
+            'slicer_url': reverse('shared_board_slicers', args=[board.share_token])}
 
 
 @login_required
@@ -78,4 +82,13 @@ def shared_board_chart_data(request, share_token, chart_id):
              .filter(pk=chart_id, owner_id=board.owner_id).first())
     if chart is None:
         return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
-    return _run_chart(chart)
+    return _run_chart(chart, _filters_from_request(request, set(board.slicers or [])))
+
+
+@require_GET
+def shared_board_slicers(request, share_token):
+    """Public. Filter options (values, ranges) for the slicer columns the owner chose."""
+    board = Dashboard.objects.filter(share_token=share_token, is_public=True).first()
+    if board is None:
+        return JsonResponse({'success': False, 'error': 'Not found'}, status=404)
+    return JsonResponse({'success': True, 'slicers': board_slicer_options(board)})

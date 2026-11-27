@@ -15,6 +15,7 @@ class Dashboard(models.Model):
     title = models.CharField(max_length=255)
     items = models.JSONField(default=list)
     refresh_seconds = models.PositiveIntegerField(default=0)
+    slicers = models.JSONField(default=list)   # column names viewers can filter by (max 3)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_public = models.BooleanField(default=False)
@@ -37,6 +38,7 @@ class Dashboard(models.Model):
             'title': self.title,
             'items': self.items,
             'refresh_seconds': self.refresh_seconds,
+            'slicers': self.slicers or [],
             'chart_count': sum(1 for i in ids if i in alive),
             'created_at': self.created_at.isoformat(),
             'updated_at': self.updated_at.isoformat(),

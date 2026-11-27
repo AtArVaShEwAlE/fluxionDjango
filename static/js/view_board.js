@@ -5,6 +5,8 @@ const boardData = boardEl ? JSON.parse(boardEl.textContent) : null;
 
 const tiles = [];          // {spec, canvas, note, chart, token}
 let refreshing = false;
+let pending = false;        // a refresh was asked for while one was running
+let activeFilters = [];     // slicers: [{c, v} | {c, min, max}]
 let lastRefresh = 0;
 
 document.addEventListener('DOMContentLoaded', initBoard);
@@ -28,6 +30,7 @@ function initBoard() {
     specs.forEach(spec => tiles.push(buildTile(grid, spec)));
 
     if (refreshBtn) refreshBtn.addEventListener('click', () => refreshAll(true));
+    initFilters();
     refreshAll(true);
 
     const secs = boardData.refresh_seconds || 0;
@@ -76,7 +79,8 @@ async function loadTile(tile, animate) {
     const myToken = ++tile.token;
     let result;
     try {
-        const response = await fetch(tile.spec.data_url || `/chart-data/${tile.spec.chart_id}`);
+        const base = tile.spec.data_url || `/chart-data/${tile.spec.chart_id}`;
+        const response = await fetch(activeFilters.length ? base + '?f=' + encodeURIComponent(JSON.stringify(activeFilters)) : base);
         result = await response.json();
         if (!response.ok || !result.success) {
             throw new Error(result.error || `Server error (${response.status})`);
@@ -107,7 +111,10 @@ async function loadTile(tile, animate) {
 }
 
 async function refreshAll(animate) {
-    if (refreshing) return;
+    if (refreshing) {
+        pending = true;
+        return;
+    }
     refreshing = true;
 
     const refreshBtn = document.getElementById('refreshBoardBtn');
@@ -128,7 +135,12 @@ async function refreshAll(animate) {
     const failed = results.filter(ok => !ok).length;
     let status = `${tiles.length} chart${tiles.length !== 1 ? 's' : ''} \u00B7 ${refreshLabel()} \u00B7 Updated ${new Date().toLocaleTimeString()}`;
     if (failed) status += ` \u00B7 ${failed} failed`;
+    if (activeFilters.length) status += ` \u00B7 ${activeFilters.length} filter${activeFilters.length !== 1 ? 's' : ''}`;
     setStatus(status);
+    if (pending) {
+        pending = false;
+        refreshAll(false);
+    }
 }
 
 function refreshLabel() {
@@ -140,4 +152,129 @@ function refreshLabel() {
 function setStatus(text) {
     const el = document.getElementById('boardStatus');
     if (el) el.textContent = text;
+}
+
+
+// ---------- Slicers (board filters) ----------
+async function initFilters() {
+    const bar = document.getElementById('boardFilters');
+    if (!bar || !boardData.slicer_url || !(boardData.slicers || []).length) return;
+    let options = [];
+    try {
+        const response = await fetch(boardData.slicer_url);
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || `Server error (${response.status})`);
+        options = data.slicers || [];
+    } catch (error) {
+        console.error('Could not load filters:', error);
+        return;
+    }
+    if (!options.length) return;
+
+    const state = {};
+    const resets = [];
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'board-filter-clear';
+    clearBtn.textContent = 'Clear filters';
+    clearBtn.hidden = true;
+
+    function apply() {
+        activeFilters = [];
+        options.forEach(function (opt) {
+            const s = state[opt.column];
+            if (!s) return;
+            if (opt.type === 'text' && s.values.size) activeFilters.push({ c: opt.column, v: Array.from(s.values) });
+            if (opt.type === 'number' && (s.min !== null || s.max !== null)) activeFilters.push({ c: opt.column, min: s.min, max: s.max });
+        });
+        clearBtn.hidden = activeFilters.length === 0;
+        refreshAll(false);
+    }
+
+    options.forEach(function (opt) {
+        const s = opt.type === 'text' ? { values: new Set() } : { min: null, max: null };
+        state[opt.column] = s;
+        const box = document.createElement('details');
+        box.className = 'board-slicer';
+        const summary = document.createElement('summary');
+        const title = document.createElement('span');
+        title.textContent = opt.column;
+        const badge = document.createElement('span');
+        badge.className = 'board-slicer-badge';
+        badge.hidden = true;
+        summary.append(title, badge);
+        const body = document.createElement('div');
+        body.className = 'board-slicer-body';
+        const refreshBadge = function () {
+            const count = opt.type === 'text' ? s.values.size : ((s.min !== null ? 1 : 0) + (s.max !== null ? 1 : 0));
+            badge.textContent = opt.type === 'text' ? String(count) : '\u2713';
+            badge.hidden = count === 0;
+        };
+        if (opt.type === 'text') {
+            const checks = [];
+            (opt.values || []).forEach(function (value) {
+                const label = document.createElement('label');
+                label.className = 'board-slicer-option';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.addEventListener('change', function () {
+                    if (input.checked) s.values.add(value); else s.values.delete(value);
+                    refreshBadge();
+                    apply();
+                });
+                const text = document.createElement('span');
+                text.textContent = value;
+                label.append(input, text);
+                body.appendChild(label);
+                checks.push(input);
+            });
+            if (opt.more) {
+                const more = document.createElement('p');
+                more.className = 'board-slicer-note';
+                more.textContent = 'Showing the 100 most common values';
+                body.appendChild(more);
+            }
+            resets.push(function () {
+                s.values.clear();
+                checks.forEach(c => { c.checked = false; });
+                refreshBadge();
+            });
+        } else {
+            const make = function (key, placeholder) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.step = 'any';
+                input.className = 'board-slicer-number';
+                input.placeholder = placeholder;
+                input.addEventListener('change', function () {
+                    const v = input.value === '' ? null : Number(input.value);
+                    s[key] = (v !== null && Number.isFinite(v)) ? v : null;
+                    refreshBadge();
+                    apply();
+                });
+                return input;
+            };
+            const lo = make('min', 'Min ' + opt.min);
+            const hi = make('max', 'Max ' + opt.max);
+            body.append(lo, hi);
+            resets.push(function () {
+                s.min = null;
+                s.max = null;
+                lo.value = '';
+                hi.value = '';
+                refreshBadge();
+            });
+        }
+        box.append(summary, body);
+        bar.appendChild(box);
+    });
+    clearBtn.addEventListener('click', function () {
+        resets.forEach(fn => fn());
+        apply();
+    });
+    bar.appendChild(clearBtn);
+    bar.hidden = false;
+    document.addEventListener('click', function (e) {
+        bar.querySelectorAll('details[open]').forEach(function (d) { if (!d.contains(e.target)) d.open = false; });
+    });
 }

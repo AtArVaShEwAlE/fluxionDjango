@@ -11,6 +11,7 @@ from datasets.models import Dataset
 from datasets.services import load_dataframe, run_query
 from .queries import spec_from_chart, clean_y_axes, widget_config
 from .options import clean_options
+from datasets.filters import clean_filters
 from .registry import ENABLED
 from .models import Chart, Report
 from .models import Chart
@@ -330,9 +331,23 @@ def export_chart_pdf(request, chart_id):
 
 # ---------- Chart data (aggregated, server-side) ----------
 
-def _run_chart(chart):
+def _filters_from_request(request, allowed=None):
+    """Board slicers: ?f=[{"c": column, "v": [values]} or {"c": column, "min": n, "max": n}]. Bad input is ignored."""
+    raw = request.GET.get('f')
+    if not raw or len(raw) > 4000:
+        return []
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        return []
+    return clean_filters(data, allowed)
+
+
+def _run_chart(chart, filters=None):
     try:
         spec = spec_from_chart(chart.chart_type, chart.config)
+        if filters:
+            spec['filters'] = filters
         result = run_query(load_dataframe(chart.dataset), spec)
     except ValueError as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
@@ -350,7 +365,7 @@ def chart_data(request, chart_id):
     chart, error = _owned_chart(request, chart_id)
     if error:
         return error
-    return _run_chart(chart)
+    return _run_chart(chart, _filters_from_request(request))
 
 
 @require_GET

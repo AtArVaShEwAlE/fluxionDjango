@@ -1,4 +1,5 @@
 import json, os, sys
+from urllib.parse import quote
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 import django
@@ -484,6 +485,27 @@ try:
             check('shared-board after unshare', anon.get(f'/shared-board/{tok}').status_code, 404)
             check('shared-board-data after unshare', anon.get(f'/shared-board-data/{tok}/{cid}').status_code, 404)
             check('re-share keeps token', js(A.post(f'/share-board/{bid}')).get('share_token'), tok)
+            check('update-board slicers', jput(A, f'/update-board/{bid}', {'slicers': ['name', 'sales', 'name', 'nope-col', 5]}).status_code, 200)
+            check('slicers cleaned (dedupe, max 3, text only)', p14_board(bid).get('slicers'), [['name', 'sales', 'nope-col']])
+            check('items kept when only slicers sent', len(p14_board(bid).get('items', [])), 2)
+            r = A.get(f'/board-slicers/{bid}')
+            check('board-slicers owner', r.status_code, 200)
+            opts = js(r).get('slicers', [])
+            check('board-slicers skips unknown column', [o['column'] for o in opts], [['name', 'sales']])
+            check('board-slicers text values', opts[0].get('values') if opts else None, [['a', 'b', 'c']])
+            check('board-slicers number range', [opts[1].get('min'), opts[1].get('max')] if len(opts) > 1 else None, [[10, 30]])
+            check('anon board-slicers', anon.get(f'/board-slicers/{bid}').status_code, 302)
+            check('B board-slicers', B.get(f'/board-slicers/{bid}').status_code, [403, 404])
+            check('shared-board-slicers public', anon.get(f'/shared-board-slicers/{tok}').status_code, 200)
+            check('shared-board-slicers bad token', anon.get('/shared-board-slicers/nope').status_code, 404)
+            check('view-board has slicer data', '"slicer_url"' in A.get(f'/view-board/{bid}').content.decode(), True)
+            check('shared-board has slicer data', '"slicer_url"' in anon.get(f'/shared-board/{tok}').content.decode(), True)
+            q = lambda f: '?f=' + quote(json.dumps(f))
+            check('shared filter by slicer column', js(anon.get(f'/shared-board-data/{tok}/{cid}' + q([{'c': 'name', 'v': ['a', 'b']}]))).get('labels'), [['a', 'b']])
+            check('shared filter on non-slicer column ignored', js(anon.get(f'/shared-board-data/{tok}/{cid}' + q([{'c': 'cost', 'min': 2}]))).get('labels'), [['a', 'b', 'c']])
+            check('shared filter no match', anon.get(f'/shared-board-data/{tok}/{cid}' + q([{'c': 'name', 'v': ['zzz']}])).status_code, 400)
+            check('bad filter json ignored', js(anon.get(f'/shared-board-data/{tok}/{cid}?f=not-json')).get('labels'), [['a', 'b', 'c']])
+            check('owner chart-data filter (number range)', js(A.get(f'/chart-data/{cid}' + q([{'c': 'sales', 'min': 15}]))).get('labels'), [['b', 'c']])
 
             r = jpost(A, '/save-board', {'title': 'ZZ dup', 'items': [{'chart_id': cid}, {'chart_id': cid, 'size': 's'}], 'refresh_seconds': 7})
             check('save-board dup items', r.status_code, 200)

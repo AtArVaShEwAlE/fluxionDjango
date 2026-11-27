@@ -283,9 +283,12 @@ def run_query(df, spec):
     if not isinstance(spec, dict):
         raise ValueError('Invalid query')
 
+    from .filters import apply_filters   # board slicers (charts/views.py adds spec['filters'])
     df = _row_range(df, spec)   # Customise: Rows from / to
+    from .filters import apply_filters   # board slicers (charts/views.py adds spec['filters'])
+    df = apply_filters(df, spec.get('filters'))
 
-    if spec.get('shape') in ('gauge', 'density', 'table'):  # no single X column, so these run before the X check
+    if spec.get('shape') in ('gauge', 'density', 'table', 'boxplot'):  # no single X column, so these run before the X check
         from .shapes import run_shape
         return run_shape(df, spec.get('x'), spec)
 

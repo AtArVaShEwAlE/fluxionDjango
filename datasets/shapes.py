@@ -270,9 +270,138 @@ def _pivot(df, x, spec):
                  'grand_total': _py(grand)},
     }
 
-SHAPES = {'bubble': _bubble, 'waterfall': _waterfall, 'pareto': _pareto,
-          'density': _density, 'gantt': _gantt, 'table': _table, 'pivot': _pivot}
+MAX_BOX_GROUPS = 30
+MAX_BOX_OUTLIERS = 30
+MAX_SANKEY_LINKS = 60
 
+
+def _boxplot(df, x, spec):
+    """Box plot numbers per group (Tukey: whiskers reach the last value within 1.5 x box height)."""
+    col = _columns(df, spec, 1, 'Box plot')[0]
+    if not isinstance(x, str) or x not in df.columns:
+        raise ValueError(f'Unknown column: {x}')
+    if x == col:
+        raise ValueError('Groups and Values must be different columns')
+    frame = pd.DataFrame({'g': df[x], 'v': _numeric(df, col)}).replace([np.inf, -np.inf], np.nan).dropna()
+    if frame.empty:
+        raise ValueError(f"Column '{col}' has no numbers for any group")
+    frame['g'] = frame['g'].astype(str)
+    rows = []
+    for name, grp in frame.groupby('g', sort=True):
+        v = grp['v'].to_numpy()
+        q1, med, q3 = np.percentile(v, [25, 50, 75])
+        iqr = q3 - q1
+        low_fence, high_fence = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+        inside = v[(v >= low_fence) & (v <= high_fence)]
+        out = v[(v < low_fence) | (v > high_fence)]
+        out = out[np.argsort(-np.abs(out - med), kind='stable')][:MAX_BOX_OUTLIERS]
+        rows.append({'name': name, 'n': len(v), 'min': float(inside.min()), 'q1': float(q1), 'med': float(med),
+                     'q3': float(q3), 'max': float(inside.max()), 'out': sorted(float(o) for o in out)})
+    groups_total = len(rows)
+    if groups_total > MAX_BOX_GROUPS:
+        rows = sorted(sorted(rows, key=lambda r: -r['n'])[:MAX_BOX_GROUPS], key=lambda r: r['name'])
+    series = [{'name': label, 'column': col, 'agg': agg, 'values': [_py(r[key]) for r in rows]}
+              for label, key, agg in (('Min', 'min', 'min'), ('Q1', 'q1', 'q1'), ('Median', 'med', 'median'),
+                                      ('Q3', 'q3', 'q3'), ('Max', 'max', 'max'), ('Count', 'n', 'count'))]
+    return {
+        'labels': [r['name'] for r in rows],
+        'series': series,
+        'meta': {'mode': 'boxplot', 'rows_in': len(df), 'x': x, 'value': col, 'groups_total': groups_total,
+                 'truncated': groups_total > len(rows), 'outliers': [[_py(o) for o in r['out']] for r in rows]},
+    }
+
+
+def _sankey(df, x, spec):
+    """Flows from Source (X) to Target (Y1), summed Value (Y2). Two sides only, so no loops."""
+    tcol, vcol = _columns(df, spec, 2, 'Sankey')
+    if len({x, tcol, vcol}) < 3:
+        raise ValueError('Source, Target and Value must be three different columns')
+    frame = df[[x, tcol, vcol]]
+    frame = frame[frame[x].notna() & frame[tcol].notna()].copy()
+    if pd.api.types.is_datetime64_any_dtype(frame[vcol]):
+        raise ValueError(f"Column '{vcol}' is a date column, not numeric")
+    frame[vcol] = pd.to_numeric(frame[vcol], errors='coerce')
+    frame = frame[frame[vcol].notna() & (frame[vcol] > 0)]
+    if frame.empty:
+        raise ValueError('No rows with a source, a target and a positive value')
+    frame[x] = frame[x].astype(str)
+    frame[tcol] = frame[tcol].astype(str)
+    links = frame.groupby([x, tcol], sort=False)[vcol].sum().reset_index()
+    links = links.sort_values(vcol, ascending=False, kind='stable')
+    links_total = len(links)
+    links = links.head(MAX_SANKEY_LINKS)
+    return {
+        'labels': links[x].tolist(),
+        'series': [{'name': tcol, 'column': tcol, 'agg': None, 'values': links[tcol].tolist()},
+                   {'name': vcol, 'column': vcol, 'agg': 'sum', 'values': [_py(v) for v in links[vcol]]}],
+        'meta': {'mode': 'sankey', 'rows_in': len(df), 'source': x, 'target': tcol, 'value': vcol,
+                 'links': len(links), 'links_total': links_total, 'truncated': links_total > len(links)},
+    }
+
+MAX_INFLUENCERS = 15
+MIN_INFLUENCER_ROWS = 10
+
+
+def _influencers(df, x, spec):
+    """Which columns move the target number most. Number columns: |correlation|. Text columns: how much
+    their groups differ in average (eta, 0 to 1). Both are 0 (no link) to 1 (perfect link)."""
+    target = _numeric(df, x).replace([np.inf, -np.inf], np.nan)
+    valid = target.notna()
+    if int(valid.sum()) < MIN_INFLUENCER_ROWS:
+        raise ValueError(f'Need at least {MIN_INFLUENCER_ROWS} rows with a number in the target column')
+    if float(target[valid].std()) == 0:
+        raise ValueError('The target column has the same value in every row')
+    found = []
+    for col in df.columns:
+        if col == x:
+            continue
+        series = df[col]
+        if pd.api.types.is_datetime64_any_dtype(series):
+            series = (series - EPOCH) / pd.Timedelta(days=1)
+        if pd.api.types.is_numeric_dtype(series) and not pd.api.types.is_bool_dtype(series):
+            val = pd.to_numeric(series, errors='coerce').replace([np.inf, -np.inf], np.nan)
+            m = valid & val.notna()
+            if int(m.sum()) < MIN_INFLUENCER_ROWS or float(val[m].std()) == 0:
+                continue
+            r = float(np.corrcoef(val[m].to_numpy(dtype=float), target[m].to_numpy(dtype=float))[0, 1])
+            if not np.isfinite(r):
+                continue
+            found.append({'column': str(col), 'kind': 'number', 'strength': abs(r), 'direction': 1 if r >= 0 else -1,
+                          'text': ('Higher values go with a higher ' if r >= 0 else 'Higher values go with a lower ') + str(x)
+                                  + f' (correlation {r:.2f})'})
+        else:
+            m = valid & series.notna()
+            groups = pd.DataFrame({'g': series[m].astype(str), 'y': target[m]})
+            n_groups = groups['g'].nunique()
+            if len(groups) < MIN_INFLUENCER_ROWS or n_groups < 2 or n_groups > 50 or n_groups > len(groups) * 0.5:
+                continue
+            stats = groups.groupby('g')['y'].agg(['mean', 'count'])
+            overall = float(groups['y'].mean())
+            ss_total = float(((groups['y'] - overall) ** 2).sum())
+            if ss_total <= 0:
+                continue
+            ss_between = float((stats['count'] * (stats['mean'] - overall) ** 2).sum())
+            eta = float(np.sqrt(min(1.0, ss_between / ss_total)))
+            pool = stats[stats['count'] >= 2] if (stats['count'] >= 2).sum() >= 2 else stats
+            hi, lo = pool['mean'].idxmax(), pool['mean'].idxmin()
+            found.append({'column': str(col), 'kind': 'groups', 'strength': eta, 'direction': 0,
+                          'text': f"Highest: {hi} (avg {pool['mean'][hi]:,.2f}) \u00B7 Lowest: {lo} (avg {pool['mean'][lo]:,.2f})"})
+    if not found:
+        raise ValueError('No other column has enough varied values to compare')
+    found.sort(key=lambda f: -f['strength'])
+    skipped = max(0, len(found) - MAX_INFLUENCERS)
+    found = found[:MAX_INFLUENCERS]
+    return {
+        'labels': [f['column'] for f in found],
+        'series': [{'name': 'Influence', 'column': x, 'agg': 'influence', 'values': [round(f['strength'], 4) for f in found]},
+                   {'name': 'Direction', 'column': x, 'agg': None, 'values': [f['direction'] for f in found]}],
+        'meta': {'mode': 'influencers', 'rows_in': len(df), 'x': x, 'value': x, 'rows_used': int(valid.sum()),
+                 'skipped': skipped, 'details': [{'kind': f['kind'], 'text': f['text']} for f in found]},
+    }
+
+SHAPES = {'bubble': _bubble, 'waterfall': _waterfall, 'pareto': _pareto,
+          'density': _density, 'gantt': _gantt, 'table': _table, 'pivot': _pivot,
+          'boxplot': _boxplot, 'sankey': _sankey, 'influencers': _influencers}
 
 def run_shape(df, x, spec):
     shape = spec.get('shape')

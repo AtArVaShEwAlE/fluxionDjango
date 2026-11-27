@@ -59,6 +59,10 @@
                     </select>
                 </div>
                 <div class="field-group">
+                    <label>Filters (up to 3 columns viewers can filter by)</label>
+                    <div id="boardSlicerList"></div>
+                </div>
+                <div class="field-group">
                     <label>Layout (top to bottom, left to right)</label>
                     <div class="board-layout-list" id="boardLayoutList"></div>
                 </div>
@@ -70,6 +74,7 @@
     {% endif %}
 </div>
 {% if board_json %}{{ board_json|json_script:"boardData" }}{% endif %}
+{{ chart_columns|json_script:"chartColumns" }}
 {% endblock %}
 
 {% block extra_css %}

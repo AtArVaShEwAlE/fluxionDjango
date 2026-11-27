@@ -398,4 +398,6 @@
         const accent = accentOf(name, o);
         return shell(chart => drawTreemap(chart, result, o, accent), opts);
     });
+    window.FluxionCanvas = { shell: shell, box: box, fit: fit, put: put, plain: plain,
+                             INK: INK, SOFT: SOFT, LINE: LINE, ZEBRA: ZEBRA, FONT: FONT, PAD: PAD, NOTE_H: NOTE_H };
 })();

@@ -27,17 +27,23 @@ window.FluxionGuide = (function () {
         sparkline: ['Sparkline', 'A tiny trend line with the latest value.', 'A date (or ordered) column and one number column.', 'Group dates by month or week; mark highest and lowest in Customise.'],
         table: ['Table', 'Shows your rows and columns as they are.', 'One or more columns of any type.', 'Use Rows from / to in Customise to pick which rows to show.'],
         pivot: ['Pivot Table', 'Sums (or averages) a number for every row and column combination, with totals.', 'A Rows text column, a Columns text column and a Value number column.', 'Calculate decides sum, average, count, minimum or maximum. Keep both text columns to a few unique values.'],
-        heatmap: ['Heatmap', 'A treemap: bigger value = bigger and darker cell. Rows are groups, Columns are the cells inside.', 'A Rows text column, a Columns text column and a Value number column.', 'Zero and negative values are left out. Shows up to 30 rows and 12 columns.']
+        heatmap: ['Heatmap', 'A treemap: bigger value = bigger and darker cell. Rows are groups, Columns are the cells inside.', 'A Rows text column, a Columns text column and a Value number column.', 'Zero and negative values are left out. Shows up to 30 rows and 12 columns.'],
+        boxplot: ['Box Plot', 'Shows the spread of a number for each group: middle value, the middle 50%, and outliers.', 'A Groups text column and a Values number column.', 'The line in the box is the median. Circles are unusual values. Shows up to 30 groups.'],
+        sankey: ['Sankey', 'Shows how amounts flow from one set of items to another.', 'A Source text column, a Target text column and a Value number column.', 'Band width is the amount. Shows the 60 biggest flows.'],
+        sunburst: ['Sunburst', 'Rings that split a total into groups and then into parts of each group.', 'An Inner ring text column, an Outer ring text column and a Value number column.', 'Zero and negative values are left out.'],
+        marimekko: ['Marimekko', 'Bars where the width is the group total and the stacked parts show each share.', 'A Bar groups text column, a Stack segments text column and a Value number column.', 'Good for market share. Zero and negative values are left out.'],
+        influencers: ['Key Influencers', 'Ranks which columns have the strongest link to one number you want to explain.', 'One Target number column. All other columns are compared with it.', 'Needs at least 10 rows. Columns with a unique value per row (like IDs) are skipped.']
     };
 
     const GROUPS = [
         ['Compare', ['bar', 'hbar', 'stacked', 'combo', 'radar', 'bullet']],
         ['Trend', ['line', 'area', 'stacked_area', 'dual_line', 'sparkline']],
         ['Parts of a whole', ['pie', 'doughnut', 'funnel', 'waterfall', 'pareto']],
-        ['Spread', ['histogram', 'density']],
-        ['Relationship', ['scatter', 'bubble']],
+        ['Spread', ['histogram', 'density', 'boxplot']],
+        ['Relationship', ['scatter', 'bubble', 'influencers']],
         ['Plan and progress', ['gantt', 'gauge']],
-        ['Tables', ['table', 'pivot', 'heatmap']]
+        ['Tables', ['table', 'pivot', 'heatmap']],
+        ['Flow and hierarchy', ['sankey', 'sunburst', 'marimekko']]
     ];
 
     function $(id) { return document.getElementById(id); }

@@ -33,7 +33,12 @@ window.FluxionTypes = (function () {
         sparkline: { title: 'Sparkline', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Date or category column', y: 'Value (numbers)', widget: ['agg', 'bucket'] },
         table: { title: 'Table', fields: 'xy', multiY: true, server: true, noX: true, y: 'Columns (numbers or text)' },
         pivot: { title: 'Pivot Table', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Rows (labels)', slots: ['Columns (labels)', 'Value (numbers)'], widget: ['agg'] },
-        heatmap: { title: 'Heatmap', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Rows (labels)', slots: ['Columns (labels)', 'Value (numbers)'], widget: ['agg'] }
+        heatmap: { title: 'Heatmap', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Rows (labels)', slots: ['Columns (labels)', 'Value (numbers)'], widget: ['agg'] },
+        boxplot: { title: 'Box Plot', fields: 'xy', multiY: false, server: true, colors: 'one', x: 'Groups (labels)', y: 'Values (numbers)' },
+        sankey: { title: 'Sankey', fields: 'xy', multiY: false, server: true, x: 'Source (labels)', slots: ['Target (labels)', 'Value (numbers)'] },
+        sunburst: { title: 'Sunburst', fields: 'xy', multiY: false, server: true, x: 'Inner ring (labels)', slots: ['Outer ring (labels)', 'Value (numbers)'], widget: ['agg'] },
+        marimekko: { title: 'Marimekko', fields: 'xy', multiY: false, server: true, x: 'Bar groups (labels)', slots: ['Stack segments (labels)', 'Value (numbers)'], widget: ['agg'] },
+        influencers: { title: 'Key Influencers', fields: 'x', multiY: false, server: true, colors: 'one', x: 'Target (number to explain)' }
     };
     const FALLBACK = { title: 'Chart', fields: 'xy', multiY: false };
 

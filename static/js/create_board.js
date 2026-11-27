@@ -4,8 +4,15 @@ const SIZE_OPTIONS = [['s', 'Small'], ['m', 'Medium'], ['l', 'Large']];
 const chartInfo = {};      // chart id (string) -> {title, type}
 let boardItems = [];       // [{chart_id, size}] in display order
 let editBoardId = null;    // set when editing an existing board
+let boardSlicers = [];     // column names viewers can filter by
+let chartColumns = {};     // chart id (string) -> column names of its dataset
 
 document.addEventListener('DOMContentLoaded', function () {
+    const colsEl = document.getElementById('chartColumns');
+    if (colsEl) {
+        try { chartColumns = JSON.parse(colsEl.textContent) || {}; } catch (e) { chartColumns = {}; }
+    }
+
     document.querySelectorAll('.board-picker-item').forEach(item => {
         const box = item.querySelector('.board-picker-checkbox');
         chartInfo[box.value] = { title: item.dataset.chartTitle, type: item.dataset.chartType };
@@ -57,7 +64,7 @@ function loadExistingBoard() {
     editBoardId = board.id;
     document.getElementById('boardTitle').value = board.title || '';
     document.getElementById('boardRefresh').value = String(board.refresh_seconds || 0);
-
+    boardSlicers = Array.isArray(board.slicers) ? board.slicers.slice() : [];
     (board.items || []).forEach(it => {
         const box = pickerBox(it.chart_id);
         if (!box) return;   // chart deleted since the board was saved
@@ -87,6 +94,7 @@ function renderLayout() {
     if (!list) return;
 
     list.replaceChildren();
+    renderSlicerPicker();
 
     if (boardItems.length === 0) {
         const hint = document.createElement('p');
@@ -175,7 +183,7 @@ async function handleSaveBoard() {
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: title, items: boardItems, refresh_seconds: refresh })
+        body: JSON.stringify({ title: title, items: boardItems, refresh_seconds: refresh, slicers: boardSlicers })
         });
         let data = {};
         try {
@@ -195,4 +203,47 @@ async function handleSaveBoard() {
 
     saveBtn.disabled = false;
     saveBtn.textContent = label;
+}
+
+
+// Slicers: up to 3 columns (from the selected charts' datasets) that viewers can filter by
+function availableColumns() {
+    const seen = [];
+    boardItems.forEach(it => {
+        (chartColumns[String(it.chart_id)] || []).forEach(c => { if (!seen.includes(c)) seen.push(c); });
+    });
+    return seen;
+}
+
+function renderSlicerPicker() {
+    const box = document.getElementById('boardSlicerList');
+    if (!box) return;
+    const cols = availableColumns();
+    boardSlicers = boardSlicers.filter(c => cols.includes(c));
+    box.replaceChildren();
+    box.style.cssText = 'display:flex;flex-wrap:wrap;gap:0.4rem 1rem;max-height:160px;overflow:auto;';
+    if (!cols.length) {
+        const hint = document.createElement('p');
+        hint.className = 'board-layout-empty';
+        hint.textContent = 'Select charts first';
+        box.appendChild(hint);
+        return;
+    }
+    cols.forEach(col => {
+        const label = document.createElement('label');
+        label.style.cssText = 'display:inline-flex;align-items:center;gap:0.4rem;font-size:0.9rem;cursor:pointer;';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.checked = boardSlicers.includes(col);
+        input.disabled = !input.checked && boardSlicers.length >= 3;
+        input.addEventListener('change', () => {
+            if (input.checked) boardSlicers.push(col);
+            else boardSlicers = boardSlicers.filter(c => c !== col);
+            renderSlicerPicker();
+        });
+        const text = document.createElement('span');
+        text.textContent = col;
+        label.append(input, text);
+        box.appendChild(label);
+    });
 }
