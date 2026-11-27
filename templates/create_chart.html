@@ -164,7 +164,7 @@
                     <button type="button" class="btn-add-y" id="addYBtn">+ Add column</button>
                 </div>
 
-                <!-- Widget settings (KPI, cards, progress, gauge, sparkline, text) -->
+                <!-- Widget settings (calculate, group dates by, gauge range) -->
                 <div id="widgetFields" style="display: none;">
                     <div class="field-group" id="wAggGroup">
                         <label for="wAgg">Calculate</label>
@@ -187,21 +187,11 @@
                             <option value="none">No grouping</option>
                         </select>
                     </div>
-                    <div class="field-group" id="wTargetGroup">
-                        <label for="wTarget">Target (number above 0)</label>
-                        <input type="number" id="wTarget" class="form-input" step="any" placeholder="e.g. 10000">
-                    </div>
                     <div class="field-group" id="wGaugeGroup">
                         <label for="wGaugeMin">Gauge minimum</label>
                         <input type="number" id="wGaugeMin" class="form-input" step="any" value="0">
                         <label for="wGaugeMax" style="margin-top: 0.75rem;">Gauge maximum</label>
                         <input type="number" id="wGaugeMax" class="form-input" step="any" placeholder="e.g. 100">
-                    </div>
-                    <div class="field-group" id="wTextGroup">
-                        <label for="wHeading">Heading (optional)</label>
-                        <input type="text" id="wHeading" class="form-input" maxlength="80" placeholder="e.g. Q4 note">
-                        <label for="wText" style="margin-top: 0.75rem;">Text</label>
-                        <textarea id="wText" class="form-input" rows="5" maxlength="600" placeholder="Write a note..."></textarea>
                     </div>
                 </div>
 
@@ -391,6 +381,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/app-theme.css' %}">
 <link rel="stylesheet" href="{% static 'css/create_chart.css' %}">
+<link rel="stylesheet" href="{% static 'css/file_viewer.css' %}">
 <link rel="stylesheet" href="{% static 'css/chart_options.css' %}">
 {% endblock %}
 

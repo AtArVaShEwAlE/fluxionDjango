@@ -435,7 +435,7 @@ function syncWidgetFields() {
     const box = document.getElementById('widgetFields');
     if (!box) return;
     if (!widgetBound) {
-        ['wAgg', 'wBucket', 'wTarget', 'wGaugeMin', 'wGaugeMax', 'wHeading', 'wText'].forEach(id => {
+        ['wAgg', 'wBucket', 'wGaugeMin', 'wGaugeMax'].forEach(id => {
             document.getElementById(id).addEventListener('input', validateSelections);
         });
         widgetBound = true;
@@ -444,9 +444,7 @@ function syncWidgetFields() {
     const show = (id, on) => { document.getElementById(id).style.display = on ? 'block' : 'none'; };
     show('wAggGroup', parts.includes('agg'));
     show('wBucketGroup', parts.includes('bucket'));
-    show('wTargetGroup', parts.includes('target'));
     show('wGaugeGroup', parts.includes('gauge'));
-    show('wTextGroup', parts.includes('text'));
     xAxisSelect.closest('.field-group').style.display = (FluxionTypes.noX(selectedChartType) || FluxionTypes.usesLabelValue(selectedChartType)) ? 'none' : 'block';
     if (FluxionTypes.noY(selectedChartType)) yAxisGroup.style.display = 'none';
     const panel = document.getElementById('customisePanel');
@@ -464,16 +462,9 @@ function widgetConfig() {
     const cfg = {};
     if (parts.includes('agg')) cfg.agg = document.getElementById('wAgg').value;
     if (parts.includes('bucket')) cfg.bucket = document.getElementById('wBucket').value;
-    if (parts.includes('target') && numberOrNull('wTarget') !== null) cfg.target = numberOrNull('wTarget');
     if (parts.includes('gauge')) {
         if (numberOrNull('wGaugeMin') !== null) cfg.gauge_min = numberOrNull('wGaugeMin');
         if (numberOrNull('wGaugeMax') !== null) cfg.gauge_max = numberOrNull('wGaugeMax');
-    }
-    if (parts.includes('text')) {
-        const heading = document.getElementById('wHeading').value.trim();
-        const text = document.getElementById('wText').value.trim();
-        if (heading) cfg.heading = heading;
-        if (text) cfg.text = text;
     }
     return cfg;
 }
@@ -485,9 +476,7 @@ function widgetValid() {
     if (!FluxionTypes.noX(t) && !FluxionTypes.xOptional(t) && xAxisSelect.value === '') return false;
     if (!FluxionTypes.noY(t) && getYColumns().length === 0) return false;
     if (FluxionTypes.slots(t).length && getYColumns().filter(c => c).length < FluxionTypes.slots(t).length) return false;
-    if (parts.includes('target') && !(cfg.target > 0)) return false;
     if (parts.includes('gauge') && !(Number.isFinite(cfg.gauge_max) && cfg.gauge_max > (cfg.gauge_min || 0))) return false;
-    if (parts.includes('text') && !(cfg.text || cfg.heading)) return false;
     return true;
 }
 
@@ -496,11 +485,8 @@ function loadWidgetConfig(cfg) {
     const set = (id, value) => { document.getElementById(id).value = value === undefined || value === null ? '' : value; };
     set('wAgg', cfg.agg || 'sum');
     set('wBucket', cfg.bucket || 'month');
-    set('wTarget', cfg.target);
     set('wGaugeMin', cfg.gauge_min === undefined ? 0 : cfg.gauge_min);
     set('wGaugeMax', cfg.gauge_max);
-    set('wHeading', cfg.heading);
-    set('wText', cfg.text);
 }
 
 // Fill the Y dropdowns from a saved list (edit mode)
